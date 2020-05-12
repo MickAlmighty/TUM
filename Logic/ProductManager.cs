@@ -1,5 +1,6 @@
 ﻿using Data;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
@@ -7,6 +8,9 @@ namespace Logic
 {
     public class ProductManager : DataManager<Product, uint>
     {
+        public ProductManager() : base() { }
+        public ProductManager(HashSet<Product> data) : base(data) { }
+
         public bool Create(string name, double price, ProductType productType)
         {
             try

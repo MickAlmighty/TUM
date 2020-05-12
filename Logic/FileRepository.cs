@@ -1,6 +1,7 @@
 ﻿using Data;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 
 namespace Logic
@@ -36,6 +37,40 @@ namespace Logic
         {
             get;
         } = new ProductManager();
+
+        public event NotifyCollectionChangedEventHandler ClientsChanged
+        {
+            add
+            {
+                ClientManager.CollectionChanged += value;
+            }
+            remove
+            {
+                ClientManager.CollectionChanged -= value;
+            }
+        }
+        public event NotifyCollectionChangedEventHandler OrdersChanged
+        {
+            add
+            {
+                OrderManager.CollectionChanged += value;
+            }
+            remove
+            {
+                OrderManager.CollectionChanged -= value;
+            }
+        }
+        public event NotifyCollectionChangedEventHandler ProductsChanged
+        {
+            add
+            {
+                ProductManager.CollectionChanged += value;
+            }
+            remove
+            {
+                ProductManager.CollectionChanged -= value;
+            }
+        }
 
         public bool CreateClient(string username, string firstName, string lastName, string street, uint streetNumber, string phoneNumber)
         {

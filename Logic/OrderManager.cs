@@ -8,6 +8,9 @@ namespace Logic
 {
     public class OrderManager : DataManager<Order, uint>
     {
+        public OrderManager() : base() { }
+        public OrderManager(HashSet<Order> data) : base(data) { }
+
         public bool Create(string clientUsername, DateTime orderDate, Dictionary<uint, uint> productIdQuantityMap, double price, DateTime? deliveryDate)
         {
             try

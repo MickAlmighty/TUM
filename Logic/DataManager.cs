@@ -1,6 +1,8 @@
 ﻿using Data;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Reflection;
 
@@ -18,11 +20,10 @@ namespace Logic
             return (KeyType)IdProperty.GetValue(data);
         }
 
-        protected HashSet<DataType> DataSet
+        protected ObservableCollection<DataType> DataSet
         {
             get;
-            set;
-        } = new HashSet<DataType>();
+        }
 
         protected DataManager()
         {
@@ -37,11 +38,29 @@ namespace Logic
                 throw new ApplicationException($"Data type {typeof(DataType).Name}'s Id property {property.Name} is of type {property.PropertyType.Name}, expected {typeof(KeyType).Name}!");
             }
             IdProperty = property;
+            DataSet = new ObservableCollection<DataType>();
+        }
+
+        protected DataManager(HashSet<DataType> data)
+        {
+            DataSet = new ObservableCollection<DataType>(data);
         }
 
         public HashSet<DataType> GetAll()
         {
             return new HashSet<DataType>(DataSet);
+        }
+
+        public event NotifyCollectionChangedEventHandler CollectionChanged
+        {
+            add
+            {
+                DataSet.CollectionChanged += value;
+            }
+            remove
+            {
+                DataSet.CollectionChanged -= value;
+            }
         }
 
         public bool Add(DataType data)

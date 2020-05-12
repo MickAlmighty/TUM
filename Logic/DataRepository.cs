@@ -1,6 +1,7 @@
 ﻿using Data;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 
 namespace Logic
 {
@@ -21,5 +22,8 @@ namespace Logic
         bool RemoveClient(string username);
         bool RemoveOrder(uint id);
         bool RemoveProduct(uint id);
+        event NotifyCollectionChangedEventHandler ClientsChanged;
+        event NotifyCollectionChangedEventHandler OrdersChanged;
+        event NotifyCollectionChangedEventHandler ProductsChanged;
     }
 }
