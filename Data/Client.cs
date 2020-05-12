@@ -40,7 +40,7 @@ namespace Data
             {
                 return _FirstName;
             }
-            private set
+            set
             {
                 if (value == null)
                 {
@@ -60,7 +60,7 @@ namespace Data
             {
                 return _LastName;
             }
-            private set
+            set
             {
                 if (value == null)
                 {
@@ -80,7 +80,7 @@ namespace Data
             {
                 return _Street;
             }
-            private set
+            set
             {
                 if (value == null)
                 {
@@ -100,7 +100,7 @@ namespace Data
             {
                 return _StreetNumber;
             }
-            private set
+            set
             {
                 if (value == 0)
                 {
@@ -116,7 +116,7 @@ namespace Data
             {
                 return _PhoneNumber;
             }
-            private set
+            set
             {
                 if (value == null)
                 {

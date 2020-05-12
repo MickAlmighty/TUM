@@ -7,7 +7,7 @@ namespace Data
     public sealed class Order : IUpdatable<Order>
     {
         private string _ClientUsername;
-        private DateTime _OrderDate;
+        private DateTime? _DeliveryDate;
         private Dictionary<uint, uint> _ProductIdQuantityMap;
         private double _Price;
 
@@ -35,18 +35,8 @@ namespace Data
 
         public DateTime OrderDate
         {
-            get
-            {
-                return _OrderDate;
-            }
-            private set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(OrderDate));
-                }
-                _OrderDate = value;
-            }
+            get;
+            set;
         }
 
         public Dictionary<uint, uint> ProductIdQuantityMap
@@ -55,7 +45,7 @@ namespace Data
             {
                 return _ProductIdQuantityMap;
             }
-            private set
+            set
             {
                 if (value == null)
                 {
@@ -79,7 +69,7 @@ namespace Data
             {
                 return _Price;
             }
-            private set
+            set
             {
                 if (value <= 0.0)
                 {
@@ -89,7 +79,26 @@ namespace Data
             }
         }
 
-        public Order(uint id, Client client, DateTime orderDate, Dictionary<Product, uint> productQuantityMap)
+        public DateTime? DeliveryDate
+        {
+            get
+            {
+                return _DeliveryDate;
+            }
+            set
+            {
+                if (value.HasValue)
+                {
+                    if (value < OrderDate)
+                    {
+                        throw new ArgumentException($"{nameof(OrderDate)} must not be greater than {nameof(DeliveryDate)}!");
+                    }
+                }
+                _DeliveryDate = value;
+            }
+        }
+
+        public Order(uint id, Client client, DateTime orderDate, Dictionary<Product, uint> productQuantityMap, DateTime? deliveryDate)
         {
             Id = id;
             if (client == null)
@@ -109,15 +118,17 @@ namespace Data
             }
             ProductIdQuantityMap = productIdQuantityMap;
             Price = productQuantityMap.Select(pair => pair.Key.Price * pair.Value).Sum();
+            DeliveryDate = deliveryDate;
         }
 
-        public Order(uint id, string clientUsername, DateTime orderDate, Dictionary<uint, uint> productIdQuantityMap, double price)
+        public Order(uint id, string clientUsername, DateTime orderDate, Dictionary<uint, uint> productIdQuantityMap, double price, DateTime? deliveryDate)
         {
             Id = id;
             ClientUsername = clientUsername;
             OrderDate = orderDate;
             ProductIdQuantityMap = productIdQuantityMap;
             Price = price;
+            DeliveryDate = deliveryDate;
         }
 
         public void Update(Order order)
@@ -134,6 +145,7 @@ namespace Data
             OrderDate = order.OrderDate;
             ProductIdQuantityMap = order.ProductIdQuantityMap;
             Price = order.Price;
+            DeliveryDate = order.DeliveryDate;
         }
     }
 }

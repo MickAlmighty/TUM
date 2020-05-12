@@ -19,7 +19,7 @@ namespace Data
             {
                 return _Name;
             }
-            private set
+            set
             {
                 if (value == null)
                 {
@@ -39,7 +39,7 @@ namespace Data
             {
                 return _Price;
             }
-            private set
+            set
             {
                 if (value <= 0.0)
                 {
@@ -52,7 +52,7 @@ namespace Data
         public ProductType ProductType
         {
             get;
-            private set;
+            set;
         }
 
         public Product(uint id, string name, double price, ProductType productType)

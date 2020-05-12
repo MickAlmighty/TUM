@@ -18,10 +18,10 @@ namespace Logic
             return (KeyType)IdProperty.GetValue(data);
         }
 
-        public HashSet<DataType> DataSet
+        protected HashSet<DataType> DataSet
         {
             get;
-            protected set;
+            set;
         } = new HashSet<DataType>();
 
         protected DataManager()
@@ -37,6 +37,11 @@ namespace Logic
                 throw new ApplicationException($"Data type {typeof(DataType).Name}'s Id property {property.Name} is of type {property.PropertyType.Name}, expected {typeof(KeyType).Name}!");
             }
             IdProperty = property;
+        }
+
+        public HashSet<DataType> GetAll()
+        {
+            return new HashSet<DataType>(DataSet);
         }
 
         public bool Add(DataType data)
