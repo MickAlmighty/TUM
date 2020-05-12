@@ -6,7 +6,7 @@ namespace Presentation.ViewModel
     /// <summary>
     ///     Acts as a base for ViewModels.
     /// </summary>
-    public abstract class ViewModel : INotifyPropertyChanged
+    public abstract class ViewModelBase : INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
