@@ -1,13 +1,88 @@
 ﻿using Data;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 
 namespace Logic
 {
-    public class FileRepository : IDataRepository
+    public class FileRepository : IDataRepository, IDisposable
     {
+
+        public FileRepository(string filename = "data.json")
+        {
+            DataFile = new FileSystemWatcher(filename);
+            if (File.Exists(filename))
+            {
+                LoadData();
+            }
+            DataFile.Changed += DataFile_Changed;
+            DataFile.Deleted += DataFile_Deleted;
+        }
+
+        private void DataFile_Deleted(object sender, FileSystemEventArgs e)
+        {
+            SaveData();
+        }
+
+        private void DataFile_Changed(object sender, FileSystemEventArgs e)
+        {
+            LoadData();
+        }
+
+        FileSystemWatcher DataFile
+        {
+            get;
+        }
+
+        public void SaveData()
+        {
+            RepositoryDTO dto = new RepositoryDTO();
+            lock (ClientLock)
+            {
+                dto.Clients = ClientManager.GetAll().ToList();
+            }
+            lock (ProductLock)
+            {
+                dto.Products = ProductManager.GetAll().ToList();
+            }
+            lock (OrderLock)
+            {
+                dto.Orders = OrderManager.GetAll().ToList();
+            }
+            lock (FileLock)
+            {
+                DataFile.Changed -= DataFile_Changed;
+                try
+                {
+                    File.WriteAllText(DataFile.Path, JsonConvert.SerializeObject(dto, Formatting.Indented));
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine($"{e.Message}\n{e.StackTrace}");
+                }
+                DataFile.Changed += DataFile_Changed;
+            }
+        }
+
+        public void LoadData()
+        {
+            lock (FileLock)
+            {
+                try
+                {
+                    RepositoryDTO dto = JsonConvert.DeserializeObject<RepositoryDTO>(File.ReadAllText(DataFile.Path));
+                }
+                catch (Exception e)
+                {
+                    Debug.WriteLine($"{e.Message}\n{e.StackTrace}");
+                }
+            }
+        }
+
         protected object ClientLock
         {
             get;
@@ -19,6 +94,11 @@ namespace Logic
         } = new object();
 
         protected object ProductLock
+        {
+            get;
+        } = new object();
+
+        protected object FileLock
         {
             get;
         } = new object();
@@ -166,9 +246,9 @@ namespace Logic
 
         public bool RemoveClient(string username)
         {
-            lock (OrderLock)
+            lock (ClientLock)
             {
-                lock (ClientLock)
+                lock (OrderLock)
                 {
                     if (ClientManager.Get(username) == null)
                     {
@@ -193,9 +273,9 @@ namespace Logic
 
         public bool RemoveProduct(uint id)
         {
-            lock (OrderLock)
+            lock (ProductLock)
             {
-                lock (ProductLock)
+                lock (OrderLock)
                 {
                     if (ProductManager.Get(id) == null)
                     {
@@ -215,9 +295,9 @@ namespace Logic
 
         public bool Update(Client client)
         {
-            lock (OrderLock)
+            lock (ClientLock)
             {
-                lock (ClientLock)
+                lock (OrderLock)
                 {
                     return ClientManager.Update(client);
                 }
@@ -263,5 +343,26 @@ namespace Logic
                 }
             }
         }
+
+        #region IDisposable Support
+        private bool disposedValue = false;
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    DataFile.Dispose();
+                }
+
+                disposedValue = true;
+            }
+        }
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+        #endregion
     }
 }

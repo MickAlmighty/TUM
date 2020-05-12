@@ -10,6 +10,8 @@ namespace Logic
 {
     public abstract class DataManager<DataType, KeyType> where DataType : IUpdatable<DataType>
     {
+        private ObservableCollection<DataType> _DataSet;
+
         private PropertyInfo IdProperty
         {
             get;
@@ -22,28 +24,54 @@ namespace Logic
 
         protected ObservableCollection<DataType> DataSet
         {
-            get;
+            get
+            {
+                return _DataSet;
+            }
+            set
+            {
+                if (_DataSet != null)
+                {
+                    _DataSet.CollectionChanged -= DataSet_CollectionChanged;
+                }
+                if (value != null)
+                {
+                    value.CollectionChanged += DataSet_CollectionChanged;
+                }
+                _DataSet = value;
+            }
+        }
+
+        protected DataManager(HashSet<DataType> data) : this()
+        {
+            DataSet = new ObservableCollection<DataType>(data);
+            IdProperty = GetIdPropertyInfo();
         }
 
         protected DataManager()
+        {
+            DataSet = new ObservableCollection<DataType>();
+            IdProperty = GetIdPropertyInfo();
+        }
+
+        private PropertyInfo GetIdPropertyInfo()
         {
             IEnumerable<PropertyInfo> idProps = typeof(DataType).GetProperties().Where(prop => Attribute.IsDefined(prop, typeof(IdAttribute)));
             if (idProps.Count() != 1)
             {
                 throw new ApplicationException($"Data type {typeof(DataType).Name} contains {idProps.Count()} Id properties instead of 1!");
             }
-            PropertyInfo property = idProps.First();
-            if (property.PropertyType != typeof(KeyType))
+            PropertyInfo propertyInfo = idProps.First();
+            if (propertyInfo.PropertyType != typeof(KeyType))
             {
-                throw new ApplicationException($"Data type {typeof(DataType).Name}'s Id property {property.Name} is of type {property.PropertyType.Name}, expected {typeof(KeyType).Name}!");
+                throw new ApplicationException($"Data type {typeof(DataType).Name}'s Id property {propertyInfo.Name} is of type {propertyInfo.PropertyType.Name}, expected {typeof(KeyType).Name}!");
             }
-            IdProperty = property;
-            DataSet = new ObservableCollection<DataType>();
+            return propertyInfo;
         }
 
-        protected DataManager(HashSet<DataType> data)
+        private void DataSet_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            DataSet = new ObservableCollection<DataType>(data);
+            CollectionChanged?.Invoke(sender, e);
         }
 
         public HashSet<DataType> GetAll()
@@ -51,16 +79,11 @@ namespace Logic
             return new HashSet<DataType>(DataSet);
         }
 
-        public event NotifyCollectionChangedEventHandler CollectionChanged
+        public event NotifyCollectionChangedEventHandler CollectionChanged;
+
+        public void ReplaceData(HashSet<DataType> data)
         {
-            add
-            {
-                DataSet.CollectionChanged += value;
-            }
-            remove
-            {
-                DataSet.CollectionChanged -= value;
-            }
+            DataSet = new ObservableCollection<DataType>(data);
         }
 
         public bool Add(DataType data)
