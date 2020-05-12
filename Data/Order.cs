@@ -4,12 +4,18 @@ using System.Linq;
 
 namespace Data
 {
-    public class Order
+    public sealed class Order : IUpdatable<Order>
     {
         private string _ClientUsername;
         private DateTime _OrderDate;
         private Dictionary<uint, uint> _ProductIdQuantityMap;
         private double _Price;
+
+        public uint Id
+        {
+            get;
+            private set;
+        }
 
         public string ClientUsername
         {
@@ -33,7 +39,7 @@ namespace Data
             {
                 return _OrderDate;
             }
-            set
+            private set
             {
                 if (value == null)
                 {
@@ -49,7 +55,7 @@ namespace Data
             {
                 return _ProductIdQuantityMap;
             }
-            set
+            private set
             {
                 if (value == null)
                 {
@@ -83,8 +89,9 @@ namespace Data
             }
         }
 
-        public Order(Client client, DateTime orderDate, Dictionary<Product, uint> productQuantityMap)
+        public Order(uint id, Client client, DateTime orderDate, Dictionary<Product, uint> productQuantityMap)
         {
+            Id = id;
             if (client == null)
             {
                 throw new ArgumentNullException(nameof(client));
@@ -104,12 +111,29 @@ namespace Data
             Price = productQuantityMap.Select(pair => pair.Key.Price * pair.Value).Sum();
         }
 
-        public Order(string clientUsername, DateTime orderDate, Dictionary<uint, uint> productIdQuantityMap, double price)
+        public Order(uint id, string clientUsername, DateTime orderDate, Dictionary<uint, uint> productIdQuantityMap, double price)
         {
+            Id = id;
             ClientUsername = clientUsername;
             OrderDate = orderDate;
             ProductIdQuantityMap = productIdQuantityMap;
             Price = price;
+        }
+
+        public void Update(Order order)
+        {
+            if (order == null)
+            {
+                throw new ArgumentNullException(nameof(order));
+            }
+            if (Id != order.Id)
+            {
+                throw new ArgumentException(nameof(order));
+            }
+            ClientUsername = order.ClientUsername;
+            OrderDate = order.OrderDate;
+            ProductIdQuantityMap = order.ProductIdQuantityMap;
+            Price = order.Price;
         }
     }
 }

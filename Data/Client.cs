@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace Data
 {
-    public class Client
+    public sealed class Client : IUpdatable<Client>
     {
         private const uint USERNAME_MIN_LENGTH = 3;
         private const string PHONE_NUMBER_REGEX = @"^((\+[0-9]{1,3}\ )?[0-9]{3}\ [0-9]{3}\ [0-9]{3,4})|((\+[0-9]{1,3}-)?[0-9]{3}-[0-9]{3}-[0-9]{3,4})$";
@@ -26,6 +26,10 @@ namespace Data
                 {
                     throw new ArgumentNullException(nameof(Username));
                 }
+                if (value.Length < USERNAME_MIN_LENGTH)
+                {
+                    throw new ArgumentOutOfRangeException($"Provided {nameof(Username)} length ({value.Length}) is lower than expected minimum ({USERNAME_MIN_LENGTH}): '{value}'.");
+                }
                 _Username = value;
             }
         }
@@ -36,7 +40,7 @@ namespace Data
             {
                 return _FirstName;
             }
-            set
+            private set
             {
                 if (value == null)
                 {
@@ -56,7 +60,7 @@ namespace Data
             {
                 return _LastName;
             }
-            set
+            private set
             {
                 if (value == null)
                 {
@@ -76,7 +80,7 @@ namespace Data
             {
                 return _Street;
             }
-            set
+            private set
             {
                 if (value == null)
                 {
@@ -96,7 +100,7 @@ namespace Data
             {
                 return _StreetNumber;
             }
-            set
+            private set
             {
                 if (value == 0)
                 {
@@ -112,7 +116,7 @@ namespace Data
             {
                 return _PhoneNumber;
             }
-            set
+            private set
             {
                 if (value == null)
                 {
@@ -126,22 +130,31 @@ namespace Data
             }
         }
 
-        public Client(string userName, string firstName, string lastName, string street, uint streetNumber, string phoneNumber)
+        public Client(string username, string firstName, string lastName, string street, uint streetNumber, string phoneNumber)
         {
-            if (userName == null)
-            {
-                throw new ArgumentNullException("{nameof(userName)} cannot be null!");
-            }
-            if (userName.Length < USERNAME_MIN_LENGTH)
-            {
-                throw new ArgumentOutOfRangeException($"Provided {nameof(userName)} length ({userName.Length}) is lower than expected minimum ({USERNAME_MIN_LENGTH}): '{userName}'.");
-            }
-            Username = userName;
+            Username = username;
             FirstName = firstName;
             LastName = lastName;
             Street = street;
             StreetNumber = streetNumber;
             PhoneNumber = phoneNumber;
+        }
+
+        public void Update(Client client)
+        {
+            if (client == null)
+            {
+                throw new ArgumentNullException(nameof(client));
+            }
+            if (Username != client.Username)
+            {
+                throw new ArgumentException(nameof(client));
+            }
+            FirstName = client.FirstName;
+            LastName = client.LastName;
+            Street = client.Street;
+            StreetNumber = client.StreetNumber;
+            PhoneNumber = client.PhoneNumber;
         }
     }
 }

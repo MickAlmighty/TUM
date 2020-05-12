@@ -2,7 +2,7 @@
 
 namespace Data
 {
-    public class Product
+    public sealed class Product : IUpdatable<Product>
     {
         private string _Name;
         private double _Price;
@@ -19,7 +19,7 @@ namespace Data
             {
                 return _Name;
             }
-            set
+            private set
             {
                 if (value == null)
                 {
@@ -39,7 +39,7 @@ namespace Data
             {
                 return _Price;
             }
-            set
+            private set
             {
                 if (value <= 0.0)
                 {
@@ -52,7 +52,7 @@ namespace Data
         public ProductType ProductType
         {
             get;
-            set;
+            private set;
         }
 
         public Product(uint id, string name, double price, ProductType productType)
@@ -61,6 +61,21 @@ namespace Data
             Name = name;
             Price = price;
             ProductType = productType;
+        }
+
+        public void Update(Product product)
+        {
+            if (product == null)
+            {
+                throw new ArgumentNullException(nameof(product));
+            }
+            if (Id != product.Id)
+            {
+                throw new ArgumentException(nameof(product));
+            }
+            Name = product.Name;
+            Price = product.Price;
+            ProductType = product.ProductType;
         }
     }
 }
