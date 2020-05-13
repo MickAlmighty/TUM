@@ -1,8 +1,6 @@
 ﻿using Data;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.Linq;
 using System.Reflection;
 
@@ -10,8 +8,6 @@ namespace Logic
 {
     public abstract class DataManager<DataType, KeyType> where DataType : IUpdatable<DataType>
     {
-        private ObservableCollection<DataType> _DataSet;
-
         private PropertyInfo IdProperty
         {
             get;
@@ -22,35 +18,21 @@ namespace Logic
             return (KeyType)IdProperty.GetValue(data);
         }
 
-        protected ObservableCollection<DataType> DataSet
+        protected HashSet<DataType> DataSet
         {
-            get
-            {
-                return _DataSet;
-            }
-            set
-            {
-                if (_DataSet != null)
-                {
-                    _DataSet.CollectionChanged -= DataSet_CollectionChanged;
-                }
-                if (value != null)
-                {
-                    value.CollectionChanged += DataSet_CollectionChanged;
-                }
-                _DataSet = value;
-            }
+            get;
+            set;
         }
 
         protected DataManager(HashSet<DataType> data) : this()
         {
-            DataSet = new ObservableCollection<DataType>(data);
+            DataSet = new HashSet<DataType>(data);
             IdProperty = GetIdPropertyInfo();
         }
 
         protected DataManager()
         {
-            DataSet = new ObservableCollection<DataType>();
+            DataSet = new HashSet<DataType>();
             IdProperty = GetIdPropertyInfo();
         }
 
@@ -69,21 +51,18 @@ namespace Logic
             return propertyInfo;
         }
 
-        private void DataSet_CollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-        {
-            CollectionChanged?.Invoke(sender, e);
-        }
-
         public HashSet<DataType> GetAll()
         {
             return new HashSet<DataType>(DataSet);
         }
 
-        public event NotifyCollectionChangedEventHandler CollectionChanged;
+        public event NotifyDataChangedEventHandler DataChanged;
 
         public void ReplaceData(HashSet<DataType> data)
         {
-            DataSet = new ObservableCollection<DataType>(data);
+            HashSet<DataType> oldData = DataSet;
+            DataSet = new HashSet<DataType>(data);
+            DataChanged?.Invoke(this, new NotifyDataChangedEventArgs(NotifyDataChangedAction.Replace, DataSet.ToList(), oldData.ToList()));
         }
 
         public bool Add(DataType data)
@@ -97,6 +76,7 @@ namespace Logic
                 return false;
             }
             DataSet.Add(data);
+            DataChanged?.Invoke(this, new NotifyDataChangedEventArgs(NotifyDataChangedAction.Add, new List<DataType> { data }));
             return true;
         }
 
@@ -120,6 +100,7 @@ namespace Logic
             {
                 targetData.Update(data);
             }
+            DataChanged?.Invoke(this, new NotifyDataChangedEventArgs(NotifyDataChangedAction.Update, new List<DataType> { data }));
             return true;
         }
 
@@ -131,7 +112,15 @@ namespace Logic
                 return false;
             }
             DataSet.Remove(data);
+            DataChanged?.Invoke(this, new NotifyDataChangedEventArgs(NotifyDataChangedAction.Remove, new List<DataType> { data }));
             return true;
+        }
+
+        public void Reset()
+        {
+            List<DataType> oldData = DataSet.ToList();
+            DataSet.Clear();
+            DataChanged?.Invoke(this, new NotifyDataChangedEventArgs(NotifyDataChangedAction.Reset, oldData));
         }
     }
 }

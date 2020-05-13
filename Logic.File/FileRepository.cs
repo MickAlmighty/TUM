@@ -2,10 +2,10 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Logic
 {
@@ -21,6 +21,31 @@ namespace Logic
             }
             DataFile.Changed += DataFile_Changed;
             DataFile.Deleted += DataFile_Deleted;
+            OrdersChanged += FileRepository_OrdersChanged;
+        }
+
+        private void FileRepository_OrdersChanged(object sender, NotifyDataChangedEventArgs e)
+        {
+            if (e.Action == NotifyDataChangedAction.Add)
+            {
+                List<uint> newOrders = e.NewItems.Cast<Order>().Select(o => o.Id).ToList();
+                Task.Run(async delegate
+                {
+                    await Task.Delay(10000);
+                    lock (OrderLock)
+                    {
+                        foreach (uint id in newOrders)
+                        {
+                            Order order = OrderManager.Get(id);
+                            if (order != null && !order.DeliveryDate.HasValue)
+                            {
+                                order.DeliveryDate = DateTime.Now;
+                                Update(order);
+                            }
+                        }
+                    }
+                });
+            }
         }
 
         private void DataFile_Deleted(object sender, FileSystemEventArgs e)
@@ -118,37 +143,37 @@ namespace Logic
             get;
         } = new ProductManager();
 
-        public event NotifyCollectionChangedEventHandler ClientsChanged
+        public event NotifyDataChangedEventHandler ClientsChanged
         {
             add
             {
-                ClientManager.CollectionChanged += value;
+                ClientManager.DataChanged += value;
             }
             remove
             {
-                ClientManager.CollectionChanged -= value;
+                ClientManager.DataChanged -= value;
             }
         }
-        public event NotifyCollectionChangedEventHandler OrdersChanged
+        public event NotifyDataChangedEventHandler OrdersChanged
         {
             add
             {
-                OrderManager.CollectionChanged += value;
+                OrderManager.DataChanged += value;
             }
             remove
             {
-                OrderManager.CollectionChanged -= value;
+                OrderManager.DataChanged -= value;
             }
         }
-        public event NotifyCollectionChangedEventHandler ProductsChanged
+        public event NotifyDataChangedEventHandler ProductsChanged
         {
             add
             {
-                ProductManager.CollectionChanged += value;
+                ProductManager.DataChanged += value;
             }
             remove
             {
-                ProductManager.CollectionChanged -= value;
+                ProductManager.DataChanged -= value;
             }
         }
 
