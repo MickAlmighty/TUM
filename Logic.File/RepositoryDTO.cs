@@ -5,19 +5,19 @@ namespace Logic
 {
     internal class RepositoryDTO
     {
-        public List<Client> Clients
+        public HashSet<Client> Clients
         {
             get;
             set;
         }
 
-        public List<Order> Orders
+        public HashSet<Order> Orders
         {
             get;
             set;
         }
 
-        public List<Product> Products
+        public HashSet<Product> Products
         {
             get;
             set;

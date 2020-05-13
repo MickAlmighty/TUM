@@ -11,6 +11,7 @@ namespace Data
         private Dictionary<uint, uint> _ProductIdQuantityMap;
         private double _Price;
 
+        [Id]
         public uint Id
         {
             get;

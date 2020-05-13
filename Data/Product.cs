@@ -7,6 +7,7 @@ namespace Data
         private string _Name;
         private double _Price;
 
+        [Id]
         public uint Id
         {
             get;

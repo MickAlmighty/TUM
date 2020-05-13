@@ -14,6 +14,7 @@ namespace Data
         private uint _StreetNumber;
         private string _PhoneNumber;
 
+        [Id]
         public string Username
         {
             get

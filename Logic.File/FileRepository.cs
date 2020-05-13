@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Logic
@@ -12,20 +13,45 @@ namespace Logic
     public class FileRepository : IDataRepository, IDisposable
     {
 
-        public FileRepository(string filename = "data.json")
+        public FileRepository(string filePath = "data.json")
         {
-            DataFile = new FileSystemWatcher(filename);
-            if (File.Exists(filename))
+            if (filePath == null)
+            {
+                throw new ArgumentNullException(nameof(filePath));
+            }
+            if (filePath.Length == 0)
+            {
+                throw new ArgumentException(nameof(filePath));
+            }
+
+            DataPathWatcher = new FileSystemWatcher(Path.GetDirectoryName(Path.GetFullPath(filePath)));
+            FileName = Path.GetFileName(filePath);
+            FullFilePath = Path.Combine(DataPathWatcher.Path, FileName);
+            if (File.Exists(filePath))
             {
                 LoadData();
             }
-            DataFile.Changed += DataFile_Changed;
-            DataFile.Deleted += DataFile_Deleted;
+            DataPathWatcher.Changed += DataFile_Changed;
+            DataPathWatcher.Deleted += DataFile_Deleted;
+            DataPathWatcher.EnableRaisingEvents = true;
+            ClientsChanged += FileRepository_ClientsChanged;
             OrdersChanged += FileRepository_OrdersChanged;
+            ProductsChanged += FileRepository_ProductsChanged;
+        }
+
+        private void FileRepository_ProductsChanged(object sender, NotifyDataChangedEventArgs e)
+        {
+            SaveData();
+        }
+
+        private void FileRepository_ClientsChanged(object sender, NotifyDataChangedEventArgs e)
+        {
+            SaveData();
         }
 
         private void FileRepository_OrdersChanged(object sender, NotifyDataChangedEventArgs e)
         {
+            SaveData();
             if (e.Action == NotifyDataChangedAction.Add)
             {
                 List<uint> newOrders = e.NewItems.Cast<Order>().Select(o => o.Id).ToList();
@@ -50,60 +76,95 @@ namespace Logic
 
         private void DataFile_Deleted(object sender, FileSystemEventArgs e)
         {
-            SaveData();
+            if (e.Name == FileName)
+            {
+                SaveData();
+            }
         }
 
         private void DataFile_Changed(object sender, FileSystemEventArgs e)
         {
-            LoadData();
+            if (e.Name == FileName)
+            {
+                LoadData();
+            }
         }
 
-        FileSystemWatcher DataFile
+        FileSystemWatcher DataPathWatcher
         {
             get;
         }
 
-        public void SaveData()
+        string FileName
+        {
+            get;
+        }
+
+        string FullFilePath
+        {
+            get;
+        }
+
+        public bool SaveData()
         {
             RepositoryDTO dto = new RepositoryDTO();
             lock (ClientLock)
             {
-                dto.Clients = ClientManager.GetAll().ToList();
+                dto.Clients = ClientManager.GetAll();
             }
             lock (ProductLock)
             {
-                dto.Products = ProductManager.GetAll().ToList();
+                dto.Products = ProductManager.GetAll();
             }
             lock (OrderLock)
             {
-                dto.Orders = OrderManager.GetAll().ToList();
+                dto.Orders = OrderManager.GetAll();
             }
             lock (FileLock)
             {
-                DataFile.Changed -= DataFile_Changed;
+                DataPathWatcher.EnableRaisingEvents = false;
+                bool success = true;
                 try
                 {
-                    File.WriteAllText(DataFile.Path, JsonConvert.SerializeObject(dto, Formatting.Indented));
+                    // TODO: provide a serialization interface and use it
+                    File.WriteAllText(FullFilePath, JsonConvert.SerializeObject(dto, Formatting.Indented));
                 }
                 catch (Exception e)
                 {
                     Debug.WriteLine($"{e.Message}\n{e.StackTrace}");
+                    success = false;
                 }
-                DataFile.Changed += DataFile_Changed;
+                DataPathWatcher.EnableRaisingEvents = true;
+                return success;
             }
         }
 
-        public void LoadData()
+        public bool LoadData()
         {
             lock (FileLock)
             {
                 try
                 {
-                    RepositoryDTO dto = JsonConvert.DeserializeObject<RepositoryDTO>(File.ReadAllText(DataFile.Path));
+                    // TODO: provide a serialization interface and use it
+                    RepositoryDTO dto = JsonConvert.DeserializeObject<RepositoryDTO>(File.ReadAllText(FullFilePath));
+                    lock (ClientLock)
+                    {
+                        lock (ProductLock)
+                        {
+                            lock (OrderLock)
+                            {
+                                ClientManager.ReplaceData(dto.Clients);
+                                OrderManager.ReplaceData(dto.Orders);
+                                ProductManager.ReplaceData(dto.Products);
+                            }
+                        }
+                    }
+                    return true;
                 }
                 catch (Exception e)
                 {
                     Debug.WriteLine($"{e.Message}\n{e.StackTrace}");
+                    return false;
                 }
             }
         }
@@ -378,7 +439,7 @@ namespace Logic
             {
                 if (disposing)
                 {
-                    DataFile.Dispose();
+                    DataPathWatcher.Dispose();
                 }
 
                 disposedValue = true;
