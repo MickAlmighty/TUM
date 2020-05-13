@@ -1,34 +1,14 @@
-﻿using Logic;
+﻿using Data;
+using Logic;
 using Presentation.Model;
-using System.Windows.Input;
 
 namespace Presentation.ViewModel
 {
-    public class DialogCreateClientViewModel : DialogBaseViewModel
+    public class DialogClientEditViewModel : DialogDataEditViewModel<Client>
     {
         private string _Username, _FirstName, _LastName, _Street, _StreetNumber, _PhoneNumber;
 
-        public DialogCreateClientViewModel(IDialogHost dialogHost, IDataRepository dataRepository) : base(dialogHost)
-        {
-            Apply = new RelayCommand(ExecuteApply);
-            Cancel = new RelayCommand(ExecuteCancel);
-            DataRepository = dataRepository;
-        }
-
-        private void ExecuteApply()
-        {
-            DataRepository.CreateClient(Username, FirstName, LastName, Street, uint.Parse(StreetNumber), PhoneNumber);
-            CloseDialog();
-        }
-
-        private void ExecuteCancel()
-        {
-            CloseDialog();
-        }
-
-        public ICommand Apply { get; }
-        public ICommand Cancel { get; }
-        public IDataRepository DataRepository { get; }
+        public DialogClientEditViewModel(IDialogHost dialogHost, IDataRepository dataRepository) : base(dialogHost, dataRepository) { }
 
         public string Username
         {
@@ -108,22 +88,34 @@ namespace Presentation.ViewModel
             }
         }
 
-        public void OpenDialog()
+        protected override void ApplyCreate()
         {
-            ResetProperties();
-            Open();
+            DataRepository.CreateClient(Username, FirstName, LastName, Street, uint.Parse(StreetNumber), PhoneNumber);
         }
 
-        public void OpenDialog(object dialogIdentifier)
+        protected override void ApplyEdit()
         {
-            ResetProperties();
-            Open(dialogIdentifier);
+            DataRepository.Update(new Client(Username, FirstName, LastName, Street, uint.Parse(StreetNumber), PhoneNumber));
         }
 
-        public void ResetProperties()
+        protected override void InjectProperties(Client toUpdate)
         {
-
+            Username = toUpdate.Username;
+            FirstName = toUpdate.FirstName;
+            LastName = toUpdate.LastName;
+            Street = toUpdate.Street;
+            StreetNumber = toUpdate.StreetNumber.ToString();
+            PhoneNumber = toUpdate.PhoneNumber;
         }
 
+        protected override void ResetProperties()
+        {
+            Username = "";
+            FirstName = "";
+            LastName = "";
+            Street = "";
+            StreetNumber = "";
+            PhoneNumber = "";
+        }
     }
 }

@@ -1,0 +1,35 @@
+﻿<UserControl x:Class="Presentation.View.OrderEditControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Presentation.View"
+             xmlns:m="clr-namespace:Presentation.Model"
+             mc:Ignorable="d" 
+             d:DesignHeight="215" d:DesignWidth="250" Height="215" Width="250">
+    <Grid>
+        <StackPanel Orientation="Vertical" Margin="10">
+            <DockPanel Margin="5">
+                <Label Content="Client username: "/>
+                <ComboBox ItemsSource="{Binding ClientUsernames}" SelectedIndex="{Binding ClientUsernameIndex}"/>
+            </DockPanel>
+            <DockPanel Margin="5">
+                <Label Content="Order date: "/>
+                <DatePicker SelectedDate="{Binding OrderDate}"/>
+            </DockPanel>
+            <DockPanel Margin="5">
+                <Label Content="Delivered: " />
+                <ToggleButton IsChecked="{Binding Delivered}" HorizontalAlignment="Left"/>
+            </DockPanel>
+            <DockPanel Margin="5" Visibility="{Binding Delivered, Converter={StaticResource BoolToVisibilityConverter}}">
+                <Label Content="Delivery date: "/>
+                <DatePicker SelectedDate="{Binding DeliveryDate}"/>
+            </DockPanel>
+            <StackPanel Orientation="Horizontal" Margin="5,20,5,10" HorizontalAlignment="Center">
+                <Button Content="CANCEL" Command="{Binding Cancel}"
+                        Style="{StaticResource MaterialDesignRaisedAccentButton}" />
+                <Button Content="APPLY" Command="{Binding Apply}" Margin="10,0,0,0" Style="{StaticResource ApplyButton}"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

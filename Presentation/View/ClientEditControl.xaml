@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Presentation.View.CreateClientControl"
+﻿<UserControl x:Class="Presentation.View.ClientEditControl"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:Presentation.View"
              xmlns:m="clr-namespace:Presentation.Model"
              mc:Ignorable="d" 
-             d:DesignHeight="300" d:DesignWidth="250" Height="300" Width="250">
+             d:DesignHeight="285" d:DesignWidth="250" Height="285" Width="250">
     <UserControl.Resources>
         <Style x:Key="ApplyButton" TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedAccentButton}">
             <Setter Property="IsEnabled" Value="False"/>

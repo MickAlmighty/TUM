@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Presentation.View"
              xmlns:vm="clr-namespace:Presentation.ViewModel"
+             xmlns:m="clr-namespace:Presentation.Model"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
@@ -15,9 +16,17 @@
             <DataTemplate DataType="{x:Type vm:DialogInformationViewModel}">
                 <local:InformationControl />
             </DataTemplate>
-            <DataTemplate DataType="{x:Type vm:DialogCreateClientViewModel}">
-                <local:CreateClientControl/>
+            <DataTemplate DataType="{x:Type vm:DialogClientEditViewModel}">
+                <local:ClientEditControl/>
             </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:DialogOrderEditViewModel}">
+                <local:OrderEditControl/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:DialogProductEditViewModel}">
+                <local:ProductEditControl/>
+            </DataTemplate>
+            <m:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+            <m:InvertedBoolToVisibilityConverter x:Key="InvertedBoolToVisibilityConverter" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

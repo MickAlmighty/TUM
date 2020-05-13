@@ -8,8 +8,39 @@
         mc:Ignorable="d"
         Title="Presentation" MinHeight="350" MinWidth="400" Height="450" Width="600">
     <Grid>
-        <Button Content="CREATE CLIENT" Command="{Binding CreateClient}" Margin="10,0,0,0"
-                        Style="{StaticResource MaterialDesignRaisedAccentButton}" />
+        <TabControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <TabItem Header="Clients">
+                <DockPanel>
+                    <Border BorderThickness="2" BorderBrush="{DynamicResource PrimaryHueMidBrush}" Width="150" DockPanel.Dock="Right">
+
+                    </Border>
+                    <Border  BorderThickness="2,2,0,2" BorderBrush="{DynamicResource PrimaryHueMidBrush}">
+                        <ListView ItemsSource="{Binding Clients}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderBrush="{DynamicResource PrimaryHueLightBrush}" BorderThickness="1">
+                                        <DockPanel>
+                                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" FlowDirection="RightToLeft">
+                                                
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                                
+                                            </StackPanel>
+                                        </DockPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Border>
+                </DockPanel>
+            </TabItem>
+            <TabItem Header="Products">
+                <ListView ItemsSource="{Binding Products}"/>
+            </TabItem>
+            <TabItem Header="Orders">
+
+            </TabItem>
+        </TabControl>
         <md:DialogHost/>
     </Grid>
 </Window>

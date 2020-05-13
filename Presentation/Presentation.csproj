@@ -63,7 +63,15 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="View\CreateClientControl.xaml">
+    <Page Include="View\OrderEditControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\ProductEditControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="View\ClientEditControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -76,18 +84,23 @@
       <SubType>Designer</SubType>
     </Page>
     <Compile Include="Model\BasicStringValidationRule.cs" />
+    <Compile Include="Model\BoolToVisibilityConverter.cs" />
     <Compile Include="Model\DialogOpenedEventArgs.cs" />
     <Compile Include="Model\DialogOpenedEventHandler.cs" />
     <Compile Include="Model\IDialogHost.cs" />
     <Compile Include="Model\IDialogSession.cs" />
+    <Compile Include="Model\InvertedBoolToVisibilityConverter.cs" />
     <Compile Include="Model\MDDialogHost.cs" />
     <Compile Include="Model\MDSession.cs" />
     <Compile Include="Model\PhoneNumberValidationRule.cs" />
     <Compile Include="Model\PositiveIntegerValidationRule.cs" />
     <Compile Include="Model\PriceValidationRule.cs" />
     <Compile Include="Model\UsernameValidationRule.cs" />
-    <Compile Include="ViewModel\DialogCreateClientViewModel.cs" />
+    <Compile Include="ViewModel\DialogClientEditViewModel.cs" />
+    <Compile Include="ViewModel\DialogDataEditViewModel.cs" />
     <Compile Include="ViewModel\DialogInformationViewModel.cs" />
+    <Compile Include="ViewModel\DialogOrderEditViewModel.cs" />
+    <Compile Include="ViewModel\DialogProductEditViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\ViewModelBase.cs" />
     <Compile Include="ViewModel\RelayCommand.cs" />
@@ -96,8 +109,14 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="ViewModel\DialogBaseViewModel.cs" />
-    <Compile Include="View\CreateClientControl.xaml.cs">
-      <DependentUpon>CreateClientControl.xaml</DependentUpon>
+    <Compile Include="View\OrderEditControl.xaml.cs">
+      <DependentUpon>OrderEditControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\ProductEditControl.xaml.cs">
+      <DependentUpon>ProductEditControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="View\ClientEditControl.xaml.cs">
+      <DependentUpon>ClientEditControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="View\InformationControl.xaml.cs">
       <DependentUpon>InformationControl.xaml</DependentUpon>
@@ -135,6 +154,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Data\Data.csproj">
+      <Project>{ca405a0b-c7cb-41e1-8fbd-e936cff0fc64}</Project>
+      <Name>Data</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Logic.File\Logic.File.csproj">
       <Project>{42977d14-9e22-49f6-8bb9-d5d0a50ee021}</Project>
       <Name>Logic.File</Name>

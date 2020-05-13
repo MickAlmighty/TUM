@@ -10,7 +10,7 @@ namespace Presentation.ViewModel
         {
             DataRepository = dataRepository;
             DialogHost = dialogHost;
-            DialogCreateClientViewModel = new DialogCreateClientViewModel(dialogHost, dataRepository);
+            DialogCreateClientViewModel = new DialogClientEditViewModel(dialogHost, dataRepository);
             CreateClient = new RelayCommand(ExecuteCreateClient);
         }
 
@@ -30,7 +30,7 @@ namespace Presentation.ViewModel
             get;
         }
 
-        public DialogCreateClientViewModel DialogCreateClientViewModel
+        public DialogClientEditViewModel DialogCreateClientViewModel
         {
             get;
         }
