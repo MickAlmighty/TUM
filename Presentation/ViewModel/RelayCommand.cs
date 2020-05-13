@@ -63,7 +63,7 @@ namespace Presentation.ViewModel
     /// </summary>
     public class RelayCommand : RelayCommand<object>
     {
-        public RelayCommand(Action execute) : this(execute, null) { }
+        public RelayCommand(Action execute) : base(p => execute()) { }
 
         public RelayCommand(Action execute, Func<bool> canExecute) : base(p => execute(), p => canExecute()) { }
     }

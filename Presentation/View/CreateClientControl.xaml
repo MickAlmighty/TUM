@@ -1,0 +1,97 @@
+﻿<UserControl x:Class="Presentation.View.CreateClientControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Presentation.View"
+             xmlns:m="clr-namespace:Presentation.Model"
+             mc:Ignorable="d" 
+             d:DesignHeight="300" d:DesignWidth="250" Height="300" Width="250">
+    <UserControl.Resources>
+        <Style x:Key="ApplyButton" TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedAccentButton}">
+            <Setter Property="IsEnabled" Value="False"/>
+            <Style.Triggers>
+                <MultiDataTrigger>
+                    <MultiDataTrigger.Conditions>
+                        <Condition Binding="{Binding Path=(Validation.HasError), ElementName=UsernameBox}" Value="False"/>
+                        <Condition Binding="{Binding Path=(Validation.HasError), ElementName=FirstNameBox}" Value="False"/>
+                        <Condition Binding="{Binding Path=(Validation.HasError), ElementName=LastNameBox}" Value="False"/>
+                        <Condition Binding="{Binding Path=(Validation.HasError), ElementName=StreetBox}" Value="False"/>
+                        <Condition Binding="{Binding Path=(Validation.HasError), ElementName=StreetNumberBox}" Value="False"/>
+                        <Condition Binding="{Binding Path=(Validation.HasError), ElementName=PhoneNumberBox}" Value="False"/>
+                    </MultiDataTrigger.Conditions>
+                    <Setter Property="IsEnabled" Value="True"/>
+                </MultiDataTrigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <StackPanel Orientation="Vertical" Margin="10">
+            <DockPanel Margin="5">
+                <Label Content="Username: "/>
+                <TextBox Name="UsernameBox">
+                    <Binding Path="Username" UpdateSourceTrigger="PropertyChanged" NotifyOnValidationError="True">
+                        <Binding.ValidationRules>
+                            <m:UsernameValidationRule ValidatesOnTargetUpdated="True"/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox>
+            </DockPanel>
+            <DockPanel Margin="5">
+                <Label Content="First name: "/>
+                <TextBox Name="FirstNameBox">
+                    <Binding Path="FirstName" UpdateSourceTrigger="PropertyChanged" NotifyOnValidationError="True">
+                        <Binding.ValidationRules>
+                            <m:BasicStringValidationRule ValidatesOnTargetUpdated="True"/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox>
+            </DockPanel>
+            <DockPanel Margin="5">
+                <Label Content="Last name: "/>
+                <TextBox Name="LastNameBox">
+                    <Binding Path="LastName" UpdateSourceTrigger="PropertyChanged" NotifyOnValidationError="True">
+                        <Binding.ValidationRules>
+                            <m:BasicStringValidationRule ValidatesOnTargetUpdated="True"/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox>
+            </DockPanel>
+            <DockPanel Margin="5">
+                <Label Content="Street: "/>
+                <TextBox Name="StreetBox">
+                    <Binding Path="Street" UpdateSourceTrigger="PropertyChanged" NotifyOnValidationError="True">
+                        <Binding.ValidationRules>
+                            <m:BasicStringValidationRule ValidatesOnTargetUpdated="True"/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox>
+            </DockPanel>
+            <DockPanel Margin="5">
+                <Label Content="Street number: "/>
+                <TextBox Name="StreetNumberBox" Width="30" HorizontalAlignment="Left">
+                    <Binding Path="StreetNumber" UpdateSourceTrigger="PropertyChanged" NotifyOnValidationError="True">
+                        <Binding.ValidationRules>
+                            <m:PositiveIntegerValidationRule ValidatesOnTargetUpdated="True"/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox>
+            </DockPanel>
+            <DockPanel Margin="5">
+                <Label Content="Phone number: "/>
+                <TextBox Name="PhoneNumberBox">
+                    <Binding Path="PhoneNumber" UpdateSourceTrigger="PropertyChanged" NotifyOnValidationError="True">
+                        <Binding.ValidationRules>
+                            <m:PhoneNumberValidationRule ValidatesOnTargetUpdated="True"/>
+                        </Binding.ValidationRules>
+                    </Binding>
+                </TextBox>
+            </DockPanel>
+            <StackPanel Orientation="Horizontal" Margin="5,20,5,10" HorizontalAlignment="Center">
+                <Button Content="CANCEL" Command="{Binding Cancel}"
+                        Style="{StaticResource MaterialDesignRaisedAccentButton}" />
+                <Button Content="APPLY" Command="{Binding Apply}" Margin="10,0,0,0" Style="{StaticResource ApplyButton}"/>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>
