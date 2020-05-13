@@ -51,7 +51,7 @@ namespace Data
                 {
                     throw new ArgumentNullException(nameof(ProductIdQuantityMap));
                 }
-                foreach (uint key in value.Where((key, quantity) => quantity == 0U).Select(pair => pair.Key).ToArray())
+                foreach (uint key in value.Where(pair => pair.Value == 0U).Select(pair => pair.Key).ToArray())
                 {
                     value.Remove(key);
                 }
@@ -96,29 +96,6 @@ namespace Data
                 }
                 _DeliveryDate = value;
             }
-        }
-
-        public Order(uint id, Client client, DateTime orderDate, Dictionary<Product, uint> productQuantityMap, DateTime? deliveryDate)
-        {
-            Id = id;
-            if (client == null)
-            {
-                throw new ArgumentNullException(nameof(client));
-            }
-            ClientUsername = client.Username;
-            OrderDate = orderDate;
-            if (productQuantityMap == null)
-            {
-                throw new ArgumentNullException(nameof(productQuantityMap));
-            }
-            Dictionary<uint, uint> productIdQuantityMap = new Dictionary<uint, uint>(productQuantityMap.Count);
-            foreach (KeyValuePair<Product, uint> pair in productQuantityMap)
-            {
-                ProductIdQuantityMap.Add(pair.Key.Id, pair.Value);
-            }
-            ProductIdQuantityMap = productIdQuantityMap;
-            Price = productQuantityMap.Select(pair => pair.Key.Price * pair.Value).Sum();
-            DeliveryDate = deliveryDate;
         }
 
         public Order(uint id, string clientUsername, DateTime orderDate, Dictionary<uint, uint> productIdQuantityMap, double price, DateTime? deliveryDate)
