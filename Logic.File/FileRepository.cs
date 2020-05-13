@@ -5,14 +5,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Logic
 {
     public class FileRepository : IDataRepository, IDisposable
     {
-
         public FileRepository(string filePath = "data.json")
         {
             if (filePath == null)
@@ -57,7 +55,7 @@ namespace Logic
                 List<uint> newOrders = e.NewItems.Cast<Order>().Select(o => o.Id).ToList();
                 Task.Run(async delegate
                 {
-                    await Task.Delay(10000);
+                    await Task.Delay(5000);
                     lock (OrderLock)
                     {
                         foreach (uint id in newOrders)
@@ -66,6 +64,7 @@ namespace Logic
                             if (order != null && !order.DeliveryDate.HasValue)
                             {
                                 order.DeliveryDate = DateTime.Now;
+                                OrdersSent?.Invoke(this, new NotifyOrderSentEventArgs(order));
                                 Update(order);
                             }
                         }
@@ -238,6 +237,8 @@ namespace Logic
             }
         }
 
+        public event NotifyOrderSentEventHandler OrdersSent;
+
         public bool CreateClient(string username, string firstName, string lastName, string street, uint streetNumber, string phoneNumber)
         {
             lock (ClientLock)
@@ -246,7 +247,7 @@ namespace Logic
             }
         }
 
-        public bool CreateOrder(string clientUsername, DateTime orderDate, Dictionary<uint, uint> productIdQuantityMap)
+        public bool CreateOrder(string clientUsername, DateTime orderDate, Dictionary<uint, uint> productIdQuantityMap, DateTime? deliveryDate)
         {
             lock (ClientLock)
             {
@@ -268,7 +269,7 @@ namespace Logic
                     }
                     lock (OrderLock)
                     {
-                        return OrderManager.Create(clientUsername, orderDate, productIdQuantityMap, totalPrice, null);
+                        return OrderManager.Create(clientUsername, orderDate, productIdQuantityMap, totalPrice, deliveryDate);
                     }
                 }
             }

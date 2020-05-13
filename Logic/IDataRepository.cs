@@ -10,7 +10,7 @@ namespace Logic
         HashSet<Order> GetAllOrders();
         HashSet<Product> GetAllProducts();
         bool CreateClient(string username, string firstName, string lastName, string street, uint streetNumber, string phoneNumber);
-        bool CreateOrder(string clientUsername, DateTime orderDate, Dictionary<uint, uint> productIdQuantityMap);
+        bool CreateOrder(string clientUsername, DateTime orderDate, Dictionary<uint, uint> productIdQuantityMap, DateTime? deliveryDate);
         bool CreateProduct(string name, double price, ProductType productType);
         Client GetClient(string username);
         Order GetOrder(uint id);
@@ -24,5 +24,6 @@ namespace Logic
         event NotifyDataChangedEventHandler ClientsChanged;
         event NotifyDataChangedEventHandler OrdersChanged;
         event NotifyDataChangedEventHandler ProductsChanged;
+        event NotifyOrderSentEventHandler OrdersSent;
     }
 }

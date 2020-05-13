@@ -6,41 +6,182 @@
         xmlns:local="clr-namespace:Presentation.View"
         xmlns:md="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Presentation" MinHeight="350" MinWidth="400" Height="450" Width="600">
+        Title="Presentation" MinHeight="400" MinWidth="700" Height="600" Width="800">
     <Grid>
         <TabControl HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <TabItem Header="Clients">
                 <DockPanel>
                     <Border BorderThickness="2" BorderBrush="{DynamicResource PrimaryHueMidBrush}" Width="150" DockPanel.Dock="Right">
-
+                        <Button Style="{StaticResource MaterialDesignFloatingActionButton}" Command="{Binding CreateClient}">
+                            <Button.Content>
+                                <md:PackIcon Kind="AccountAdd"/>
+                            </Button.Content>
+                        </Button>
                     </Border>
                     <Border  BorderThickness="2,2,0,2" BorderBrush="{DynamicResource PrimaryHueMidBrush}">
                         <ListView ItemsSource="{Binding Clients}">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
-                                    <Border BorderBrush="{DynamicResource PrimaryHueLightBrush}" BorderThickness="1">
-                                        <DockPanel>
+                                    <Border HorizontalAlignment="Stretch" BorderBrush="{DynamicResource PrimaryHueLightBrush}" BorderThickness="1">
+                                        <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Center">
                                             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" FlowDirection="RightToLeft">
-                                                
+                                                <Button Style="{StaticResource MaterialDesignFloatingActionMiniButton}" CommandParameter="{Binding Path=.}" Margin="0,0,10,0"
+                                                        Command="{Binding DataContext.EditClient, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}">
+                                                    <Button.Content>
+                                                        <md:PackIcon Kind="AccountEdit"/>
+                                                    </Button.Content>
+                                                </Button>
+                                                <Button Style="{StaticResource MaterialDesignFloatingActionMiniButton}" CommandParameter="{Binding Path=.}"
+                                                        Command="{Binding DataContext.RemoveClient, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}">
+                                                    <Button.Content>
+                                                        <md:PackIcon Kind="AccountRemove"/>
+                                                    </Button.Content>
+                                                </Button>
                                             </StackPanel>
-                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                                
-                                            </StackPanel>
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="*"/>
+                                                    <RowDefinition Height="*"/>
+                                                </Grid.RowDefinitions>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="0">
+                                                    <Label Content="{Binding Username}" ContentStringFormat="Username: {0},"/>
+                                                    <Label Content="{Binding FirstName}" ContentStringFormat=" {0}"/>
+                                                    <Label Content="{Binding LastName}" ContentStringFormat=" {0}"/>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="1">
+                                                    <Label Content="{Binding Street}"/>
+                                                    <Label Content="{Binding StreetNumber}" ContentStringFormat=" {0},"/>
+                                                    <Label Content="{Binding PhoneNumber}" ContentStringFormat=" {0}"/>
+                                                </StackPanel>
+                                            </Grid>
                                         </DockPanel>
                                     </Border>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                </Style>
+                            </ListView.ItemContainerStyle>
                         </ListView>
                     </Border>
                 </DockPanel>
             </TabItem>
             <TabItem Header="Products">
-                <ListView ItemsSource="{Binding Products}"/>
+                <DockPanel>
+                    <Border BorderThickness="2" BorderBrush="{DynamicResource PrimaryHueMidBrush}" Width="150" DockPanel.Dock="Right">
+                        <Button Style="{StaticResource MaterialDesignFloatingActionButton}" Command="{Binding CreateProduct}">
+                            <Button.Content>
+                                <md:PackIcon Kind="DatabaseAdd"/>
+                            </Button.Content>
+                        </Button>
+                    </Border>
+                    <Border  BorderThickness="2,2,0,2" BorderBrush="{DynamicResource PrimaryHueMidBrush}">
+                        <ListView ItemsSource="{Binding Products}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Height="50" HorizontalAlignment="Stretch" BorderBrush="{DynamicResource PrimaryHueLightBrush}" BorderThickness="1">
+                                        <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" FlowDirection="RightToLeft">
+                                                <Button Style="{StaticResource MaterialDesignFloatingActionMiniButton}" CommandParameter="{Binding Path=.}" Margin="0,0,10,0"
+                                                        Command="{Binding DataContext.EditProduct, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}">
+                                                    <Button.Content>
+                                                        <md:PackIcon Kind="DatabaseEdit"/>
+                                                    </Button.Content>
+                                                </Button>
+                                                <Button Style="{StaticResource MaterialDesignFloatingActionMiniButton}" CommandParameter="{Binding Path=.}"
+                                                        Command="{Binding DataContext.RemoveProduct, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}">
+                                                    <Button.Content>
+                                                        <md:PackIcon Kind="DatabaseRemove"/>
+                                                    </Button.Content>
+                                                </Button>
+                                            </StackPanel>
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="*"/>
+                                                    <RowDefinition Height="*"/>
+                                                </Grid.RowDefinitions>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="0">
+                                                    <Label Content="{Binding ProductType}"/>
+                                                    <Label Content="{Binding Id}" ContentStringFormat="#{0}"/>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="1">
+                                                    <Label Content="{Binding Name}"/>
+                                                    <Label Content="{Binding Price}" ContentStringFormat=" worth {0}"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </DockPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                        </ListView>
+                    </Border>
+                </DockPanel>
             </TabItem>
             <TabItem Header="Orders">
-
+                <DockPanel>
+                    <Border BorderThickness="2" BorderBrush="{DynamicResource PrimaryHueMidBrush}" Width="150" DockPanel.Dock="Right">
+                        <Button Style="{StaticResource MaterialDesignFloatingActionButton}" Command="{Binding CreateOrder}">
+                            <Button.Content>
+                                <md:PackIcon Kind="CreditCardPlus"/>
+                            </Button.Content>
+                        </Button>
+                    </Border>
+                    <Border  BorderThickness="2,2,0,2" BorderBrush="{DynamicResource PrimaryHueMidBrush}">
+                        <ListView ItemsSource="{Binding Orders}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Height="50" HorizontalAlignment="Stretch" BorderBrush="{DynamicResource PrimaryHueLightBrush}" BorderThickness="1">
+                                        <DockPanel HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" FlowDirection="RightToLeft">
+                                                <Button Style="{StaticResource MaterialDesignFloatingActionMiniButton}" CommandParameter="{Binding Path=.}" Margin="0,0,10,0"
+                                                        Command="{Binding DataContext.EditOrder, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}">
+                                                    <Button.Content>
+                                                        <md:PackIcon Kind="CreditCardSettings"/>
+                                                    </Button.Content>
+                                                </Button>
+                                                <Button Style="{StaticResource MaterialDesignFloatingActionMiniButton}" CommandParameter="{Binding Path=.}"
+                                                        Command="{Binding DataContext.RemoveOrder, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}}">
+                                                    <Button.Content>
+                                                        <md:PackIcon Kind="CreditCardRemove"/>
+                                                    </Button.Content>
+                                                </Button>
+                                            </StackPanel>
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="*"/>
+                                                    <RowDefinition Height="*"/>
+                                                </Grid.RowDefinitions>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="0">
+                                                    <Label Content="{Binding Id}" ContentStringFormat="Order #{0}"/>
+                                                    <Label Content="{Binding ClientUsername}" ContentStringFormat="of {0} worth"/>
+                                                    <Label Content="{Binding Price}" ContentStringFormat=" {0},"/>
+                                                </StackPanel>
+                                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Grid.Row="1">
+                                                    <Label Content="{Binding OrderDate}" ContentStringFormat="Created on {0},"/>
+                                                    <Label Content="{Binding DeliveryDate}" ContentStringFormat="delivery date: {0}"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </DockPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                        </ListView>
+                    </Border>
+                </DockPanel>
             </TabItem>
         </TabControl>
-        <md:DialogHost/>
+        <md:DialogHost Identifier="0"/>
+        <md:DialogHost Identifier="1"/>
     </Grid>
 </Window>

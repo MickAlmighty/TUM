@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:Presentation.View"
              xmlns:m="clr-namespace:Presentation.Model"
              mc:Ignorable="d" 
-             d:DesignHeight="285" d:DesignWidth="250" Height="285" Width="250">
+             d:DesignHeight="295" d:DesignWidth="250" Height="295" Width="250">
     <UserControl.Resources>
         <Style x:Key="ApplyButton" TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedAccentButton}">
             <Setter Property="IsEnabled" Value="False"/>
@@ -29,7 +29,7 @@
         <StackPanel Orientation="Vertical" Margin="10">
             <DockPanel Margin="5">
                 <Label Content="Username: "/>
-                <TextBox Name="UsernameBox">
+                <TextBox Name="UsernameBox" IsEnabled="{Binding CreateMode}">
                     <Binding Path="Username" UpdateSourceTrigger="PropertyChanged" NotifyOnValidationError="True">
                         <Binding.ValidationRules>
                             <m:UsernameValidationRule ValidatesOnTargetUpdated="True"/>

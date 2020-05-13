@@ -1,6 +1,7 @@
 ﻿using Logic;
 using Presentation.Model;
 using Presentation.ViewModel;
+using System;
 using System.Windows;
 
 namespace Presentation
@@ -12,8 +13,14 @@ namespace Presentation
     {
         public MainWindow()
         {
+            Closing += MainWindow_Closing;
+            DataContext = new MainViewModel(new MDDialogHost(), new FileRepository(), "0", "1");
             InitializeComponent();
-            DataContext = new MainViewModel(new MDDialogHost(), new FileRepository());
+        }
+
+        private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            ((DataContext as MainViewModel)?.DataRepository as IDisposable)?.Dispose();
         }
     }
 }

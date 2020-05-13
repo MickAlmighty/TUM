@@ -45,7 +45,7 @@ namespace Presentation.ViewModel
         public ICommand Apply { get; }
         public ICommand Cancel { get; }
         public IDataRepository DataRepository { get; }
-        private bool EditMode
+        public bool EditMode
         {
             get
             {
@@ -55,6 +55,15 @@ namespace Presentation.ViewModel
             {
                 _EditMode = value;
                 RaisePropertyChanged();
+                RaisePropertyChanged(nameof(CreateMode));
+            }
+        }
+
+        public bool CreateMode
+        {
+            get
+            {
+                return !EditMode;
             }
         }
 
