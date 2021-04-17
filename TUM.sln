@@ -6,8 +6,14 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Data", "Data\Data.csproj", "{C103066C-2C38-4EF0-A660-ACBC928E3E5A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logic", "Logic\Logic.csproj", "{37F902CC-090D-423E-A690-69673E9FF26B}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C103066C-2C38-4EF0-A660-ACBC928E3E5A} = {C103066C-2C38-4EF0-A660-ACBC928E3E5A}
+	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Presentation", "Presentation\Presentation.csproj", "{EEA86CE0-4E24-49BB-AB6F-569D511DEC0D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{37F902CC-090D-423E-A690-69673E9FF26B} = {37F902CC-090D-423E-A690-69673E9FF26B}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
