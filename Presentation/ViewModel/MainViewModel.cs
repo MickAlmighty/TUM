@@ -121,12 +121,13 @@ namespace Presentation.ViewModel
                     Orders.Clear();
                     break;
                 case NotifyDataChangedAction.Update:
-                    foreach (Order item in e.UpdatedItems)
-                    {
-                        int index = Orders.IndexOf(Orders.FirstOrDefault(o => o.Id == item.Id));
-                        Orders.RemoveAt(index);
-                        Orders.Insert(index, item);
-                    }
+                    SyncContext.Post(_ => {
+                        foreach (Order item in e.UpdatedItems) {
+                            int index = Orders.IndexOf(Orders.FirstOrDefault(o => o.Id == item.Id));
+                            Orders.RemoveAt(index);
+                            Orders.Insert(index, item);
+                        }
+                    }, null);
                     break;
                 default:
                     throw new NotImplementedException();
