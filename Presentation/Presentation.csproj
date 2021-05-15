@@ -86,19 +86,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Compile Include="Model\BasicStringValidationRule.cs" />
-    <Compile Include="Model\BoolToVisibilityConverter.cs" />
+    <Compile Include="View\BasicStringValidationRule.cs" />
+    <Compile Include="View\BoolToVisibilityConverter.cs" />
     <Compile Include="Model\DialogOpenedEventArgs.cs" />
     <Compile Include="Model\DialogOpenedEventHandler.cs" />
     <Compile Include="Model\IDialogHost.cs" />
     <Compile Include="Model\IDialogSession.cs" />
-    <Compile Include="Model\InvertedBoolToVisibilityConverter.cs" />
+    <Compile Include="View\InvertedBoolToVisibilityConverter.cs" />
     <Compile Include="Model\MDDialogHost.cs" />
     <Compile Include="Model\MDSession.cs" />
-    <Compile Include="Model\PhoneNumberValidationRule.cs" />
-    <Compile Include="Model\PositiveIntegerValidationRule.cs" />
-    <Compile Include="Model\PriceValidationRule.cs" />
-    <Compile Include="Model\UsernameValidationRule.cs" />
+    <Compile Include="View\PhoneNumberValidationRule.cs" />
+    <Compile Include="View\PositiveIntegerValidationRule.cs" />
+    <Compile Include="View\PriceValidationRule.cs" />
+    <Compile Include="View\UsernameValidationRule.cs" />
     <Compile Include="ViewModel\DialogClientEditViewModel.cs" />
     <Compile Include="ViewModel\DialogDataEditViewModel.cs" />
     <Compile Include="ViewModel\DialogInformationViewModel.cs" />

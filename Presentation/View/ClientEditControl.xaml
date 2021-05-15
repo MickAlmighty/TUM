@@ -5,7 +5,6 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Presentation.View"
              xmlns:vm="clr-namespace:Presentation.ViewModel"
-             xmlns:m="clr-namespace:Presentation.Model"
              mc:Ignorable="d" 
              d:DesignHeight="295" d:DesignWidth="250" Height="295" Width="250"
              d:DataContext="{d:DesignInstance vm:DialogClientEditViewModel}">
@@ -34,7 +33,7 @@
                 <TextBox Name="UsernameBox" IsEnabled="{Binding CreateMode}">
                     <Binding Path="Username" UpdateSourceTrigger="PropertyChanged" NotifyOnValidationError="True">
                         <Binding.ValidationRules>
-                            <m:UsernameValidationRule ValidatesOnTargetUpdated="True"/>
+                            <local:UsernameValidationRule ValidatesOnTargetUpdated="True"/>
                         </Binding.ValidationRules>
                     </Binding>
                 </TextBox>
@@ -44,7 +43,7 @@
                 <TextBox Name="FirstNameBox">
                     <Binding Path="FirstName" UpdateSourceTrigger="PropertyChanged" NotifyOnValidationError="True">
                         <Binding.ValidationRules>
-                            <m:BasicStringValidationRule ValidatesOnTargetUpdated="True"/>
+                            <local:BasicStringValidationRule ValidatesOnTargetUpdated="True"/>
                         </Binding.ValidationRules>
                     </Binding>
                 </TextBox>
@@ -54,7 +53,7 @@
                 <TextBox Name="LastNameBox">
                     <Binding Path="LastName" UpdateSourceTrigger="PropertyChanged" NotifyOnValidationError="True">
                         <Binding.ValidationRules>
-                            <m:BasicStringValidationRule ValidatesOnTargetUpdated="True"/>
+                            <local:BasicStringValidationRule ValidatesOnTargetUpdated="True"/>
                         </Binding.ValidationRules>
                     </Binding>
                 </TextBox>
@@ -64,7 +63,7 @@
                 <TextBox Name="StreetBox">
                     <Binding Path="Street" UpdateSourceTrigger="PropertyChanged" NotifyOnValidationError="True">
                         <Binding.ValidationRules>
-                            <m:BasicStringValidationRule ValidatesOnTargetUpdated="True"/>
+                            <local:BasicStringValidationRule ValidatesOnTargetUpdated="True"/>
                         </Binding.ValidationRules>
                     </Binding>
                 </TextBox>
@@ -74,7 +73,7 @@
                 <TextBox Name="StreetNumberBox" Width="30" HorizontalAlignment="Left">
                     <Binding Path="StreetNumber" UpdateSourceTrigger="PropertyChanged" NotifyOnValidationError="True">
                         <Binding.ValidationRules>
-                            <m:PositiveIntegerValidationRule ValidatesOnTargetUpdated="True"/>
+                            <local:PositiveIntegerValidationRule ValidatesOnTargetUpdated="True"/>
                         </Binding.ValidationRules>
                     </Binding>
                 </TextBox>
@@ -84,7 +83,7 @@
                 <TextBox Name="PhoneNumberBox">
                     <Binding Path="PhoneNumber" UpdateSourceTrigger="PropertyChanged" NotifyOnValidationError="True">
                         <Binding.ValidationRules>
-                            <m:PhoneNumberValidationRule ValidatesOnTargetUpdated="True"/>
+                            <local:PhoneNumberValidationRule ValidatesOnTargetUpdated="True"/>
                         </Binding.ValidationRules>
                     </Binding>
                 </TextBox>

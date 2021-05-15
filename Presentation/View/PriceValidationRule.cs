@@ -2,9 +2,9 @@
 using System.Globalization;
 using System.Windows.Controls;
 
-namespace Presentation.Model
+namespace Presentation.View
 {
-    class UsernameValidationRule : ValidationRule
+    class PriceValidationRule : ValidationRule
     {
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
@@ -13,11 +13,15 @@ namespace Presentation.Model
             {
                 return new ValidationResult(false, null);
             }
-            if (strValue.Length < 3)
+            if (double.TryParse(strValue, out double price))
             {
-                return new ValidationResult(false, "Username is too short");
+                if (price <= 0.0)
+                {
+                    return new ValidationResult(false, "Price must be positive");
+                }
+                return new ValidationResult(true, null);
             }
-            return new ValidationResult(true, null);
+            return new ValidationResult(false, "Invalid number format");
         }
     }
 }

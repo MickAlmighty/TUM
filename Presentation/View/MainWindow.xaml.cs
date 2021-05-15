@@ -1,11 +1,12 @@
-﻿using Presentation.Model;
-using Presentation.ViewModel;
-using System;
+﻿using System;
 using System.Windows;
 
 using Logic.File;
 
-namespace Presentation
+using Presentation.Model;
+using Presentation.ViewModel;
+
+namespace Presentation.View
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

@@ -3,9 +3,9 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
-namespace Presentation.Model
+namespace Presentation.View
 {
-    public class InvertedBoolToVisibilityConverter : IValueConverter
+    public class BoolToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
@@ -13,13 +13,13 @@ namespace Presentation.Model
             {
                 if ((bool)value)
                 {
-                    return Visibility.Collapsed;
+                    return Visibility.Visible;
                 }
 
-                return Visibility.Visible;
+                return Visibility.Collapsed;
             }
 
-            return Visibility.Collapsed;
+            return Visibility.Visible;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

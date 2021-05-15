@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Globalization;
-using System.Text.RegularExpressions;
 using System.Windows.Controls;
 
-namespace Presentation.Model
+namespace Presentation.View
 {
-    class PhoneNumberValidationRule : ValidationRule
+    class UsernameValidationRule : ValidationRule
     {
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
@@ -14,9 +13,9 @@ namespace Presentation.Model
             {
                 return new ValidationResult(false, null);
             }
-            if (!Regex.IsMatch(strValue, @"^((\+[0-9]{1,3}\ )?[0-9]{3}\ [0-9]{3}\ [0-9]{3,4})|((\+[0-9]{1,3}-)?[0-9]{3}-[0-9]{3}-[0-9]{3,4})$"))
+            if (strValue.Length < 3)
             {
-                return new ValidationResult(false, "Invalid phone number format");
+                return new ValidationResult(false, "Username is too short");
             }
             return new ValidationResult(true, null);
         }

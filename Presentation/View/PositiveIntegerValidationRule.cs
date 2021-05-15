@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows.Controls;
 
-namespace Presentation.Model
+namespace Presentation.View
 {
     class PositiveIntegerValidationRule : ValidationRule
     {
