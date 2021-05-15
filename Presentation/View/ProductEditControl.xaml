@@ -4,9 +4,11 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Presentation.View"
+             xmlns:vm="clr-namespace:Presentation.ViewModel"
              xmlns:m="clr-namespace:Presentation.Model"
              mc:Ignorable="d" 
-             d:DesignHeight="190" d:DesignWidth="250" Height="190" Width="250">
+             d:DesignHeight="190" d:DesignWidth="250" Height="190" Width="250"
+             d:DataContext="{d:DesignInstance vm:DialogProductEditViewModel}">
     <UserControl.Resources>
         <Style x:Key="ApplyButton" TargetType="Button" BasedOn="{StaticResource MaterialDesignRaisedAccentButton}">
             <Setter Property="IsEnabled" Value="False"/>

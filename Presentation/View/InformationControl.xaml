@@ -4,8 +4,10 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Presentation.View"
+             xmlns:vm="clr-namespace:Presentation.ViewModel"
              mc:Ignorable="d" 
-             d:DesignHeight="150" d:DesignWidth="300" MinHeight="150" MinWidth="200">
+             d:DesignHeight="150" d:DesignWidth="300" MinHeight="150" MinWidth="200"
+             d:DataContext="{d:DesignInstance vm:DialogInformationViewModel}">
     <Grid>
         <DockPanel Margin="10">
             <StackPanel Orientation="Horizontal" DockPanel.Dock="Bottom" HorizontalAlignment="Center">
