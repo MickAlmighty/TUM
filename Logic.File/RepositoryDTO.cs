@@ -1,7 +1,8 @@
-﻿using Data;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace Logic
+using Data;
+
+namespace Logic.File
 {
     internal class RepositoryDTO
     {

@@ -9,7 +9,7 @@ using System.Windows.Input;
 
 namespace Presentation.ViewModel
 {
-    internal class MainViewModel : ViewModelBase
+    internal class MainViewModel : ViewModelBase, IObserver<OrderSent>
     {
         public MainViewModel(IDialogHost dialogHost, IDataRepository dataRepository, object dialogIdentifier0, object dialogIdentifier1)
         {
@@ -36,17 +36,13 @@ namespace Presentation.ViewModel
             DataRepository.ClientsChanged += DataRepository_ClientsChanged;
             DataRepository.OrdersChanged += DataRepository_OrdersChanged;
             DataRepository.ProductsChanged += DataRepository_ProductsChanged;
-            DataRepository.OrdersSent += DataRepository_OrdersSent;
+            OrderSentUnsubscriber = DataRepository.Subscribe(this);
         }
+
 
         static MainViewModel()
         {
             SyncContext = SynchronizationContext.Current;
-        }
-
-        private void DataRepository_OrdersSent(object sender, NotifyOrderSentEventArgs e)
-        {
-            SyncContext.Post(o => { DialogOrderSentViewModel.OpenDialog(DialogIdentifier1, $"Order {e.Order.Id} of {e.Order.ClientUsername} was successfully delivered on {e.Order.DeliveryDate.Value}!"); }, null);
         }
 
         private void DataRepository_ClientsChanged(object sender, NotifyDataChangedEventArgs e)
@@ -250,6 +246,8 @@ namespace Presentation.ViewModel
             get;
         }
 
+        public IDisposable OrderSentUnsubscriber { get; }
+
         public object DialogIdentifier0
         {
             get;
@@ -280,6 +278,21 @@ namespace Presentation.ViewModel
         public DialogInformationViewModel DialogOrderSentViewModel
         {
             get;
+        }
+
+        public void OnNext(OrderSent value)
+        {
+            SyncContext.Post(o => { DialogOrderSentViewModel.OpenDialog(DialogIdentifier1, $"Order {value.Order.Id} of {value.Order.ClientUsername} was successfully delivered on {value.Order.DeliveryDate.Value}!"); }, null);
+        }
+
+        public void OnError(Exception error)
+        {
+            Console.WriteLine($"An exception occurred during {nameof(OrderSent)} subscription: {error.Message}\n{error.StackTrace}");
+        }
+
+        public void OnCompleted()
+        {
+            Console.WriteLine($"{nameof(OrderSent)} subscription was completed.");
         }
     }
 }

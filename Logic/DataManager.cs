@@ -38,7 +38,7 @@ namespace Logic
 
         private PropertyInfo GetIdPropertyInfo()
         {
-            IEnumerable<PropertyInfo> idProps = typeof(DataType).GetProperties().Where(prop => Attribute.IsDefined(prop, typeof(IdAttribute)));
+            IEnumerable<PropertyInfo> idProps = typeof(DataType).GetProperties().Where(prop => Attribute.IsDefined(prop, typeof(IdAttribute))).ToList();
             if (idProps.Count() != 1)
             {
                 throw new ApplicationException($"Data type {typeof(DataType).Name} contains {idProps.Count()} Id properties instead of 1!");

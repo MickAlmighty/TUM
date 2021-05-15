@@ -1,11 +1,12 @@
-﻿using Data;
-using System;
+﻿using System;
+
+using Data;
 
 namespace Logic
 {
-    public class NotifyOrderSentEventArgs : EventArgs
+    public class OrderSent : EventArgs
     {
-        public NotifyOrderSentEventArgs(Order order)
+        public OrderSent(Order order)
         {
             Order = order;
         }

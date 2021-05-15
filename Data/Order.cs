@@ -26,11 +26,7 @@ namespace Data
             }
             private set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(ClientUsername));
-                }
-                _ClientUsername = value;
+                _ClientUsername = value ?? throw new ArgumentNullException(nameof(ClientUsername));
             }
         }
 

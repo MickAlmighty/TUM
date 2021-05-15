@@ -7,7 +7,7 @@ namespace Logic
 {
     public class ClientManager : DataManager<Client, string>
     {
-        public ClientManager() : base() { }
+        public ClientManager() { }
         public ClientManager(HashSet<Client> data) : base(data) { }
 
         public bool Create(string username, string firstName, string lastName, string street, uint streetNumber, string phoneNumber)

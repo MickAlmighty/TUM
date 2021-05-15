@@ -1,8 +1,9 @@
-﻿using Logic;
-using Presentation.Model;
+﻿using Presentation.Model;
 using Presentation.ViewModel;
 using System;
 using System.Windows;
+
+using Logic.File;
 
 namespace Presentation
 {

@@ -8,7 +8,7 @@ namespace Logic
 {
     public class ProductManager : DataManager<Product, uint>
     {
-        public ProductManager() : base() { }
+        public ProductManager() { }
         public ProductManager(HashSet<Product> data) : base(data) { }
 
         public bool Create(string name, double price, ProductType productType)

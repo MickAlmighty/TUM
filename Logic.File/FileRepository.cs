@@ -1,13 +1,15 @@
-﻿using Data;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Logic
+using Data;
+
+using Newtonsoft.Json;
+
+namespace Logic.File
 {
     public class FileRepository : IDataRepository, IDisposable
     {
@@ -22,10 +24,10 @@ namespace Logic
                 throw new ArgumentException(nameof(filePath));
             }
 
-            DataPathWatcher = new FileSystemWatcher(Path.GetDirectoryName(Path.GetFullPath(filePath)));
+            DataPathWatcher = new FileSystemWatcher(Path.GetDirectoryName(Path.GetFullPath(filePath)) ?? throw new InvalidOperationException());
             FileName = Path.GetFileName(filePath);
             FullFilePath = Path.Combine(DataPathWatcher.Path, FileName);
-            if (File.Exists(filePath))
+            if (System.IO.File.Exists(filePath))
             {
                 LoadData();
             }
@@ -64,7 +66,9 @@ namespace Logic
                             if (order != null && !order.DeliveryDate.HasValue)
                             {
                                 order.DeliveryDate = DateTime.Now;
-                                OrdersSent?.Invoke(this, new NotifyOrderSentEventArgs(order));
+                                foreach (IObserver<OrderSent> observer in Observers) {
+                                    observer.OnNext(new OrderSent(order));
+                                }
                                 Update(order);
                             }
                         }
@@ -126,7 +130,7 @@ namespace Logic
                 try
                 {
                     // TODO: provide a serialization interface and use it
-                    File.WriteAllText(FullFilePath, JsonConvert.SerializeObject(dto, Formatting.Indented));
+                    System.IO.File.WriteAllText(FullFilePath, JsonConvert.SerializeObject(dto, Formatting.Indented));
                 }
                 catch (Exception e)
                 {
@@ -145,7 +149,7 @@ namespace Logic
                 try
                 {
                     // TODO: provide a serialization interface and use it
-                    RepositoryDTO dto = JsonConvert.DeserializeObject<RepositoryDTO>(File.ReadAllText(FullFilePath));
+                    RepositoryDTO dto = JsonConvert.DeserializeObject<RepositoryDTO>(System.IO.File.ReadAllText(FullFilePath));
                     lock (ClientLock)
                     {
                         lock (ProductLock)
@@ -236,8 +240,6 @@ namespace Logic
                 ProductManager.DataChanged -= value;
             }
         }
-
-        public event NotifyOrderSentEventHandler OrdersSent;
 
         public bool CreateClient(string username, string firstName, string lastName, string street, uint streetNumber, string phoneNumber)
         {
@@ -431,8 +433,19 @@ namespace Logic
             }
         }
 
+        #region IObservable<OrderSent> implementation
+        private HashSet<IObserver<OrderSent>> Observers { get; } = new HashSet<IObserver<OrderSent>>();
+
+        public IDisposable Subscribe(IObserver<OrderSent> observer)
+        {
+            Observers.Add(observer);
+            return new Unsubscriber<OrderSent>(Observers, observer);
+        }
+
+        #endregion
+
         #region IDisposable Support
-        private bool disposedValue = false;
+        private bool disposedValue;
 
         protected virtual void Dispose(bool disposing)
         {

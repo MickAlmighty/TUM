@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Logic
 {
-    public interface IDataRepository
+    public interface IDataRepository : IObservable<OrderSent>
     {
         HashSet<Client> GetAllClients();
         HashSet<Order> GetAllOrders();
@@ -24,6 +24,5 @@ namespace Logic
         event NotifyDataChangedEventHandler ClientsChanged;
         event NotifyDataChangedEventHandler OrdersChanged;
         event NotifyDataChangedEventHandler ProductsChanged;
-        event NotifyOrderSentEventHandler OrdersSent;
     }
 }
