@@ -9,13 +9,18 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data", "Data\Data.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logic", "Logic\Logic.csproj", "{DF7D98D3-E93E-4B8E-A82F-FA0ED1EF1566}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataTest", "DataTest\DataTest.csproj", "{F1C5FA27-88C7-45F0-A0A3-3C63CAA9FABC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataTest", "DataTest\DataTest.csproj", "{F1C5FA27-88C7-45F0-A0A3-3C63CAA9FABC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LogicTest", "LogicTest\LogicTest.csproj", "{1B01CB5F-7EC1-4D44-96E6-A0E80260EA2D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LogicTest", "LogicTest\LogicTest.csproj", "{1B01CB5F-7EC1-4D44-96E6-A0E80260EA2D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PresentationTest", "PresentationTest\PresentationTest.csproj", "{7BC14A3C-4748-44E8-B796-996A7C6A11D5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PresentationTest", "PresentationTest\PresentationTest.csproj", "{7BC14A3C-4748-44E8-B796-996A7C6A11D5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logic.File", "Logic.File\Logic.File.csproj", "{42977D14-9E22-49F6-8BB9-D5D0A50EE021}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logic.File", "Logic.File\Logic.File.csproj", "{42977D14-9E22-49F6-8BB9-D5D0A50EE021}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{378BBCAD-912C-448D-9767-15B4543417A6}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
