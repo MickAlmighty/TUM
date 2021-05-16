@@ -1,4 +1,4 @@
-﻿namespace Data.DTO
+﻿namespace Data.Transfer
 {
     public enum WebRequestType
     {

@@ -7,7 +7,7 @@ using Newtonsoft.Json;
 
 using JsonException = System.Text.Json.JsonException;
 
-namespace Data.DTO
+namespace Data.Transfer
 {
     public sealed class WebSerializer
     {

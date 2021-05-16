@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Data.DTO
+namespace Data.Transfer
 {
     public class OrderDTO
     {

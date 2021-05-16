@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Data.DTO
+namespace Data.Transfer
 {
     public class ProductDTO
     {

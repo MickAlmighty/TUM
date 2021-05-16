@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Logic\Logic.csproj" />
+    <ProjectReference Include="..\Data.Transfer\Data.Transfer.csproj" />
   </ItemGroup>
 
 </Project>
