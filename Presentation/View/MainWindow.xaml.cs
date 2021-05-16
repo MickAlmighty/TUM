@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows;
 
-using Logic.File;
+using Logic.Client;
 
 using Presentation.Model;
 using Presentation.ViewModel;
@@ -16,7 +16,7 @@ namespace Presentation.View
         public MainWindow()
         {
             Closing += MainWindow_Closing;
-            DataContext = new MainViewModel(new MDDialogHost(), new FileRepository(), "0", "1");
+            DataContext = new MainViewModel(new MDDialogHost(), new WebRepository(), "0", "1");
             InitializeComponent();
         }
 

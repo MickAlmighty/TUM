@@ -5,6 +5,7 @@
         GetAllClients,
         GetAllProducts,
         GetAllOrders,
-        Success
+        Success,
+        Failure
     }
 }

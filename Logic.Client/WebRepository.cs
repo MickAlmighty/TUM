@@ -27,7 +27,7 @@ namespace Logic.Client
 
         public async Task<bool> OpenRepository()
         {
-            await WebSocketClient.Connect(this, null, wsc => WebSocketConnection = wsc,
+            await WebSocketClient.Connect(this, new Uri("ws://localhost:4444"), wsc => WebSocketConnection = wsc,
                 logMsg => Console.WriteLine($"CLIENT> {logMsg}"));
             if (WebSocketConnection == null)
             {

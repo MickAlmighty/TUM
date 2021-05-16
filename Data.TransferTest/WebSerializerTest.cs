@@ -61,9 +61,9 @@ namespace Data.TransferTest
             { WebMessageType.GetClient, SampleClientDTO.Username },
             { WebMessageType.GetProduct, SampleProductDTO.Id },
             { WebMessageType.GetOrder, SampleOrderDTO.Id },
-            { WebMessageType.RemoveClient, SampleClientDTO.Username },
-            { WebMessageType.RemoveProduct, SampleProductDTO.Id },
-            { WebMessageType.RemoveOrder, SampleOrderDTO.Id }
+            { WebMessageType.RemoveClient, SampleClientDTO },
+            { WebMessageType.RemoveProduct, SampleProductDTO },
+            { WebMessageType.RemoveOrder, SampleOrderDTO }
         };
 
         [TestMethod]

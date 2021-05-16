@@ -82,14 +82,17 @@ namespace Data.Transfer
                 case WebMessageType.AddClient:
                 case WebMessageType.UpdateClient:
                 case WebMessageType.ProvideClient:
+                case WebMessageType.RemoveClient:
                     return SerializeWebMessage<ClientDTO>(messageType, data);
                 case WebMessageType.AddProduct:
                 case WebMessageType.UpdateProduct:
                 case WebMessageType.ProvideProduct:
+                case WebMessageType.RemoveProduct:
                     return SerializeWebMessage<ProductDTO>(messageType, data);
                 case WebMessageType.AddOrder:
                 case WebMessageType.UpdateOrder:
                 case WebMessageType.ProvideOrder:
+                case WebMessageType.RemoveOrder:
                 case WebMessageType.OrderSent:
                     return SerializeWebMessage<OrderDTO>(messageType, data);
                 case WebMessageType.ProvideAllClients:
@@ -99,12 +102,9 @@ namespace Data.Transfer
                 case WebMessageType.ProvideAllOrders:
                     return SerializeWebMessage<HashSet<OrderDTO>>(messageType, data);
                 case WebMessageType.GetProduct:
-                case WebMessageType.RemoveProduct:
                 case WebMessageType.GetOrder:
-                case WebMessageType.RemoveOrder:
                     return SerializeWebMessage<uint>(messageType, data);
                 case WebMessageType.GetClient:
-                case WebMessageType.RemoveClient:
                 case WebMessageType.Error:
                     return SerializeWebMessage<string>(messageType, data);
                 default:
@@ -129,14 +129,17 @@ namespace Data.Transfer
                 case WebMessageType.AddClient:
                 case WebMessageType.UpdateClient:
                 case WebMessageType.ProvideClient:
+                case WebMessageType.RemoveClient:
                     return JsonConvert.DeserializeObject<WebMessageDTO<ClientDTO>>(jsonData, SerializerSettings).ToObjectWebMessage();
                 case WebMessageType.AddProduct:
                 case WebMessageType.UpdateProduct:
                 case WebMessageType.ProvideProduct:
+                case WebMessageType.RemoveProduct:
                     return JsonConvert.DeserializeObject<WebMessageDTO<ProductDTO>>(jsonData, SerializerSettings).ToObjectWebMessage();
                 case WebMessageType.AddOrder:
                 case WebMessageType.UpdateOrder:
                 case WebMessageType.ProvideOrder:
+                case WebMessageType.RemoveOrder:
                 case WebMessageType.OrderSent:
                     return JsonConvert.DeserializeObject<WebMessageDTO<OrderDTO>>(jsonData, SerializerSettings).ToObjectWebMessage();
                 case WebMessageType.ProvideAllClients:
@@ -146,12 +149,9 @@ namespace Data.Transfer
                 case WebMessageType.ProvideAllOrders:
                     return JsonConvert.DeserializeObject<WebMessageDTO<HashSet<OrderDTO>>>(jsonData, SerializerSettings).ToObjectWebMessage();
                 case WebMessageType.GetProduct:
-                case WebMessageType.RemoveProduct:
                 case WebMessageType.GetOrder:
-                case WebMessageType.RemoveOrder:
                     return JsonConvert.DeserializeObject<WebMessageDTO<uint>>(jsonData, SerializerSettings).ToObjectWebMessage();
                 case WebMessageType.GetClient:
-                case WebMessageType.RemoveClient:
                 case WebMessageType.Error:
                     return JsonConvert.DeserializeObject<WebMessageDTO<string>>(jsonData, SerializerSettings).ToObjectWebMessage();
                 default:

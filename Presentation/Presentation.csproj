@@ -43,8 +43,8 @@
     <Reference Include="MaterialDesignThemes.Wpf, Version=3.1.1.1361, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\MaterialDesignThemes.3.1.1\lib\net45\MaterialDesignThemes.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -161,9 +161,9 @@
       <Project>{ca405a0b-c7cb-41e1-8fbd-e936cff0fc64}</Project>
       <Name>Data</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Logic.File\Logic.File.csproj">
-      <Project>{42977d14-9e22-49f6-8bb9-d5d0a50ee021}</Project>
-      <Name>Logic.File</Name>
+    <ProjectReference Include="..\Logic.Client\Logic.Client.csproj">
+      <Project>{5484370E-F636-4D31-863C-E9CC3E8BB673}</Project>
+      <Name>Logic.Client</Name>
     </ProjectReference>
     <ProjectReference Include="..\Logic\Logic.csproj">
       <Project>{df7d98d3-e93e-4b8e-a82f-fa0ed1ef1566}</Project>
