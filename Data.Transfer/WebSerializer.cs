@@ -18,15 +18,15 @@ namespace Data.Transfer
         };
 
         /// <summary>
-        /// Attempts to parse provided web message to a <see cref="WebRequestType"/>.
+        /// Attempts to parse provided web message to a <see cref="WebSimpleMessageType"/>.
         /// If the parse fails, the message is expected to be a <see cref="WebMessageDTO{T}"/> json.
         /// </summary>
         /// <param name="webMessage">The web message.</param>
-        /// <param name="requestType">The parse result.</param>
+        /// <param name="simpleMessageType">The parse result.</param>
         /// <returns>True if the parse succeeded, false otherwise.</returns>
-        public bool TryParseRequest(string webMessage, out WebRequestType requestType)
+        public bool TryParseRequest(string webMessage, out WebSimpleMessageType simpleMessageType)
         {
-            return Enum.TryParse(webMessage, out requestType);
+            return Enum.TryParse(webMessage, out simpleMessageType);
         }
 
         private WebMessageType GetMessageType(string jsonData)
@@ -90,6 +90,7 @@ namespace Data.Transfer
                 case WebMessageType.AddOrder:
                 case WebMessageType.UpdateOrder:
                 case WebMessageType.ProvideOrder:
+                case WebMessageType.OrderSent:
                     return SerializeWebMessage<OrderDTO>(messageType, data);
                 case WebMessageType.ProvideAllClients:
                     return SerializeWebMessage<HashSet<ClientDTO>>(messageType, data);
@@ -97,8 +98,13 @@ namespace Data.Transfer
                     return SerializeWebMessage<HashSet<ProductDTO>>(messageType, data);
                 case WebMessageType.ProvideAllOrders:
                     return SerializeWebMessage<HashSet<OrderDTO>>(messageType, data);
-                case WebMessageType.OrderSent:
+                case WebMessageType.GetProduct:
+                case WebMessageType.RemoveProduct:
+                case WebMessageType.GetOrder:
+                case WebMessageType.RemoveOrder:
                     return SerializeWebMessage<uint>(messageType, data);
+                case WebMessageType.GetClient:
+                case WebMessageType.RemoveClient:
                 case WebMessageType.Error:
                     return SerializeWebMessage<string>(messageType, data);
                 default:
@@ -131,6 +137,7 @@ namespace Data.Transfer
                 case WebMessageType.AddOrder:
                 case WebMessageType.UpdateOrder:
                 case WebMessageType.ProvideOrder:
+                case WebMessageType.OrderSent:
                     return JsonConvert.DeserializeObject<WebMessageDTO<OrderDTO>>(jsonData, SerializerSettings).ToObjectWebMessage();
                 case WebMessageType.ProvideAllClients:
                     return JsonConvert.DeserializeObject<WebMessageDTO<HashSet<ClientDTO>>>(jsonData, SerializerSettings).ToObjectWebMessage();
@@ -138,8 +145,13 @@ namespace Data.Transfer
                     return JsonConvert.DeserializeObject<WebMessageDTO<HashSet<ProductDTO>>>(jsonData, SerializerSettings).ToObjectWebMessage();
                 case WebMessageType.ProvideAllOrders:
                     return JsonConvert.DeserializeObject<WebMessageDTO<HashSet<OrderDTO>>>(jsonData, SerializerSettings).ToObjectWebMessage();
-                case WebMessageType.OrderSent:
+                case WebMessageType.GetProduct:
+                case WebMessageType.RemoveProduct:
+                case WebMessageType.GetOrder:
+                case WebMessageType.RemoveOrder:
                     return JsonConvert.DeserializeObject<WebMessageDTO<uint>>(jsonData, SerializerSettings).ToObjectWebMessage();
+                case WebMessageType.GetClient:
+                case WebMessageType.RemoveClient:
                 case WebMessageType.Error:
                     return JsonConvert.DeserializeObject<WebMessageDTO<string>>(jsonData, SerializerSettings).ToObjectWebMessage();
                 default:

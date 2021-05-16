@@ -56,16 +56,22 @@ namespace Data.TransferTest
             { WebMessageType.ProvideAllClients, new HashSet<ClientDTO> {SampleClientDTO} },
             { WebMessageType.ProvideAllProducts, new HashSet<ProductDTO> {SampleProductDTO} },
             { WebMessageType.ProvideAllOrders, new HashSet<OrderDTO> {SampleOrderDTO} },
-            { WebMessageType.OrderSent, 1U },
-            { WebMessageType.Error, "Sample exception message." }
+            { WebMessageType.OrderSent, SampleOrderDTO },
+            { WebMessageType.Error, "Sample exception message." },
+            { WebMessageType.GetClient, SampleClientDTO.Username },
+            { WebMessageType.GetProduct, SampleProductDTO.Id },
+            { WebMessageType.GetOrder, SampleOrderDTO.Id },
+            { WebMessageType.RemoveClient, SampleClientDTO.Username },
+            { WebMessageType.RemoveProduct, SampleProductDTO.Id },
+            { WebMessageType.RemoveOrder, SampleOrderDTO.Id }
         };
 
         [TestMethod]
         public void TryParseRequest_ValidValues_ParseSucceeds()
         {
-            foreach (WebRequestType requestType in Enum.GetValues(typeof(WebRequestType)))
+            foreach (WebSimpleMessageType requestType in Enum.GetValues(typeof(WebSimpleMessageType)))
             {
-                Assert.IsTrue(Serializer.TryParseRequest(requestType.ToString(), out WebRequestType returnedRequestType));
+                Assert.IsTrue(Serializer.TryParseRequest(requestType.ToString(), out WebSimpleMessageType returnedRequestType));
                 Assert.AreEqual(requestType, returnedRequestType);
             }
         }
@@ -75,7 +81,7 @@ namespace Data.TransferTest
         {
             foreach (string value in new[] { null, "", "asdf", "Invalid", "    " })
             {
-                Assert.IsFalse(Serializer.TryParseRequest(value, out WebRequestType _));
+                Assert.IsFalse(Serializer.TryParseRequest(value, out WebSimpleMessageType _));
             }
         }
 

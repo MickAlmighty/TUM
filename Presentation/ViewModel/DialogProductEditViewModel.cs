@@ -16,12 +16,12 @@ namespace Presentation.ViewModel
 
         protected override void ApplyCreate()
         {
-            DataRepository.CreateProduct(Name, double.Parse(Price), ProductTypes[ProductTypeIndex]);
+            DataRepository.CreateProduct(Name, double.Parse(Price), ProductTypes[ProductTypeIndex]).GetAwaiter().GetResult();
         }
 
         protected override void ApplyEdit()
         {
-            DataRepository.Update(new Product(_Id, Name, double.Parse(Price), ProductTypes[ProductTypeIndex]));
+            DataRepository.Update(new Product(_Id, Name, double.Parse(Price), ProductTypes[ProductTypeIndex])).GetAwaiter().GetResult();
         }
 
         public static ProductType[] ProductTypes

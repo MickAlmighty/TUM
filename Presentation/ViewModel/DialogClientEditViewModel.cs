@@ -90,12 +90,12 @@ namespace Presentation.ViewModel
 
         protected override void ApplyCreate()
         {
-            DataRepository.CreateClient(Username, FirstName, LastName, Street, uint.Parse(StreetNumber), PhoneNumber);
+            DataRepository.CreateClient(Username, FirstName, LastName, Street, uint.Parse(StreetNumber), PhoneNumber).GetAwaiter().GetResult();
         }
 
         protected override void ApplyEdit()
         {
-            DataRepository.Update(new Client(Username, FirstName, LastName, Street, uint.Parse(StreetNumber), PhoneNumber));
+            DataRepository.Update(new Client(Username, FirstName, LastName, Street, uint.Parse(StreetNumber), PhoneNumber)).GetAwaiter().GetResult();
         }
 
         protected override void InjectProperties(Client toUpdate)

@@ -33,9 +33,13 @@ namespace Presentation.ViewModel
             CreateProduct = new RelayCommand(ExecuteCreateProduct);
             EditProduct = new RelayCommand<Product>(ExecuteEditProduct);
             RemoveProduct = new RelayCommand<Product>(ExecuteRemoveProduct);
-            Clients = new ObservableCollection<Client>(dataRepository.GetAllClients());
-            Orders = new ObservableCollection<Order>(dataRepository.GetAllOrders());
-            Products = new ObservableCollection<Product>(dataRepository.GetAllProducts());
+            if (!dataRepository.OpenRepository().GetAwaiter().GetResult())
+            {
+                throw new ApplicationException("Failed to open the data repository!");
+            }
+            Clients = new ObservableCollection<Client>(dataRepository.GetAllClients().GetAwaiter().GetResult());
+            Orders = new ObservableCollection<Order>(dataRepository.GetAllOrders().GetAwaiter().GetResult());
+            Products = new ObservableCollection<Product>(dataRepository.GetAllProducts().GetAwaiter().GetResult());
             OrderSentUnsubscriber = DataRepository.Subscribe((IObserver<OrderSent>)this);
             ClientUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<Client>>)this);
             ProductUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<Product>>)this);
@@ -56,9 +60,9 @@ namespace Presentation.ViewModel
         {
             DialogClientEditViewModel.OpenDialog(client, DialogIdentifier0);
         }
-        private void ExecuteRemoveClient(Client client)
+        private async void ExecuteRemoveClient(Client client)
         {
-            DataRepository.RemoveClient(client.Username);
+            await DataRepository.RemoveClient(client.Username);
         }
         private void ExecuteCreateOrder()
         {
@@ -71,9 +75,9 @@ namespace Presentation.ViewModel
         {
             DialogOrderEditViewModel.OpenDialog(order, DialogIdentifier0);
         }
-        private void ExecuteRemoveOrder(Order order)
+        private async void ExecuteRemoveOrder(Order order)
         {
-            DataRepository.RemoveOrder(order.Id);
+            await DataRepository.RemoveOrder(order.Id);
         }
         private void ExecuteCreateProduct()
         {
@@ -83,9 +87,9 @@ namespace Presentation.ViewModel
         {
             DialogProductEditViewModel.OpenDialog(product, DialogIdentifier0);
         }
-        private void ExecuteRemoveProduct(Product product)
+        private async void ExecuteRemoveProduct(Product product)
         {
-            DataRepository.RemoveProduct(product.Id);
+            await DataRepository.RemoveProduct(product.Id);
         }
 
         public ICommand CreateClient { get; }

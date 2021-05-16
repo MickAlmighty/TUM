@@ -181,12 +181,12 @@ namespace Presentation.ViewModel
 
         protected override void ApplyCreate()
         {
-            DataRepository.CreateOrder(ClientUsernames[ClientUsernameIndex], OrderDate, GetProductIdQuantityMap(), Delivered ? DeliveryDate : (DateTime?)null);
+            DataRepository.CreateOrder(ClientUsernames[ClientUsernameIndex], OrderDate, GetProductIdQuantityMap(), Delivered ? DeliveryDate : (DateTime?)null).GetAwaiter().GetResult();
         }
 
         protected override void ApplyEdit()
         {
-            DataRepository.Update(new Order(_Id, ClientUsernames[ClientUsernameIndex], OrderDate, GetProductIdQuantityMap(), GetPrice(), Delivered ? DeliveryDate : (DateTime?)null));
+            DataRepository.Update(new Order(_Id, ClientUsernames[ClientUsernameIndex], OrderDate, GetProductIdQuantityMap(), GetPrice(), Delivered ? DeliveryDate : (DateTime?)null)).GetAwaiter().GetResult();
         }
 
         protected override void InjectProperties(Order toUpdate)
@@ -253,9 +253,9 @@ namespace Presentation.ViewModel
 
         private void UpdateDataSets()
         {
-            ClientUsernames = DataRepository.GetAllClients().Select(c => c.Username).ToArray();
+            ClientUsernames = DataRepository.GetAllClients().GetAwaiter().GetResult().Select(c => c.Username).ToArray();
             Products.Clear();
-            foreach (Product product in DataRepository.GetAllProducts())
+            foreach (Product product in DataRepository.GetAllProducts().GetAwaiter().GetResult())
             {
                 Products.Add(product);
             }

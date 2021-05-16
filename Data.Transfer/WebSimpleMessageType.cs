@@ -1,12 +1,10 @@
 ﻿namespace Data.Transfer
 {
-    public enum WebRequestType
+    public enum WebSimpleMessageType
     {
-        GetClient,
-        GetProduct,
-        GetOrder,
         GetAllClients,
         GetAllProducts,
         GetAllOrders,
+        Success
     }
 }

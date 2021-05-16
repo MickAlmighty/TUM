@@ -147,29 +147,5 @@ namespace Logic
             Observers.Add(observer);
             return new Unsubscriber<DataChanged<DataType>>(Observers, observer);
         }
-
-        private class Unsubscriber<T> : IDisposable
-        {
-            private HashSet<IObserver<T>> Observers
-            {
-                get;
-            }
-
-            private IObserver<T> Observer
-            {
-                get;
-            }
-
-            public Unsubscriber(HashSet<IObserver<T>> observers, IObserver<T> observer)
-            {
-                Observers = observers;
-                Observer = observer;
-            }
-
-            public void Dispose()
-            {
-                Observers.Remove(Observer);
-            }
-        }
     }
 }

@@ -27,13 +27,6 @@ namespace Logic.File
             DataPathWatcher = new FileSystemWatcher(Path.GetDirectoryName(Path.GetFullPath(filePath)) ?? throw new InvalidOperationException());
             FileName = Path.GetFileName(filePath);
             FullFilePath = Path.Combine(DataPathWatcher.Path, FileName);
-            if (System.IO.File.Exists(filePath))
-            {
-                LoadData();
-            }
-            DataPathWatcher.Changed += DataFile_Changed;
-            DataPathWatcher.Deleted += DataFile_Deleted;
-            DataPathWatcher.EnableRaisingEvents = true;
             OrderUnsubscriber = OrderManager.Subscribe(this);
         }
 
@@ -63,7 +56,7 @@ namespace Logic.File
                                 {
                                     observer.OnNext(new OrderSent(order));
                                 }
-                                Update(order);
+                                Update(order).GetAwaiter().GetResult();
                             }
                         }
                     }
@@ -203,27 +196,27 @@ namespace Logic.File
 
         private IDisposable OrderUnsubscriber { get; }
 
-        public bool CreateClient(string username, string firstName, string lastName, string street, uint streetNumber, string phoneNumber)
+        public Task<bool> CreateClient(string username, string firstName, string lastName, string street, uint streetNumber, string phoneNumber)
         {
             lock (ClientLock)
             {
                 if (ClientManager.Create(username, firstName, lastName, street, streetNumber, phoneNumber))
                 {
                     SaveData();
-                    return true;
+                    return Task.FromResult(true);
                 }
 
-                return false;
+                return Task.FromResult(false);
             }
         }
 
-        public bool CreateOrder(string clientUsername, DateTime orderDate, Dictionary<uint, uint> productIdQuantityMap, DateTime? deliveryDate)
+        public Task<bool> CreateOrder(string clientUsername, DateTime orderDate, Dictionary<uint, uint> productIdQuantityMap, DateTime? deliveryDate)
         {
             lock (ClientLock)
             {
                 if (ClientManager.Get(clientUsername) == null)
                 {
-                    return false;
+                    return Task.FromResult(false);
                 }
                 lock (ProductLock)
                 {
@@ -233,7 +226,7 @@ namespace Logic.File
                         Product product = ProductManager.Get(pair.Key);
                         if (product == null)
                         {
-                            return false;
+                            return Task.FromResult(false);
                         }
                         totalPrice += product.Price * pair.Value;
                     }
@@ -243,78 +236,90 @@ namespace Logic.File
                             deliveryDate))
                         {
                             SaveData();
-                            return true;
+                            return Task.FromResult(true);
                         }
 
-                        return false;
+                        return Task.FromResult(false);
                     }
                 }
             }
         }
 
-        public bool CreateProduct(string name, double price, ProductType productType)
+        public Task<bool> CreateProduct(string name, double price, ProductType productType)
         {
             lock (ProductLock)
             {
                 if (ProductManager.Create(name, price, productType))
                 {
                     SaveData();
-                    return true;
+                    return Task.FromResult(true);
                 }
 
-                return false;
+                return Task.FromResult(false);
             }
         }
 
-        public HashSet<Client> GetAllClients()
+        public Task<bool> OpenRepository()
+        {
+            if (System.IO.File.Exists(FullFilePath))
+            {
+                LoadData();
+            }
+            DataPathWatcher.Changed += DataFile_Changed;
+            DataPathWatcher.Deleted += DataFile_Deleted;
+            DataPathWatcher.EnableRaisingEvents = true;
+            return Task.FromResult(true);
+        }
+
+        public Task<HashSet<Client>> GetAllClients()
         {
             lock (ClientLock)
             {
-                return ClientManager.GetAll();
+                return Task.FromResult(ClientManager.GetAll());
             }
         }
 
-        public HashSet<Order> GetAllOrders()
+        public Task<HashSet<Order>> GetAllOrders()
         {
             lock (OrderLock)
             {
-                return OrderManager.GetAll();
+                return Task.FromResult(OrderManager.GetAll());
             }
         }
 
-        public HashSet<Product> GetAllProducts()
+        public Task<HashSet<Product>> GetAllProducts()
         {
             lock (ProductLock)
             {
-                return ProductManager.GetAll();
+                return Task.FromResult(ProductManager.GetAll());
             }
         }
 
-        public Client GetClient(string username)
+        public Task<Client> GetClient(string username)
         {
             lock (ClientLock)
             {
-                return ClientManager.Get(username);
+                return Task.FromResult(ClientManager.Get(username));
             }
         }
 
-        public Order GetOrder(uint id)
+        public Task<Order> GetOrder(uint id)
         {
             lock (OrderLock)
             {
-                return OrderManager.Get(id);
+                return Task.FromResult(OrderManager.Get(id));
             }
         }
 
-        public Product GetProduct(uint id)
+        public Task<Product> GetProduct(uint id)
         {
             lock (ProductLock)
             {
-                return ProductManager.Get(id);
+                return Task.FromResult(ProductManager.Get(id));
             }
         }
 
-        public bool RemoveClient(string username)
+        public Task<bool> RemoveClient(string username)
         {
             lock (ClientLock)
             {
@@ -322,7 +327,7 @@ namespace Logic.File
                 {
                     if (ClientManager.Get(username) == null)
                     {
-                        return false;
+                        return Task.FromResult(false);
                     }
 
                     bool changed = false;
@@ -334,33 +339,33 @@ namespace Logic.File
                     if (ClientManager.Remove(username))
                     {
                         SaveData();
-                        return true;
+                        return Task.FromResult(true);
                     }
 
                     if (changed)
                     {
                         SaveData();
                     }
-                    return false;
+                    return Task.FromResult(false);
                 }
             }
         }
 
-        public bool RemoveOrder(uint id)
+        public Task<bool> RemoveOrder(uint id)
         {
             lock (OrderLock)
             {
                 if (OrderManager.Remove(id))
                 {
                     SaveData();
-                    return true;
+                    return Task.FromResult(true);
                 }
 
-                return false;
+                return Task.FromResult(false);
             }
         }
 
-        public bool RemoveProduct(uint id)
+        public Task<bool> RemoveProduct(uint id)
         {
             lock (ProductLock)
             {
@@ -368,28 +373,28 @@ namespace Logic.File
                 {
                     if (ProductManager.Get(id) == null)
                     {
-                        return false;
+                        return Task.FromResult(false);
                     }
                     foreach (Order order in OrderManager.GetAll())
                     {
                         if (order.ProductIdQuantityMap.ContainsKey(id))
                         {
-                            return false;
+                            return Task.FromResult(false);
                         }
                     }
 
                     if (ProductManager.Remove(id))
                     {
                         SaveData();
-                        return true;
+                        return Task.FromResult(true);
                     }
 
-                    return false;
+                    return Task.FromResult(false);
                 }
             }
         }
 
-        public bool Update(Client client)
+        public Task<bool> Update(Client client)
         {
             lock (ClientLock)
             {
@@ -398,21 +403,21 @@ namespace Logic.File
                     if (ClientManager.Update(client))
                     {
                         SaveData();
-                        return true;
+                        return Task.FromResult(true);
                     }
 
-                    return false;
+                    return Task.FromResult(false);
                 }
             }
         }
 
-        public bool Update(Order order)
+        public Task<bool> Update(Order order)
         {
             lock (ClientLock)
             {
                 if (ClientManager.Get(order.ClientUsername) == null)
                 {
-                    return false;
+                    return Task.FromResult(false);
                 }
                 lock (ProductLock)
                 {
@@ -422,7 +427,7 @@ namespace Logic.File
                         Product product = ProductManager.Get(pair.Key);
                         if (product == null)
                         {
-                            return false;
+                            return Task.FromResult(false);
                         }
                         totalPrice += product.Price * pair.Value;
                     }
@@ -432,16 +437,16 @@ namespace Logic.File
                         if (OrderManager.Update(order))
                         {
                             SaveData();
-                            return true;
+                            return Task.FromResult(true);
                         }
 
-                        return false;
+                        return Task.FromResult(false);
                     }
                 }
             }
         }
 
-        public bool Update(Product product)
+        public Task<bool> Update(Product product)
         {
             lock (ProductLock)
             {
@@ -450,10 +455,10 @@ namespace Logic.File
                     if (ProductManager.Update(product))
                     {
                         SaveData();
-                        return true;
+                        return Task.FromResult(true);
                     }
 
-                    return false;
+                    return Task.FromResult(false);
                 }
             }
         }
