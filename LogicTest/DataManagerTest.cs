@@ -2,6 +2,7 @@
 using Logic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace LogicTest
@@ -55,7 +56,7 @@ namespace LogicTest
 
             public void Update(TestDataType t)
             {
-                throw new System.NotImplementedException();
+                throw new NotImplementedException();
             }
         }
         private class InvalidDataManager1 : DataManager<InvalidDataType1, uint> { }
@@ -63,6 +64,28 @@ namespace LogicTest
         private class InvalidTestDataManager : DataManager<TestDataType, double> { }
 
         private class TestDataManager : DataManager<TestDataType, uint> { }
+
+        private class TestDataObserver : IObserver<DataChanged<TestDataType>>
+        {
+            public int CompleteCount { get; private set; }
+            public Queue<Exception> Errors { get; } = new Queue<Exception>();
+            public Queue<DataChanged<TestDataType>> Next { get; } = new Queue<DataChanged<TestDataType>>();
+
+            public void OnCompleted()
+            {
+                ++CompleteCount;
+            }
+
+            public void OnError(Exception error)
+            {
+                Errors.Enqueue(error);
+            }
+
+            public void OnNext(DataChanged<TestDataType> value)
+            {
+                Next.Enqueue(value);
+            }
+        }
 
         [TestMethod]
         [ExpectedException(typeof(ApplicationException))]
@@ -96,17 +119,15 @@ namespace LogicTest
         {
             TestDataManager dm = new TestDataManager();
             TestDataType data = new TestDataType();
-            bool raised = false;
-            dm.DataChanged += (o, e) =>
-            {
-                if (e.Action == NotifyDataChangedAction.Add && e.NewItems?.Cast<TestDataType>().FirstOrDefault() == data)
-                {
-                    raised = true;
-                }
-            };
+            TestDataObserver obs = new TestDataObserver();
+            using IDisposable unsubscriber = dm.Subscribe(obs);
             Assert.IsTrue(dm.Add(data));
             Assert.IsFalse(dm.Add(data));
-            Assert.IsTrue(raised);
+            Assert.AreEqual(0, obs.CompleteCount);
+            Assert.AreEqual(0, obs.Errors.Count);
+            Assert.AreEqual(1, obs.Next.Count);
+            DataChanged<TestDataType> change = obs.Next.Dequeue();
+            Assert.IsTrue(change.Action == DataChangedAction.Add && change.NewItems?.FirstOrDefault() == data);
         }
 
         [TestMethod]
@@ -130,17 +151,15 @@ namespace LogicTest
             TestDataManager dm = new TestDataManager();
             TestDataType data = new TestDataType { Id = 1U };
             dm.Add(data);
-            bool raised = false;
-            dm.DataChanged += (o, e) =>
-            {
-                if (e.Action == NotifyDataChangedAction.Remove && e.OldItems?.Cast<TestDataType>().FirstOrDefault() == data)
-                {
-                    raised = true;
-                }
-            };
+            TestDataObserver obs = new TestDataObserver();
+            using IDisposable unsubscriber = dm.Subscribe(obs);
             Assert.IsTrue(dm.Remove(data.Id));
             Assert.IsFalse(dm.Remove(data.Id));
-            Assert.IsTrue(raised);
+            Assert.AreEqual(0, obs.CompleteCount);
+            Assert.AreEqual(0, obs.Errors.Count);
+            Assert.AreEqual(1, obs.Next.Count);
+            DataChanged<TestDataType> change = obs.Next.Dequeue();
+            Assert.IsTrue(change.Action == DataChangedAction.Remove && change.OldItems?.FirstOrDefault() == data);
         }
 
         [TestMethod]
@@ -149,17 +168,15 @@ namespace LogicTest
             TestDataManager dm = new TestDataManager();
             TestDataType data = new TestDataType();
             dm.Add(data);
-            bool raised = false;
-            dm.DataChanged += (o, e) =>
-            {
-                if (e.Action == NotifyDataChangedAction.Reset && e.OldItems?.Cast<TestDataType>().FirstOrDefault() == data)
-                {
-                    raised = true;
-                }
-            };
+            TestDataObserver obs = new TestDataObserver();
+            using IDisposable unsubscriber = dm.Subscribe(obs);
             dm.Reset();
             Assert.IsFalse(dm.GetAll().Any());
-            Assert.IsTrue(raised);
+            Assert.AreEqual(0, obs.CompleteCount);
+            Assert.AreEqual(0, obs.Errors.Count);
+            Assert.AreEqual(1, obs.Next.Count);
+            DataChanged<TestDataType> change = obs.Next.Dequeue();
+            Assert.IsTrue(change.Action == DataChangedAction.Reset && change.OldItems?.FirstOrDefault() == data);
         }
 
         [TestMethod]
@@ -168,20 +185,19 @@ namespace LogicTest
             TestDataManager dm = new TestDataManager();
             TestDataType data1 = new TestDataType { Id = 1U }, data2 = new TestDataType { Id = 2U };
             dm.Add(data1);
-            bool raised = false;
-            dm.DataChanged += (o, e) =>
-            {
-                if (e.Action == NotifyDataChangedAction.Replace
-                && e.OldItems?.Cast<TestDataType>().FirstOrDefault() == data1
-                && e.NewItems?.Cast<TestDataType>().FirstOrDefault() == data2)
-                {
-                    raised = true;
-                }
-            };
+
+            TestDataObserver obs = new TestDataObserver();
+            using IDisposable unsubscriber = dm.Subscribe(obs);
             Assert.AreEqual(dm.Get(1U), data1);
-            dm.ReplaceData(new System.Collections.Generic.HashSet<TestDataType> { data2 });
+            dm.ReplaceData(new HashSet<TestDataType> { data2 });
             Assert.AreEqual(dm.Get(2U), data2);
-            Assert.IsTrue(raised);
+            Assert.AreEqual(0, obs.CompleteCount);
+            Assert.AreEqual(0, obs.Errors.Count);
+            Assert.AreEqual(1, obs.Next.Count);
+            DataChanged<TestDataType> change = obs.Next.Dequeue();
+            Assert.IsTrue(change.Action == DataChangedAction.Replace
+                          && change.OldItems?.FirstOrDefault() == data1
+                          && change.NewItems?.FirstOrDefault() == data2);
         }
     }
 }

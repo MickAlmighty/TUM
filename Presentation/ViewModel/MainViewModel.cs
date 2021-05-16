@@ -1,6 +1,9 @@
 ﻿using Data;
+
 using Logic;
+
 using Presentation.Model;
+
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -9,7 +12,7 @@ using System.Windows.Input;
 
 namespace Presentation.ViewModel
 {
-    internal class MainViewModel : ViewModelBase, IObserver<OrderSent>
+    internal class MainViewModel : ViewModelBase, IObserver<OrderSent>, IObserver<DataChanged<Client>>, IObserver<DataChanged<Product>>, IObserver<DataChanged<Order>>
     {
         public MainViewModel(IDialogHost dialogHost, IDataRepository dataRepository, object dialogIdentifier0, object dialogIdentifier1)
         {
@@ -33,143 +36,16 @@ namespace Presentation.ViewModel
             Clients = new ObservableCollection<Client>(dataRepository.GetAllClients());
             Orders = new ObservableCollection<Order>(dataRepository.GetAllOrders());
             Products = new ObservableCollection<Product>(dataRepository.GetAllProducts());
-            DataRepository.ClientsChanged += DataRepository_ClientsChanged;
-            DataRepository.OrdersChanged += DataRepository_OrdersChanged;
-            DataRepository.ProductsChanged += DataRepository_ProductsChanged;
-            OrderSentUnsubscriber = DataRepository.Subscribe(this);
+            OrderSentUnsubscriber = DataRepository.Subscribe((IObserver<OrderSent>)this);
+            ClientUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<Client>>)this);
+            ProductUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<Product>>)this);
+            OrderUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<Order>>)this);
         }
 
 
         static MainViewModel()
         {
             SyncContext = SynchronizationContext.Current;
-        }
-
-        private void DataRepository_ClientsChanged(object sender, NotifyDataChangedEventArgs e)
-        {
-            switch (e.Action)
-            {
-                case NotifyDataChangedAction.Add:
-                    foreach (Client c in e.NewItems)
-                    {
-                        Clients.Add(c);
-                    }
-                    break;
-                case NotifyDataChangedAction.Remove:
-                    foreach (Client c in Clients.Where(client => e.OldItems.Cast<Client>().FirstOrDefault(cl => cl.Username == client.Username) != null).ToList())
-                    {
-                        Clients.Remove(c);
-                    }
-                    break;
-                case NotifyDataChangedAction.Replace:
-                    foreach (Client c in Clients.Where(client => e.OldItems.Cast<Client>().FirstOrDefault(cl => cl.Username == client.Username) != null).ToList())
-                    {
-                        Clients.Remove(c);
-                    }
-                    foreach (Client c in e.NewItems)
-                    {
-                        Clients.Add(c);
-                    }
-                    break;
-                case NotifyDataChangedAction.Reset:
-                    Clients.Clear();
-                    break;
-                case NotifyDataChangedAction.Update:
-                    foreach (Client item in e.UpdatedItems)
-                    {
-                        int index = Clients.IndexOf(Clients.FirstOrDefault(c => c.Username == item.Username));
-                        Clients.RemoveAt(index);
-                        Clients.Insert(index, item);
-                    }
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-        }
-
-        private void DataRepository_OrdersChanged(object sender, NotifyDataChangedEventArgs e)
-        {
-            switch (e.Action)
-            {
-                case NotifyDataChangedAction.Add:
-                    foreach (Order o in e.NewItems)
-                    {
-                        Orders.Add(o);
-                    }
-                    break;
-                case NotifyDataChangedAction.Remove:
-                    foreach (Order o in Orders.Where(order => e.OldItems.Cast<Order>().FirstOrDefault(or => or.Id == order.Id) != null).ToList())
-                    {
-                        Orders.Remove(o);
-                    }
-                    break;
-                case NotifyDataChangedAction.Replace:
-                    foreach (Order o in Orders.Where(order => e.OldItems.Cast<Order>().FirstOrDefault(or => or.Id == order.Id) != null).ToList())
-                    {
-                        Orders.Remove(o);
-                    }
-                    foreach (Order o in e.NewItems)
-                    {
-                        Orders.Add(o);
-                    }
-                    break;
-                case NotifyDataChangedAction.Reset:
-                    Orders.Clear();
-                    break;
-                case NotifyDataChangedAction.Update:
-                    SyncContext.Post(_ => {
-                        foreach (Order item in e.UpdatedItems) {
-                            int index = Orders.IndexOf(Orders.FirstOrDefault(o => o.Id == item.Id));
-                            Orders.RemoveAt(index);
-                            Orders.Insert(index, item);
-                        }
-                    }, null);
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
-        }
-
-        private void DataRepository_ProductsChanged(object sender, NotifyDataChangedEventArgs e)
-        {
-            switch (e.Action)
-            {
-                case NotifyDataChangedAction.Add:
-                    foreach (Product p in e.NewItems)
-                    {
-                        Products.Add(p);
-                    }
-                    break;
-                case NotifyDataChangedAction.Remove:
-                    foreach (Product p in Products.Where(product => e.OldItems.Cast<Product>().FirstOrDefault(pr => pr.Id == product.Id) != null).ToList())
-                    {
-                        Products.Remove(p);
-                    }
-                    break;
-                case NotifyDataChangedAction.Replace:
-                    foreach (Product p in Products.Where(product => e.OldItems.Cast<Product>().FirstOrDefault(pr => pr.Id == product.Id) != null).ToList())
-                    {
-                        Products.Remove(p);
-                    }
-                    foreach (Product p in e.NewItems)
-                    {
-                        Products.Add(p);
-                    }
-                    break;
-                case NotifyDataChangedAction.Reset:
-                    Products.Clear();
-                    break;
-                case NotifyDataChangedAction.Update:
-                    foreach (Product item in e.UpdatedItems)
-                    {
-                        int index = Products.IndexOf(Products.FirstOrDefault(p => p.Id == item.Id));
-                        Products.RemoveAt(index);
-                        Products.Insert(index, item);
-                    }
-                    break;
-                default:
-                    throw new NotImplementedException();
-            }
         }
 
         private void ExecuteCreateClient()
@@ -247,6 +123,9 @@ namespace Presentation.ViewModel
         }
 
         public IDisposable OrderSentUnsubscriber { get; }
+        public IDisposable ClientUnsubscriber { get; }
+        public IDisposable ProductUnsubscriber { get; }
+        public IDisposable OrderUnsubscriber { get; }
 
         public object DialogIdentifier0
         {
@@ -282,17 +161,175 @@ namespace Presentation.ViewModel
 
         public void OnNext(OrderSent value)
         {
-            SyncContext.Post(o => { DialogOrderSentViewModel.OpenDialog(DialogIdentifier1, $"Order {value.Order.Id} of {value.Order.ClientUsername} was successfully delivered on {value.Order.DeliveryDate.Value}!"); }, null);
+            SyncContext.Post(o => { DialogOrderSentViewModel.OpenDialog(DialogIdentifier1, $"Order {value.Order.Id} of {value.Order.ClientUsername} was successfully delivered on {(value.Order.DeliveryDate.HasValue ? value.Order.DeliveryDate.Value.ToString() : "")}!"); }, null);
         }
 
-        public void OnError(Exception error)
+        public void OnNext(DataChanged<Client> value)
         {
-            Console.WriteLine($"An exception occurred during {nameof(OrderSent)} subscription: {error.Message}\n{error.StackTrace}");
+            switch (value.Action)
+            {
+                case DataChangedAction.Add:
+                    foreach (Client c in value.NewItems)
+                    {
+                        Clients.Add(c);
+                    }
+                    break;
+                case DataChangedAction.Remove:
+                    foreach (Client c in Clients.Where(client => value.OldItems.FirstOrDefault(cl => cl.Username == client.Username) != null).ToList())
+                    {
+                        Clients.Remove(c);
+                    }
+                    break;
+                case DataChangedAction.Replace:
+                    foreach (Client c in Clients.Where(client => value.OldItems.FirstOrDefault(cl => cl.Username == client.Username) != null).ToList())
+                    {
+                        Clients.Remove(c);
+                    }
+                    foreach (Client c in value.NewItems)
+                    {
+                        Clients.Add(c);
+                    }
+                    break;
+                case DataChangedAction.Reset:
+                    Clients.Clear();
+                    break;
+                case DataChangedAction.Update:
+                    foreach (Client item in value.UpdatedItems)
+                    {
+                        int index = Clients.IndexOf(Clients.FirstOrDefault(c => c.Username == item.Username));
+                        Clients.RemoveAt(index);
+                        Clients.Insert(index, item);
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
 
-        public void OnCompleted()
+        public void OnNext(DataChanged<Product> value)
+        {
+            switch (value.Action)
+            {
+                case DataChangedAction.Add:
+                    foreach (Product p in value.NewItems)
+                    {
+                        Products.Add(p);
+                    }
+                    break;
+                case DataChangedAction.Remove:
+                    foreach (Product p in Products.Where(product => value.OldItems.FirstOrDefault(pr => pr.Id == product.Id) != null).ToList())
+                    {
+                        Products.Remove(p);
+                    }
+                    break;
+                case DataChangedAction.Replace:
+                    foreach (Product p in Products.Where(product => value.OldItems.FirstOrDefault(pr => pr.Id == product.Id) != null).ToList())
+                    {
+                        Products.Remove(p);
+                    }
+                    foreach (Product p in value.NewItems)
+                    {
+                        Products.Add(p);
+                    }
+                    break;
+                case DataChangedAction.Reset:
+                    Products.Clear();
+                    break;
+                case DataChangedAction.Update:
+                    foreach (Product item in value.UpdatedItems)
+                    {
+                        int index = Products.IndexOf(Products.FirstOrDefault(p => p.Id == item.Id));
+                        Products.RemoveAt(index);
+                        Products.Insert(index, item);
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public void OnNext(DataChanged<Order> value)
+        {
+            switch (value.Action)
+            {
+                case DataChangedAction.Add:
+                    foreach (Order o in value.NewItems)
+                    {
+                        Orders.Add(o);
+                    }
+                    break;
+                case DataChangedAction.Remove:
+                    foreach (Order o in Orders.Where(order => value.OldItems.FirstOrDefault(or => or.Id == order.Id) != null).ToList())
+                    {
+                        Orders.Remove(o);
+                    }
+                    break;
+                case DataChangedAction.Replace:
+                    foreach (Order o in Orders.Where(order => value.OldItems.FirstOrDefault(or => or.Id == order.Id) != null).ToList())
+                    {
+                        Orders.Remove(o);
+                    }
+                    foreach (Order o in value.NewItems)
+                    {
+                        Orders.Add(o);
+                    }
+                    break;
+                case DataChangedAction.Reset:
+                    Orders.Clear();
+                    break;
+                case DataChangedAction.Update:
+                    SyncContext.Post(_ => {
+                        foreach (Order item in value.UpdatedItems)
+                        {
+                            int index = Orders.IndexOf(Orders.FirstOrDefault(o => o.Id == item.Id));
+                            Orders.RemoveAt(index);
+                            Orders.Insert(index, item);
+                        }
+                    }, null);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        void IObserver<DataChanged<Order>>.OnCompleted()
+        {
+            Console.WriteLine($"{nameof(Order)} subscription was completed.");
+        }
+
+        void IObserver<DataChanged<Order>>.OnError(Exception error)
+        {
+            Console.WriteLine($"An exception occurred during {nameof(Order)} subscription: {error}");
+        }
+
+        void IObserver<DataChanged<Product>>.OnCompleted()
+        {
+            Console.WriteLine($"{nameof(Product)} subscription was completed.");
+        }
+
+        void IObserver<DataChanged<Product>>.OnError(Exception error)
+        {
+            Console.WriteLine($"An exception occurred during {nameof(Product)} subscription: {error}");
+        }
+
+        void IObserver<DataChanged<Client>>.OnCompleted()
+        {
+            Console.WriteLine($"{nameof(Client)} subscription was completed.");
+        }
+
+        void IObserver<DataChanged<Client>>.OnError(Exception error)
+        {
+            Console.WriteLine($"An exception occurred during {nameof(Client)} subscription: {error}");
+        }
+
+        void IObserver<OrderSent>.OnCompleted()
         {
             Console.WriteLine($"{nameof(OrderSent)} subscription was completed.");
+        }
+
+        void IObserver<OrderSent>.OnError(Exception error)
+        {
+            Console.WriteLine($"An exception occurred during {nameof(OrderSent)} subscription: {error}");
         }
     }
 }

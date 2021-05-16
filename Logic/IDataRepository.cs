@@ -1,10 +1,11 @@
 ﻿using Data;
+
 using System;
 using System.Collections.Generic;
 
 namespace Logic
 {
-    public interface IDataRepository : IObservable<OrderSent>
+    public interface IDataRepository : IObservable<OrderSent>, IObservable<DataChanged<Client>>, IObservable<DataChanged<Product>>, IObservable<DataChanged<Order>>
     {
         HashSet<Client> GetAllClients();
         HashSet<Order> GetAllOrders();
@@ -21,8 +22,5 @@ namespace Logic
         bool RemoveClient(string username);
         bool RemoveOrder(uint id);
         bool RemoveProduct(uint id);
-        event NotifyDataChangedEventHandler ClientsChanged;
-        event NotifyDataChangedEventHandler OrdersChanged;
-        event NotifyDataChangedEventHandler ProductsChanged;
     }
 }

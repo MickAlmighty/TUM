@@ -1,34 +1,36 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Generic;
+
+using Data;
 
 namespace Logic
 {
-    public class NotifyDataChangedEventArgs : EventArgs
+    public class DataChanged<DataType> where DataType : IUpdatable<DataType>
     {
-        public NotifyDataChangedEventArgs(NotifyDataChangedAction action, IList changedItems)
+        public DataChanged(DataChangedAction action, IList<DataType> changedItems)
         {
             Action = action;
             switch (action)
             {
-                case NotifyDataChangedAction.Add:
+                case DataChangedAction.Add:
                     NewItems = changedItems;
                     break;
-                case NotifyDataChangedAction.Remove:
+                case DataChangedAction.Remove:
                     OldItems = changedItems;
                     break;
-                case NotifyDataChangedAction.Update:
+                case DataChangedAction.Update:
                     UpdatedItems = changedItems;
                     break;
-                case NotifyDataChangedAction.Reset:
+                case DataChangedAction.Reset:
                     OldItems = changedItems;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(action));
             }
         }
-        public NotifyDataChangedEventArgs(NotifyDataChangedAction action, IList newItems, IList oldItems)
+        public DataChanged(DataChangedAction action, IList<DataType> newItems, IList<DataType> oldItems)
         {
-            if (action != NotifyDataChangedAction.Replace)
+            if (action != DataChangedAction.Replace)
             {
                 throw new ArgumentOutOfRangeException(nameof(action));
             }
@@ -36,9 +38,9 @@ namespace Logic
             NewItems = newItems;
             OldItems = oldItems;
         }
-        public NotifyDataChangedAction Action { get; }
-        public IList NewItems { get; }
-        public IList UpdatedItems { get; }
-        public IList OldItems { get; }
+        public DataChangedAction Action { get; }
+        public IList<DataType> NewItems { get; }
+        public IList<DataType> UpdatedItems { get; }
+        public IList<DataType> OldItems { get; }
     }
 }

@@ -11,7 +11,7 @@ using Newtonsoft.Json;
 
 namespace Logic.File
 {
-    public class FileRepository : IDataRepository, IDisposable
+    public class FileRepository : IDataRepository, IDisposable, IObserver<DataChanged<Order>>
     {
         public FileRepository(string filePath = "data.json")
         {
@@ -34,27 +34,20 @@ namespace Logic.File
             DataPathWatcher.Changed += DataFile_Changed;
             DataPathWatcher.Deleted += DataFile_Deleted;
             DataPathWatcher.EnableRaisingEvents = true;
-            ClientsChanged += FileRepository_ClientsChanged;
-            OrdersChanged += FileRepository_OrdersChanged;
-            ProductsChanged += FileRepository_ProductsChanged;
+            OrderUnsubscriber = OrderManager.Subscribe(this);
         }
 
-        private void FileRepository_ProductsChanged(object sender, NotifyDataChangedEventArgs e)
+        public void OnCompleted() { }
+        public void OnError(Exception error)
         {
-            SaveData();
+            Console.WriteLine($"Order subscription error: {error}.");
         }
 
-        private void FileRepository_ClientsChanged(object sender, NotifyDataChangedEventArgs e)
+        public void OnNext(DataChanged<Order> value)
         {
-            SaveData();
-        }
-
-        private void FileRepository_OrdersChanged(object sender, NotifyDataChangedEventArgs e)
-        {
-            SaveData();
-            if (e.Action == NotifyDataChangedAction.Add)
+            if (value.Action == DataChangedAction.Add)
             {
-                List<uint> newOrders = e.NewItems.Cast<Order>().Select(o => o.Id).ToList();
+                List<uint> newOrders = value.NewItems.Select(o => o.Id).ToList();
                 Task.Run(async delegate
                 {
                     await Task.Delay(5000);
@@ -66,7 +59,8 @@ namespace Logic.File
                             if (order != null && !order.DeliveryDate.HasValue)
                             {
                                 order.DeliveryDate = DateTime.Now;
-                                foreach (IObserver<OrderSent> observer in Observers) {
+                                foreach (IObserver<OrderSent> observer in OrderSentObservers.ToList())
+                                {
                                     observer.OnNext(new OrderSent(order));
                                 }
                                 Update(order);
@@ -207,45 +201,19 @@ namespace Logic.File
             get;
         } = new ProductManager();
 
-        public event NotifyDataChangedEventHandler ClientsChanged
-        {
-            add
-            {
-                ClientManager.DataChanged += value;
-            }
-            remove
-            {
-                ClientManager.DataChanged -= value;
-            }
-        }
-        public event NotifyDataChangedEventHandler OrdersChanged
-        {
-            add
-            {
-                OrderManager.DataChanged += value;
-            }
-            remove
-            {
-                OrderManager.DataChanged -= value;
-            }
-        }
-        public event NotifyDataChangedEventHandler ProductsChanged
-        {
-            add
-            {
-                ProductManager.DataChanged += value;
-            }
-            remove
-            {
-                ProductManager.DataChanged -= value;
-            }
-        }
+        private IDisposable OrderUnsubscriber { get; }
 
         public bool CreateClient(string username, string firstName, string lastName, string street, uint streetNumber, string phoneNumber)
         {
             lock (ClientLock)
             {
-                return ClientManager.Create(username, firstName, lastName, street, streetNumber, phoneNumber);
+                if (ClientManager.Create(username, firstName, lastName, street, streetNumber, phoneNumber))
+                {
+                    SaveData();
+                    return true;
+                }
+
+                return false;
             }
         }
 
@@ -271,7 +239,14 @@ namespace Logic.File
                     }
                     lock (OrderLock)
                     {
-                        return OrderManager.Create(clientUsername, orderDate, productIdQuantityMap, totalPrice, deliveryDate);
+                        if (OrderManager.Create(clientUsername, orderDate, productIdQuantityMap, totalPrice,
+                            deliveryDate))
+                        {
+                            SaveData();
+                            return true;
+                        }
+
+                        return false;
                     }
                 }
             }
@@ -281,7 +256,13 @@ namespace Logic.File
         {
             lock (ProductLock)
             {
-                return ProductManager.Create(name, price, productType);
+                if (ProductManager.Create(name, price, productType))
+                {
+                    SaveData();
+                    return true;
+                }
+
+                return false;
             }
         }
 
@@ -343,11 +324,24 @@ namespace Logic.File
                     {
                         return false;
                     }
+
+                    bool changed = false;
                     foreach (uint orderId in OrderManager.GetAll().Where(order => order.ClientUsername == username).Select(o => o.Id))
                     {
-                        OrderManager.Remove(orderId);
+                        changed |= OrderManager.Remove(orderId);
                     }
-                    return ClientManager.Remove(username);
+
+                    if (ClientManager.Remove(username))
+                    {
+                        SaveData();
+                        return true;
+                    }
+
+                    if (changed)
+                    {
+                        SaveData();
+                    }
+                    return false;
                 }
             }
         }
@@ -356,7 +350,13 @@ namespace Logic.File
         {
             lock (OrderLock)
             {
-                return OrderManager.Remove(id);
+                if (OrderManager.Remove(id))
+                {
+                    SaveData();
+                    return true;
+                }
+
+                return false;
             }
         }
 
@@ -377,7 +377,14 @@ namespace Logic.File
                             return false;
                         }
                     }
-                    return ProductManager.Remove(id);
+
+                    if (ProductManager.Remove(id))
+                    {
+                        SaveData();
+                        return true;
+                    }
+
+                    return false;
                 }
             }
         }
@@ -388,7 +395,13 @@ namespace Logic.File
             {
                 lock (OrderLock)
                 {
-                    return ClientManager.Update(client);
+                    if (ClientManager.Update(client))
+                    {
+                        SaveData();
+                        return true;
+                    }
+
+                    return false;
                 }
             }
         }
@@ -416,7 +429,13 @@ namespace Logic.File
                     order.Price = totalPrice;
                     lock (OrderLock)
                     {
-                        return OrderManager.Update(order);
+                        if (OrderManager.Update(order))
+                        {
+                            SaveData();
+                            return true;
+                        }
+
+                        return false;
                     }
                 }
             }
@@ -428,18 +447,40 @@ namespace Logic.File
             {
                 lock (OrderLock)
                 {
-                    return ProductManager.Update(product);
+                    if (ProductManager.Update(product))
+                    {
+                        SaveData();
+                        return true;
+                    }
+
+                    return false;
                 }
             }
         }
 
-        #region IObservable<OrderSent> implementation
-        private HashSet<IObserver<OrderSent>> Observers { get; } = new HashSet<IObserver<OrderSent>>();
+        #region IObservable implementation
+
+        private HashSet<IObserver<OrderSent>> OrderSentObservers { get; } = new HashSet<IObserver<OrderSent>>();
 
         public IDisposable Subscribe(IObserver<OrderSent> observer)
         {
-            Observers.Add(observer);
-            return new Unsubscriber<OrderSent>(Observers, observer);
+            OrderSentObservers.Add(observer);
+            return new Unsubscriber<OrderSent>(OrderSentObservers, observer);
+        }
+
+        public IDisposable Subscribe(IObserver<DataChanged<Client>> observer)
+        {
+            return ClientManager.Subscribe(observer);
+        }
+
+        public IDisposable Subscribe(IObserver<DataChanged<Product>> observer)
+        {
+            return ProductManager.Subscribe(observer);
+        }
+
+        public IDisposable Subscribe(IObserver<DataChanged<Order>> observer)
+        {
+            return OrderManager.Subscribe(observer);
         }
 
         #endregion
@@ -453,6 +494,7 @@ namespace Logic.File
             {
                 if (disposing)
                 {
+                    OrderUnsubscriber.Dispose();
                     DataPathWatcher.Dispose();
                 }
 

@@ -1,4 +1,5 @@
 ﻿using Data;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,8 +7,13 @@ using System.Reflection;
 
 namespace Logic
 {
-    public abstract class DataManager<DataType, KeyType> where DataType : IUpdatable<DataType>
+    public abstract class DataManager<DataType, KeyType> : IObservable<DataChanged<DataType>> where DataType : IUpdatable<DataType>
     {
+        private HashSet<IObserver<DataChanged<DataType>>> Observers
+        {
+            get;
+        } = new HashSet<IObserver<DataChanged<DataType>>>();
+
         private PropertyInfo IdProperty
         {
             get;
@@ -56,13 +62,14 @@ namespace Logic
             return new HashSet<DataType>(DataSet);
         }
 
-        public event NotifyDataChangedEventHandler DataChanged;
-
         public void ReplaceData(HashSet<DataType> data)
         {
             HashSet<DataType> oldData = DataSet;
             DataSet = new HashSet<DataType>(data);
-            DataChanged?.Invoke(this, new NotifyDataChangedEventArgs(NotifyDataChangedAction.Replace, DataSet.ToList(), oldData.ToList()));
+            foreach (IObserver<DataChanged<DataType>> observer in Observers.ToList())
+            {
+                observer.OnNext(new DataChanged<DataType>(DataChangedAction.Replace, DataSet.ToList(), oldData.ToList()));
+            }
         }
 
         public bool Add(DataType data)
@@ -76,7 +83,10 @@ namespace Logic
                 return false;
             }
             DataSet.Add(data);
-            DataChanged?.Invoke(this, new NotifyDataChangedEventArgs(NotifyDataChangedAction.Add, new List<DataType> { data }));
+            foreach (IObserver<DataChanged<DataType>> observer in Observers.ToList())
+            {
+                observer.OnNext(new DataChanged<DataType>(DataChangedAction.Add, new List<DataType> { data }));
+            }
             return true;
         }
 
@@ -100,7 +110,10 @@ namespace Logic
             {
                 targetData.Update(data);
             }
-            DataChanged?.Invoke(this, new NotifyDataChangedEventArgs(NotifyDataChangedAction.Update, new List<DataType> { data }));
+            foreach (IObserver<DataChanged<DataType>> observer in Observers.ToList())
+            {
+                observer.OnNext(new DataChanged<DataType>(DataChangedAction.Update, new List<DataType> { data }));
+            }
             return true;
         }
 
@@ -112,7 +125,10 @@ namespace Logic
                 return false;
             }
             DataSet.Remove(data);
-            DataChanged?.Invoke(this, new NotifyDataChangedEventArgs(NotifyDataChangedAction.Remove, new List<DataType> { data }));
+            foreach (IObserver<DataChanged<DataType>> observer in Observers.ToList())
+            {
+                observer.OnNext(new DataChanged<DataType>(DataChangedAction.Remove, new List<DataType> { data }));
+            }
             return true;
         }
 
@@ -120,7 +136,40 @@ namespace Logic
         {
             List<DataType> oldData = DataSet.ToList();
             DataSet.Clear();
-            DataChanged?.Invoke(this, new NotifyDataChangedEventArgs(NotifyDataChangedAction.Reset, oldData));
+            foreach (IObserver<DataChanged<DataType>> observer in Observers.ToList())
+            {
+                observer.OnNext(new DataChanged<DataType>(DataChangedAction.Reset, oldData));
+            }
+        }
+
+        public IDisposable Subscribe(IObserver<DataChanged<DataType>> observer)
+        {
+            Observers.Add(observer);
+            return new Unsubscriber<DataChanged<DataType>>(Observers, observer);
+        }
+
+        private class Unsubscriber<T> : IDisposable
+        {
+            private HashSet<IObserver<T>> Observers
+            {
+                get;
+            }
+
+            private IObserver<T> Observer
+            {
+                get;
+            }
+
+            public Unsubscriber(HashSet<IObserver<T>> observers, IObserver<T> observer)
+            {
+                Observers = observers;
+                Observer = observer;
+            }
+
+            public void Dispose()
+            {
+                Observers.Remove(Observer);
+            }
         }
     }
 }

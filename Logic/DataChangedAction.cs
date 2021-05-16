@@ -1,6 +1,6 @@
 ﻿namespace Logic
 {
-    public enum NotifyDataChangedAction
+    public enum DataChangedAction
     {
         Add = 0,
         Remove = 1,
