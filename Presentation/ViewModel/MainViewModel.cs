@@ -24,6 +24,7 @@ namespace Presentation.ViewModel
             DialogOrderEditViewModel = new DialogOrderEditViewModel(dialogHost, dataRepository);
             DialogProductEditViewModel = new DialogProductEditViewModel(dialogHost, dataRepository);
             DialogOrderSentViewModel = new DialogInformationViewModel(dialogHost);
+            Connect = new RelayCommand(ExecuteConnect);
             CreateClient = new RelayCommand(ExecuteCreateClient);
             EditClient = new RelayCommand<Client>(ExecuteEditClient);
             RemoveClient = new RelayCommand<Client>(ExecuteRemoveClient);
@@ -33,23 +34,27 @@ namespace Presentation.ViewModel
             CreateProduct = new RelayCommand(ExecuteCreateProduct);
             EditProduct = new RelayCommand<Product>(ExecuteEditProduct);
             RemoveProduct = new RelayCommand<Product>(ExecuteRemoveProduct);
-            if (!dataRepository.OpenRepository().GetAwaiter().GetResult())
-            {
-                throw new ApplicationException("Failed to open the data repository!");
-            }
-            Clients = new ObservableCollection<Client>(dataRepository.GetAllClients().GetAwaiter().GetResult());
-            Orders = new ObservableCollection<Order>(dataRepository.GetAllOrders().GetAwaiter().GetResult());
-            Products = new ObservableCollection<Product>(dataRepository.GetAllProducts().GetAwaiter().GetResult());
-            OrderSentUnsubscriber = DataRepository.Subscribe((IObserver<OrderSent>)this);
-            ClientUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<Client>>)this);
-            ProductUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<Product>>)this);
-            OrderUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<Order>>)this);
         }
 
 
         static MainViewModel()
         {
             SyncContext = SynchronizationContext.Current;
+        }
+
+        private async void ExecuteConnect()
+        {
+            if (!await DataRepository.OpenRepository())
+            {
+                throw new ApplicationException("Failed to open the data repository!");
+            }
+            Clients = new ObservableCollection<Client>(await DataRepository.GetAllClients());
+            Orders = new ObservableCollection<Order>(await DataRepository.GetAllOrders());
+            Products = new ObservableCollection<Product>(await DataRepository.GetAllProducts());
+            OrderSentUnsubscriber = DataRepository.Subscribe((IObserver<OrderSent>)this);
+            ClientUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<Client>>)this);
+            ProductUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<Product>>)this);
+            OrderUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<Order>>)this);
         }
 
         private void ExecuteCreateClient()
@@ -92,6 +97,7 @@ namespace Presentation.ViewModel
             await DataRepository.RemoveProduct(product.Id);
         }
 
+        public ICommand Connect { get; }
         public ICommand CreateClient { get; }
         public ICommand EditClient { get; }
         public ICommand RemoveClient { get; }
@@ -114,22 +120,25 @@ namespace Presentation.ViewModel
         public ObservableCollection<Client> Clients
         {
             get;
+            private set;
         }
 
         public ObservableCollection<Order> Orders
         {
             get;
+            private set;
         }
 
         public ObservableCollection<Product> Products
         {
             get;
+            private set;
         }
 
-        public IDisposable OrderSentUnsubscriber { get; }
-        public IDisposable ClientUnsubscriber { get; }
-        public IDisposable ProductUnsubscriber { get; }
-        public IDisposable OrderUnsubscriber { get; }
+        public IDisposable OrderSentUnsubscriber { get; private set; }
+        public IDisposable ClientUnsubscriber { get; private set; }
+        public IDisposable ProductUnsubscriber { get; private set; }
+        public IDisposable OrderUnsubscriber { get; private set; }
 
         public object DialogIdentifier0
         {

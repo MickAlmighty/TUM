@@ -24,13 +24,18 @@ namespace Presentation.Server
 
         public async Task RunServer()
         {
+            if (!await DataRepository.OpenRepository())
+            {
+                Console.WriteLine("Failed to open the data repository!");
+                return;
+            }
             await WebSocketServer.Server(this, 4444, wsc => {
                 Connections.Add(wsc);
                 Console.WriteLine("A new client has connected!");
             });
         }
 
-        private async void ProcessClientMessage(WebSocketConnection connection, string message)
+        private async Task ProcessClientMessage(WebSocketConnection connection, string message)
         {
             if (WebSerializer.TryParseRequest(message, out WebSimpleMessageType msgType))
             {
@@ -347,7 +352,7 @@ namespace Presentation.Server
 
         public void OnMessage(WebSocketConnection connection, string message)
         {
-            new Task(() => ProcessClientMessage(connection, message)).Start();
+            ProcessClientMessage(connection, message).GetAwaiter().GetResult();
         }
 
         public void OnClose(WebSocketConnection connection)

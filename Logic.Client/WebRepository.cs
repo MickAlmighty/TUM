@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -38,6 +39,7 @@ namespace Logic.Client
 
         public void OnMessage(string message)
         {
+            Debug.WriteLine($"Server->Client: {message}");
             if (_IsReading)
             {
                 MessageQueue.Enqueue(message);
@@ -54,120 +56,131 @@ namespace Logic.Client
                 WebMessageDTO<object> msgDto = WebSerializer.DeserializeWebMessage(message);
                 switch (msgDto.MessageType)
                 {
+                    case WebMessageType.ProvideAllClients:
+                    case WebMessageType.ProvideAllProducts:
+                    case WebMessageType.ProvideAllOrders:
+                    case WebMessageType.ProvideClient:
+                    case WebMessageType.ProvideProduct:
+                    case WebMessageType.ProvideOrder:
+                        {
+                            MessageQueue.Enqueue(message);
+                            NewMessageEvent.Set();
+                            break;
+                        }
                     case WebMessageType.OrderSent:
-                    {
-                        OrderSent orderSent = new OrderSent((msgDto.Data as OrderDTO)?.ToOrder());
-                        foreach (IObserver<OrderSent> observer in OrderSentObservers)
                         {
-                            observer.OnNext(orderSent);
+                            OrderSent orderSent = new OrderSent((msgDto.Data as OrderDTO)?.ToOrder());
+                            foreach (IObserver<OrderSent> observer in OrderSentObservers)
+                            {
+                                observer.OnNext(orderSent);
+                            }
+                            break;
                         }
-                        break;
-                    }
                     case WebMessageType.AddClient:
-                    {
-                        DataChanged<Data.Client> change =
-                            new DataChanged<Data.Client>(DataChangedAction.Add,
-                                new List<Data.Client> { (msgDto.Data as ClientDTO)?.ToClient() });
-                        foreach (IObserver<DataChanged<Data.Client>> observer in ClientObservers)
                         {
-                            observer.OnNext(change);
+                            DataChanged<Data.Client> change =
+                                new DataChanged<Data.Client>(DataChangedAction.Add,
+                                    new List<Data.Client> { (msgDto.Data as ClientDTO)?.ToClient() });
+                            foreach (IObserver<DataChanged<Data.Client>> observer in ClientObservers)
+                            {
+                                observer.OnNext(change);
+                            }
+                            break;
                         }
-                        break;
-                    }
                     case WebMessageType.UpdateClient:
-                    {
-                        DataChanged<Data.Client> change =
-                            new DataChanged<Data.Client>(DataChangedAction.Update,
-                                new List<Data.Client> { (msgDto.Data as ClientDTO)?.ToClient() });
-                        foreach (IObserver<DataChanged<Data.Client>> observer in ClientObservers)
                         {
-                            observer.OnNext(change);
+                            DataChanged<Data.Client> change =
+                                new DataChanged<Data.Client>(DataChangedAction.Update,
+                                    new List<Data.Client> { (msgDto.Data as ClientDTO)?.ToClient() });
+                            foreach (IObserver<DataChanged<Data.Client>> observer in ClientObservers)
+                            {
+                                observer.OnNext(change);
+                            }
+                            break;
                         }
-                        break;
-                    }
                     case WebMessageType.RemoveClient:
-                    {
-                        DataChanged<Data.Client> change =
-                            new DataChanged<Data.Client>(DataChangedAction.Remove,
-                                new List<Data.Client> { (msgDto.Data as ClientDTO)?.ToClient() });
-                        foreach (IObserver<DataChanged<Data.Client>> observer in ClientObservers)
                         {
-                            observer.OnNext(change);
+                            DataChanged<Data.Client> change =
+                                new DataChanged<Data.Client>(DataChangedAction.Remove,
+                                    new List<Data.Client> { (msgDto.Data as ClientDTO)?.ToClient() });
+                            foreach (IObserver<DataChanged<Data.Client>> observer in ClientObservers)
+                            {
+                                observer.OnNext(change);
+                            }
+                            break;
                         }
-                        break;
-                    }
                     case WebMessageType.AddProduct:
-                    {
-                        DataChanged<Product> change =
-                            new DataChanged<Product>(DataChangedAction.Add,
-                                new List<Product> { (msgDto.Data as ProductDTO)?.ToProduct() });
-                        foreach (IObserver<DataChanged<Product>> observer in ProductObservers)
                         {
-                            observer.OnNext(change);
+                            DataChanged<Product> change =
+                                new DataChanged<Product>(DataChangedAction.Add,
+                                    new List<Product> { (msgDto.Data as ProductDTO)?.ToProduct() });
+                            foreach (IObserver<DataChanged<Product>> observer in ProductObservers)
+                            {
+                                observer.OnNext(change);
+                            }
+                            break;
                         }
-                        break;
-                    }
                     case WebMessageType.UpdateProduct:
-                    {
-                        DataChanged<Product> change =
-                            new DataChanged<Product>(DataChangedAction.Update,
-                                new List<Product> { (msgDto.Data as ProductDTO)?.ToProduct() });
-                        foreach (IObserver<DataChanged<Product>> observer in ProductObservers)
                         {
-                            observer.OnNext(change);
+                            DataChanged<Product> change =
+                                new DataChanged<Product>(DataChangedAction.Update,
+                                    new List<Product> { (msgDto.Data as ProductDTO)?.ToProduct() });
+                            foreach (IObserver<DataChanged<Product>> observer in ProductObservers)
+                            {
+                                observer.OnNext(change);
+                            }
+                            break;
                         }
-                        break;
-                    }
                     case WebMessageType.RemoveProduct:
-                    {
-                        DataChanged<Product> change =
-                            new DataChanged<Product>(DataChangedAction.Remove,
-                                new List<Product> { (msgDto.Data as ProductDTO)?.ToProduct() });
-                        foreach (IObserver<DataChanged<Product>> observer in ProductObservers)
                         {
-                            observer.OnNext(change);
+                            DataChanged<Product> change =
+                                new DataChanged<Product>(DataChangedAction.Remove,
+                                    new List<Product> { (msgDto.Data as ProductDTO)?.ToProduct() });
+                            foreach (IObserver<DataChanged<Product>> observer in ProductObservers)
+                            {
+                                observer.OnNext(change);
+                            }
+                            break;
                         }
-                        break;
-                    }
                     case WebMessageType.AddOrder:
-                    {
-                        DataChanged<Order> change =
-                            new DataChanged<Order>(DataChangedAction.Add,
-                                new List<Order> { (msgDto.Data as OrderDTO)?.ToOrder() });
-                        foreach (IObserver<DataChanged<Order>> observer in OrderObservers)
                         {
-                            observer.OnNext(change);
+                            DataChanged<Order> change =
+                                new DataChanged<Order>(DataChangedAction.Add,
+                                    new List<Order> { (msgDto.Data as OrderDTO)?.ToOrder() });
+                            foreach (IObserver<DataChanged<Order>> observer in OrderObservers)
+                            {
+                                observer.OnNext(change);
+                            }
+                            break;
                         }
-                        break;
-                    }
                     case WebMessageType.UpdateOrder:
-                    {
-                        DataChanged<Order> change =
-                            new DataChanged<Order>(DataChangedAction.Update,
-                                new List<Order> { (msgDto.Data as OrderDTO)?.ToOrder() });
-                        foreach (IObserver<DataChanged<Order>> observer in OrderObservers)
                         {
-                            observer.OnNext(change);
+                            DataChanged<Order> change =
+                                new DataChanged<Order>(DataChangedAction.Update,
+                                    new List<Order> { (msgDto.Data as OrderDTO)?.ToOrder() });
+                            foreach (IObserver<DataChanged<Order>> observer in OrderObservers)
+                            {
+                                observer.OnNext(change);
+                            }
+                            break;
                         }
-                        break;
-                    }
                     case WebMessageType.RemoveOrder:
-                    {
-                        DataChanged<Order> change =
-                            new DataChanged<Order>(DataChangedAction.Remove,
-                                new List<Order> { (msgDto.Data as OrderDTO)?.ToOrder() });
-                        foreach (IObserver<DataChanged<Order>> observer in OrderObservers)
                         {
-                            observer.OnNext(change);
+                            DataChanged<Order> change =
+                                new DataChanged<Order>(DataChangedAction.Remove,
+                                    new List<Order> { (msgDto.Data as OrderDTO)?.ToOrder() });
+                            foreach (IObserver<DataChanged<Order>> observer in OrderObservers)
+                            {
+                                observer.OnNext(change);
+                            }
+                            break;
                         }
-                        break;
-                    }
                     case WebMessageType.Error:
-                    {
-                        string errorMsg = msgDto.Data as string;
-                        Console.WriteLine($"The server has encountered an exception! {errorMsg}");
-                        break;
-                    }
+                        {
+                            string errorMsg = msgDto.Data as string;
+                            Console.WriteLine($"The server has encountered an exception! {errorMsg}");
+                            break;
+                        }
                 }
             }
         }
@@ -185,6 +198,7 @@ namespace Logic.Client
         private string ReadMessage()
         {
             _IsReading = true;
+            NewMessageEvent.Reset();
             while (!MessageQueue.IsEmpty)
             {
                 if (MessageQueue.TryDequeue(out string msg))
@@ -196,8 +210,7 @@ namespace Logic.Client
 
             if (!NewMessageEvent.WaitOne(WEB_TIMEOUT))
             {
-                _IsReading = false;
-                throw new TimeoutException("Read operation timed out!");
+                //throw new TimeoutException("Read operation timed out!");
             }
 
             if (MessageQueue.TryDequeue(out string message))

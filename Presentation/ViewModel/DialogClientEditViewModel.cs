@@ -88,14 +88,14 @@ namespace Presentation.ViewModel
             }
         }
 
-        protected override void ApplyCreate()
+        protected override async void ApplyCreate()
         {
-            DataRepository.CreateClient(Username, FirstName, LastName, Street, uint.Parse(StreetNumber), PhoneNumber).GetAwaiter().GetResult();
+            await DataRepository.CreateClient(Username, FirstName, LastName, Street, uint.Parse(StreetNumber), PhoneNumber);
         }
 
-        protected override void ApplyEdit()
+        protected override async void ApplyEdit()
         {
-            DataRepository.Update(new Client(Username, FirstName, LastName, Street, uint.Parse(StreetNumber), PhoneNumber)).GetAwaiter().GetResult();
+            await DataRepository.Update(new Client(Username, FirstName, LastName, Street, uint.Parse(StreetNumber), PhoneNumber));
         }
 
         protected override void InjectProperties(Client toUpdate)

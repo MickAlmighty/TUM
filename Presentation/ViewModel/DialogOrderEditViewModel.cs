@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace Presentation.ViewModel
@@ -179,19 +180,19 @@ namespace Presentation.ViewModel
             return ProductQuantities.Any() && ClientUsernameIndex != -1 && (!Delivered || DeliveryDate >= OrderDate);
         }
 
-        protected override void ApplyCreate()
+        protected override async void ApplyCreate()
         {
-            DataRepository.CreateOrder(ClientUsernames[ClientUsernameIndex], OrderDate, GetProductIdQuantityMap(), Delivered ? DeliveryDate : (DateTime?)null).GetAwaiter().GetResult();
+            await DataRepository.CreateOrder(ClientUsernames[ClientUsernameIndex], OrderDate, GetProductIdQuantityMap(), Delivered ? DeliveryDate : (DateTime?)null);
         }
 
-        protected override void ApplyEdit()
+        protected override async void ApplyEdit()
         {
-            DataRepository.Update(new Order(_Id, ClientUsernames[ClientUsernameIndex], OrderDate, GetProductIdQuantityMap(), GetPrice(), Delivered ? DeliveryDate : (DateTime?)null)).GetAwaiter().GetResult();
+            await DataRepository.Update(new Order(_Id, ClientUsernames[ClientUsernameIndex], OrderDate, GetProductIdQuantityMap(), GetPrice(), Delivered ? DeliveryDate : (DateTime?)null));
         }
 
-        protected override void InjectProperties(Order toUpdate)
+        protected override async void InjectProperties(Order toUpdate)
         {
-            UpdateDataSets();
+            await UpdateDataSets();
             _Id = toUpdate.Id;
             ProductQuantities.Clear();
             foreach (KeyValuePair<uint, uint> pair in toUpdate.ProductIdQuantityMap)
@@ -241,9 +242,9 @@ namespace Presentation.ViewModel
             return result;
         }
 
-        protected override void ResetProperties()
+        protected override async void ResetProperties()
         {
-            UpdateDataSets();
+            await UpdateDataSets();
             OrderDate = DateTime.Now;
             DeliveryDate = DateTime.Now;
             Delivered = false;
@@ -251,11 +252,11 @@ namespace Presentation.ViewModel
             ProductQuantities.Clear();
         }
 
-        private void UpdateDataSets()
+        private async Task UpdateDataSets()
         {
-            ClientUsernames = DataRepository.GetAllClients().GetAwaiter().GetResult().Select(c => c.Username).ToArray();
+            ClientUsernames = (await DataRepository.GetAllClients()).Select(c => c.Username).ToArray();
             Products.Clear();
-            foreach (Product product in DataRepository.GetAllProducts().GetAwaiter().GetResult())
+            foreach (Product product in (await DataRepository.GetAllProducts()))
             {
                 Products.Add(product);
             }

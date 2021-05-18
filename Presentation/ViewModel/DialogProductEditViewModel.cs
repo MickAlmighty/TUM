@@ -14,14 +14,14 @@ namespace Presentation.ViewModel
 
         public DialogProductEditViewModel(IDialogHost dialogHost, IDataRepository dataRepository) : base(dialogHost, dataRepository) { }
 
-        protected override void ApplyCreate()
+        protected override async void ApplyCreate()
         {
-            DataRepository.CreateProduct(Name, double.Parse(Price), ProductTypes[ProductTypeIndex]).GetAwaiter().GetResult();
+            await DataRepository.CreateProduct(Name, double.Parse(Price), ProductTypes[ProductTypeIndex]);
         }
 
-        protected override void ApplyEdit()
+        protected override async void ApplyEdit()
         {
-            DataRepository.Update(new Product(_Id, Name, double.Parse(Price), ProductTypes[ProductTypeIndex])).GetAwaiter().GetResult();
+            await DataRepository.Update(new Product(_Id, Name, double.Parse(Price), ProductTypes[ProductTypeIndex]));
         }
 
         public static ProductType[] ProductTypes
