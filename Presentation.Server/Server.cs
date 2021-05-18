@@ -347,7 +347,7 @@ namespace Presentation.Server
 
         public void OnMessage(WebSocketConnection connection, string message)
         {
-
+            new Task(() => ProcessClientMessage(connection, message)).Start();
         }
 
         public void OnClose(WebSocketConnection connection)
