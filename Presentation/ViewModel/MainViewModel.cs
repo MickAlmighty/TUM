@@ -51,6 +51,9 @@ namespace Presentation.ViewModel
             Clients = new ObservableCollection<Client>(await DataRepository.GetAllClients());
             Orders = new ObservableCollection<Order>(await DataRepository.GetAllOrders());
             Products = new ObservableCollection<Product>(await DataRepository.GetAllProducts());
+            RaisePropertyChanged(nameof(Clients));
+            RaisePropertyChanged(nameof(Orders));
+            RaisePropertyChanged(nameof(Products));
             OrderSentUnsubscriber = DataRepository.Subscribe((IObserver<OrderSent>)this);
             ClientUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<Client>>)this);
             ProductUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<Product>>)this);

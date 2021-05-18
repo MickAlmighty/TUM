@@ -350,9 +350,9 @@ namespace Presentation.Server
             }
         }
 
-        public void OnMessage(WebSocketConnection connection, string message)
+        public async void OnMessage(WebSocketConnection connection, string message)
         {
-            ProcessClientMessage(connection, message).GetAwaiter().GetResult();
+            await ProcessClientMessage(connection, message);
         }
 
         public void OnClose(WebSocketConnection connection)
