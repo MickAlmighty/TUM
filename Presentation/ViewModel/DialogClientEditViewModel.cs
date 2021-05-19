@@ -8,7 +8,8 @@ namespace Presentation.ViewModel
     {
         private string _Username, _FirstName, _LastName, _Street, _StreetNumber, _PhoneNumber;
 
-        public DialogClientEditViewModel(IDialogHost dialogHost, IDataRepository dataRepository) : base(dialogHost, dataRepository) { }
+        public DialogClientEditViewModel(IDialogHost dialogHost, ILoadingPresenter loadingPresenter, IDataRepository dataRepository)
+            : base(dialogHost, loadingPresenter, dataRepository) { }
 
         public string Username
         {
@@ -90,12 +91,16 @@ namespace Presentation.ViewModel
 
         protected override async void ApplyCreate()
         {
+            LoadingPresenter.StartLoading();
             await DataRepository.CreateClient(Username, FirstName, LastName, Street, uint.Parse(StreetNumber), PhoneNumber);
+            LoadingPresenter.StopLoading();
         }
 
         protected override async void ApplyEdit()
         {
+            LoadingPresenter.StartLoading();
             await DataRepository.Update(new Client(Username, FirstName, LastName, Street, uint.Parse(StreetNumber), PhoneNumber));
+            LoadingPresenter.StopLoading();
         }
 
         protected override void InjectProperties(Client toUpdate)

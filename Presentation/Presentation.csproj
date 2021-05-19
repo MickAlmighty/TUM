@@ -120,6 +120,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Compile Include="Model\ILoadingPresenter.cs" />
     <Compile Include="View\BasicStringValidationRule.cs" />
     <Compile Include="View\BoolToVisibilityConverter.cs" />
     <Compile Include="Model\DialogOpenedEventArgs.cs" />

@@ -12,16 +12,21 @@ namespace Presentation.ViewModel
         private string _Name, _Price;
         private int _ProductTypeIndex;
 
-        public DialogProductEditViewModel(IDialogHost dialogHost, IDataRepository dataRepository) : base(dialogHost, dataRepository) { }
+        public DialogProductEditViewModel(IDialogHost dialogHost, ILoadingPresenter loadingPresenter, IDataRepository dataRepository)
+            : base(dialogHost, loadingPresenter, dataRepository) { }
 
         protected override async void ApplyCreate()
         {
+            LoadingPresenter.StartLoading();
             await DataRepository.CreateProduct(Name, double.Parse(Price), ProductTypes[ProductTypeIndex]);
+            LoadingPresenter.StopLoading();
         }
 
         protected override async void ApplyEdit()
         {
+            LoadingPresenter.StartLoading();
             await DataRepository.Update(new Product(_Id, Name, double.Parse(Price), ProductTypes[ProductTypeIndex]));
+            LoadingPresenter.StopLoading();
         }
 
         public static ProductType[] ProductTypes

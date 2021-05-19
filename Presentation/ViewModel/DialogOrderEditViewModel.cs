@@ -48,7 +48,8 @@ namespace Presentation.ViewModel
         private DateTime _OrderDate, _DeliveryDate;
         private bool _Delivered;
 
-        public DialogOrderEditViewModel(IDialogHost dialogHost, IDataRepository dataRepository) : base(dialogHost, dataRepository)
+        public DialogOrderEditViewModel(IDialogHost dialogHost, ILoadingPresenter loadingPresenter, IDataRepository dataRepository)
+            : base(dialogHost, loadingPresenter, dataRepository)
         {
             AddProduct = new RelayCommand<Product>(ExecuteAddProduct, CanAddProduct);
             IncrementQuantity = new RelayCommand<ProductQuantityViewModel>(ExecuteIncrementQuantity);
@@ -182,12 +183,16 @@ namespace Presentation.ViewModel
 
         protected override async void ApplyCreate()
         {
+            LoadingPresenter.StartLoading();
             await DataRepository.CreateOrder(ClientUsernames[ClientUsernameIndex], OrderDate, GetProductIdQuantityMap(), Delivered ? DeliveryDate : (DateTime?)null);
+            LoadingPresenter.StopLoading();
         }
 
         protected override async void ApplyEdit()
         {
+            LoadingPresenter.StartLoading();
             await DataRepository.Update(new Order(_Id, ClientUsernames[ClientUsernameIndex], OrderDate, GetProductIdQuantityMap(), GetPrice(), Delivered ? DeliveryDate : (DateTime?)null));
+            LoadingPresenter.StopLoading();
         }
 
         protected override async void InjectProperties(Order toUpdate)

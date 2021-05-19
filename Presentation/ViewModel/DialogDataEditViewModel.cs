@@ -9,11 +9,12 @@ namespace Presentation.ViewModel
     {
         private bool _EditMode;
 
-        protected DialogDataEditViewModel(IDialogHost dialogHost, IDataRepository dataRepository) : base(dialogHost)
+        protected DialogDataEditViewModel(IDialogHost dialogHost, ILoadingPresenter loadingPresenter, IDataRepository dataRepository) : base(dialogHost)
         {
             Apply = new RelayCommand(ExecuteApply, CanApply);
             Cancel = new RelayCommand(ExecuteCancel);
             DataRepository = dataRepository;
+            LoadingPresenter = loadingPresenter;
         }
 
         private void ExecuteApply()
@@ -45,6 +46,7 @@ namespace Presentation.ViewModel
         public ICommand Apply { get; }
         public ICommand Cancel { get; }
         public IDataRepository DataRepository { get; }
+        public ILoadingPresenter LoadingPresenter { get; }
         public bool EditMode
         {
             get

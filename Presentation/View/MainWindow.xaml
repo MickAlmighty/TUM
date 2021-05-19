@@ -191,5 +191,16 @@
         </TabControl>
         <md:DialogHost Identifier="0"/>
         <md:DialogHost Identifier="1"/>
+        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Visibility="{Binding IsProcessing, Converter={StaticResource BoolToVisibilityConverter}}">
+            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="{DynamicResource PrimaryHueDarkBrush}" Opacity="0.3"/>
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar IsIndeterminate="True" Style="{StaticResource MaterialDesignCircularProgressBar}" Margin="50" Foreground="{DynamicResource PrimaryHueDarkBrush}">
+                    <ProgressBar.RenderTransform>
+                        <ScaleTransform CenterX="10" CenterY="10" ScaleX="5.0" ScaleY="5.0"/>
+                    </ProgressBar.RenderTransform>
+                </ProgressBar>
+                <Label Content="Processing..." Margin="30" FontSize="35" FontWeight="Bold"/>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>

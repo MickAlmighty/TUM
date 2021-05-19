@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace Presentation.ViewModel
 {
-    internal class MainViewModel : ViewModelBase, IObserver<OrderSent>, IObserver<DataChanged<Client>>, IObserver<DataChanged<Product>>, IObserver<DataChanged<Order>>
+    internal class MainViewModel : ViewModelBase, ILoadingPresenter, IObserver<OrderSent>, IObserver<DataChanged<Client>>, IObserver<DataChanged<Product>>, IObserver<DataChanged<Order>>
     {
         public MainViewModel(IDialogHost dialogHost, IDataRepository dataRepository, object dialogIdentifier0, object dialogIdentifier1)
         {
@@ -20,9 +20,9 @@ namespace Presentation.ViewModel
             DialogHost = dialogHost;
             DialogIdentifier0 = dialogIdentifier0;
             DialogIdentifier1 = dialogIdentifier1;
-            DialogClientEditViewModel = new DialogClientEditViewModel(dialogHost, dataRepository);
-            DialogOrderEditViewModel = new DialogOrderEditViewModel(dialogHost, dataRepository);
-            DialogProductEditViewModel = new DialogProductEditViewModel(dialogHost, dataRepository);
+            DialogClientEditViewModel = new DialogClientEditViewModel(dialogHost, this, dataRepository);
+            DialogOrderEditViewModel = new DialogOrderEditViewModel(dialogHost, this, dataRepository);
+            DialogProductEditViewModel = new DialogProductEditViewModel(dialogHost, this, dataRepository);
             DialogOrderSentViewModel = new DialogInformationViewModel(dialogHost);
             Connect = new RelayCommand(ExecuteConnect);
             CreateClient = new RelayCommand(ExecuteCreateClient);
@@ -44,6 +44,7 @@ namespace Presentation.ViewModel
 
         private async void ExecuteConnect()
         {
+            StartLoading();
             if (!await DataRepository.OpenRepository())
             {
                 throw new ApplicationException("Failed to open the data repository!");
@@ -58,6 +59,7 @@ namespace Presentation.ViewModel
             ClientUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<Client>>)this);
             ProductUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<Product>>)this);
             OrderUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<Order>>)this);
+            StopLoading();
         }
 
         private void ExecuteCreateClient()
@@ -70,13 +72,17 @@ namespace Presentation.ViewModel
         }
         private async void ExecuteRemoveClient(Client client)
         {
+            StartLoading();
             await DataRepository.RemoveClient(client);
+            StopLoading();
         }
         private void ExecuteCreateOrder()
         {
             if (Clients.Any() && Products.Any())
             {
+                StartLoading();
                 DialogOrderEditViewModel.OpenDialog(DialogIdentifier0);
+                StopLoading();
             }
         }
         private void ExecuteEditOrder(Order order)
@@ -85,7 +91,9 @@ namespace Presentation.ViewModel
         }
         private async void ExecuteRemoveOrder(Order order)
         {
+            StartLoading();
             await DataRepository.RemoveOrder(order);
+            StopLoading();
         }
         private void ExecuteCreateProduct()
         {
@@ -97,7 +105,9 @@ namespace Presentation.ViewModel
         }
         private async void ExecuteRemoveProduct(Product product)
         {
+            StartLoading();
             await DataRepository.RemoveProduct(product);
+            StopLoading();
         }
 
         public ICommand Connect { get; }
@@ -118,6 +128,27 @@ namespace Presentation.ViewModel
         public IDialogHost DialogHost
         {
             get;
+        }
+
+        public bool IsProcessing
+        {
+            get
+            {
+                return _IsProcessing;
+            }
+            set
+            {
+                _IsProcessing = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private bool _IsProcessing;
+
+        private uint LoadingCounter
+        {
+            get;
+            set;
         }
 
         public ObservableCollection<Client> Clients
@@ -352,6 +383,21 @@ namespace Presentation.ViewModel
         void IObserver<OrderSent>.OnError(Exception error)
         {
             Console.WriteLine($"An exception occurred during {nameof(OrderSent)} subscription: {error}");
+        }
+
+        public void StartLoading()
+        {
+            ++LoadingCounter;
+            SyncContext.Post(o => IsProcessing = LoadingCounter > 0U, null);
+        }
+
+        public void StopLoading()
+        {
+            if (LoadingCounter > 0U)
+            {
+                --LoadingCounter;
+            }
+            SyncContext.Post(o => IsProcessing = LoadingCounter > 0U, null);
         }
     }
 }
