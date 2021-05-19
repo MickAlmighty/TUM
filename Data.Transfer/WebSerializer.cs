@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Reflection;
 using System.Text.Json;
 
 using Newtonsoft.Json;
@@ -11,6 +12,45 @@ namespace Data.Transfer
 {
     public sealed class WebSerializer
     {
+        private Dictionary<WebMessageType, Type> MessageDataTypes { get; } = new Dictionary<WebMessageType, Type> {
+            { WebMessageType.AddClient, typeof(ClientDTO) },
+            { WebMessageType.UpdateClient, typeof(ClientDTO) },
+            { WebMessageType.ProvideClient, typeof(ClientDTO) },
+            { WebMessageType.RemoveClient, typeof(ClientDTO) },
+            { WebMessageType.AddProduct, typeof(ProductDTO) },
+            { WebMessageType.UpdateProduct, typeof(ProductDTO) },
+            { WebMessageType.ProvideProduct, typeof(ProductDTO) },
+            { WebMessageType.RemoveProduct, typeof(ProductDTO) },
+            { WebMessageType.AddOrder, typeof(OrderDTO) },
+            { WebMessageType.UpdateOrder, typeof(OrderDTO) },
+            { WebMessageType.ProvideOrder, typeof(OrderDTO) },
+            { WebMessageType.RemoveOrder, typeof(OrderDTO) },
+            { WebMessageType.OrderSent, typeof(OrderDTO) },
+            { WebMessageType.ProvideAllClients, typeof(HashSet<ClientDTO>) },
+            { WebMessageType.ProvideAllProducts, typeof(HashSet<ProductDTO>) },
+            { WebMessageType.ProvideAllOrders, typeof(HashSet<OrderDTO>) },
+            { WebMessageType.GetProduct, typeof(uint) },
+            { WebMessageType.GetOrder, typeof(uint) },
+            { WebMessageType.GetClient, typeof(string) },
+            { WebMessageType.Error, typeof(string) }
+        };
+
+        private Dictionary<WebMessageType, Type> MessageDTOTypes { get; } = new Dictionary<WebMessageType, Type>();
+
+        public WebSerializer()
+        {
+            GenerateMessageDTOTypes();
+        }
+
+        private void GenerateMessageDTOTypes()
+        {
+            Type baseType = typeof(WebMessageDTO<>);
+            foreach (KeyValuePair<WebMessageType, Type> pair in MessageDataTypes)
+            {
+                MessageDTOTypes.Add(pair.Key, baseType.MakeGenericType(pair.Value));
+            }
+        }
+
         private JsonSerializerSettings SerializerSettings { get; } = new JsonSerializerSettings {
             Formatting = Formatting.Indented,
             // DateTimeZoneHandling = DateTimeZoneHandling.Utc,
@@ -53,17 +93,6 @@ namespace Data.Transfer
             return messageType;
         }
 
-        private string SerializeWebMessage<T>(WebMessageType messageType, object data)
-        {
-            if (!(data is T validData))
-            {
-                throw new ArgumentException($"Invalid data type! Expected {typeof(T)}, got {data.GetType()}.");
-            }
-
-            return JsonConvert.SerializeObject(
-                new WebMessageDTO<T> { MessageType = messageType, Data = validData }, SerializerSettings);
-        }
-
         /// <summary>
         /// Returns a json string representing a <see cref="WebMessageDTO{T}"/> with given <see cref="WebMessageType"/> and <see cref="data"/> object.
         /// Throws an exception if provided data is null or of an invalid type.
@@ -77,39 +106,23 @@ namespace Data.Transfer
             {
                 throw new ArgumentNullException(nameof(data));
             }
-            switch (messageType)
+
+            if (!MessageDataTypes.ContainsKey(messageType))
             {
-                case WebMessageType.AddClient:
-                case WebMessageType.UpdateClient:
-                case WebMessageType.ProvideClient:
-                case WebMessageType.RemoveClient:
-                    return SerializeWebMessage<ClientDTO>(messageType, data);
-                case WebMessageType.AddProduct:
-                case WebMessageType.UpdateProduct:
-                case WebMessageType.ProvideProduct:
-                case WebMessageType.RemoveProduct:
-                    return SerializeWebMessage<ProductDTO>(messageType, data);
-                case WebMessageType.AddOrder:
-                case WebMessageType.UpdateOrder:
-                case WebMessageType.ProvideOrder:
-                case WebMessageType.RemoveOrder:
-                case WebMessageType.OrderSent:
-                    return SerializeWebMessage<OrderDTO>(messageType, data);
-                case WebMessageType.ProvideAllClients:
-                    return SerializeWebMessage<HashSet<ClientDTO>>(messageType, data);
-                case WebMessageType.ProvideAllProducts:
-                    return SerializeWebMessage<HashSet<ProductDTO>>(messageType, data);
-                case WebMessageType.ProvideAllOrders:
-                    return SerializeWebMessage<HashSet<OrderDTO>>(messageType, data);
-                case WebMessageType.GetProduct:
-                case WebMessageType.GetOrder:
-                    return SerializeWebMessage<uint>(messageType, data);
-                case WebMessageType.GetClient:
-                case WebMessageType.Error:
-                    return SerializeWebMessage<string>(messageType, data);
-                default:
-                    throw new InvalidEnumArgumentException($"Encountered unsupported message type '{messageType}'!");
+                throw new InvalidEnumArgumentException($"Encountered unsupported message type '{messageType}'!");
             }
+
+            Type dataType = MessageDataTypes[messageType];
+
+            if (data.GetType() != dataType && !data.GetType().IsInstanceOfType(dataType))
+            {
+                throw new ArgumentException($"Invalid data type! Expected {dataType}, got {data.GetType()}.");
+            }
+
+            Type genericType = MessageDTOTypes[messageType];
+
+            return JsonConvert.SerializeObject(
+                Activator.CreateInstance(genericType, messageType, data), SerializerSettings);
         }
 
         /// <summary>
@@ -123,40 +136,25 @@ namespace Data.Transfer
         /// <returns>A valid <see cref="WebMessageDTO{T}"/> instance.</returns>
         public WebMessageDTO<object> DeserializeWebMessage(string jsonData)
         {
-            WebMessageType messageType = GetMessageType(jsonData);
-            switch (messageType)
+            if (string.IsNullOrWhiteSpace(jsonData))
             {
-                case WebMessageType.AddClient:
-                case WebMessageType.UpdateClient:
-                case WebMessageType.ProvideClient:
-                case WebMessageType.RemoveClient:
-                    return JsonConvert.DeserializeObject<WebMessageDTO<ClientDTO>>(jsonData, SerializerSettings).ToObjectWebMessage();
-                case WebMessageType.AddProduct:
-                case WebMessageType.UpdateProduct:
-                case WebMessageType.ProvideProduct:
-                case WebMessageType.RemoveProduct:
-                    return JsonConvert.DeserializeObject<WebMessageDTO<ProductDTO>>(jsonData, SerializerSettings).ToObjectWebMessage();
-                case WebMessageType.AddOrder:
-                case WebMessageType.UpdateOrder:
-                case WebMessageType.ProvideOrder:
-                case WebMessageType.RemoveOrder:
-                case WebMessageType.OrderSent:
-                    return JsonConvert.DeserializeObject<WebMessageDTO<OrderDTO>>(jsonData, SerializerSettings).ToObjectWebMessage();
-                case WebMessageType.ProvideAllClients:
-                    return JsonConvert.DeserializeObject<WebMessageDTO<HashSet<ClientDTO>>>(jsonData, SerializerSettings).ToObjectWebMessage();
-                case WebMessageType.ProvideAllProducts:
-                    return JsonConvert.DeserializeObject<WebMessageDTO<HashSet<ProductDTO>>>(jsonData, SerializerSettings).ToObjectWebMessage();
-                case WebMessageType.ProvideAllOrders:
-                    return JsonConvert.DeserializeObject<WebMessageDTO<HashSet<OrderDTO>>>(jsonData, SerializerSettings).ToObjectWebMessage();
-                case WebMessageType.GetProduct:
-                case WebMessageType.GetOrder:
-                    return JsonConvert.DeserializeObject<WebMessageDTO<uint>>(jsonData, SerializerSettings).ToObjectWebMessage();
-                case WebMessageType.GetClient:
-                case WebMessageType.Error:
-                    return JsonConvert.DeserializeObject<WebMessageDTO<string>>(jsonData, SerializerSettings).ToObjectWebMessage();
-                default:
-                    throw new InvalidEnumArgumentException($"Encountered unsupported message type '{messageType}'!");
+                throw new ArgumentException("Provided JSON data is either empty or null!");
             }
+            WebMessageType messageType = GetMessageType(jsonData);
+
+            if (!MessageDataTypes.ContainsKey(messageType))
+            {
+                throw new InvalidEnumArgumentException($"Encountered unsupported message type '{messageType}'!");
+            }
+
+            Type genericType = MessageDTOTypes[messageType];
+            return RecastDeserializedMessage(JsonConvert.DeserializeObject(jsonData, genericType, SerializerSettings));
+        }
+
+        private WebMessageDTO<object> RecastDeserializedMessage(object obj)
+        {
+            MethodInfo method = obj.GetType().GetMethod(nameof(WebMessageDTO<object>.ToObjectWebMessage));
+            return (WebMessageDTO<object>) method?.Invoke(obj, null);
         }
     }
 }

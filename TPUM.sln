@@ -28,9 +28,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data.TransferTest", "Data.T
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logic.FileTest", "Logic.FileTest\Logic.FileTest.csproj", "{FD24382D-3CB9-48C3-8D94-CB871137672C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logic.Client", "Logic.Client\Logic.Client.csproj", "{5484370E-F636-4D31-863C-E9CC3E8BB673}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Logic.Client", "Logic.Client\Logic.Client.csproj", "{5484370E-F636-4D31-863C-E9CC3E8BB673}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Presentation.Server", "Presentation.Server\Presentation.Server.csproj", "{954271FA-23F7-4793-BDAD-ED1874AF09B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Presentation.Server", "Presentation.Server\Presentation.Server.csproj", "{954271FA-23F7-4793-BDAD-ED1874AF09B7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSockets", "WebSockets\WebSockets.csproj", "{CCC859B8-3852-40C2-8814-8FE318C24F19}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -86,6 +88,10 @@ Global
 		{954271FA-23F7-4793-BDAD-ED1874AF09B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{954271FA-23F7-4793-BDAD-ED1874AF09B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{954271FA-23F7-4793-BDAD-ED1874AF09B7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCC859B8-3852-40C2-8814-8FE318C24F19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCC859B8-3852-40C2-8814-8FE318C24F19}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCC859B8-3852-40C2-8814-8FE318C24F19}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCC859B8-3852-40C2-8814-8FE318C24F19}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

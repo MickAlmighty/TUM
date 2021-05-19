@@ -319,24 +319,24 @@ namespace Logic.File
             }
         }
 
-        public Task<bool> RemoveClient(string username)
+        public Task<bool> RemoveClient(Client client)
         {
             lock (ClientLock)
             {
                 lock (OrderLock)
                 {
-                    if (ClientManager.Get(username) == null)
+                    if (ClientManager.Get(client.Username) == null)
                     {
                         return Task.FromResult(false);
                     }
 
                     bool changed = false;
-                    foreach (uint orderId in OrderManager.GetAll().Where(order => order.ClientUsername == username).Select(o => o.Id))
+                    foreach (uint orderId in OrderManager.GetAll().Where(order => order.ClientUsername == client.Username).Select(o => o.Id))
                     {
                         changed |= OrderManager.Remove(orderId);
                     }
 
-                    if (ClientManager.Remove(username))
+                    if (ClientManager.Remove(client.Username))
                     {
                         SaveData();
                         return Task.FromResult(true);
@@ -351,11 +351,11 @@ namespace Logic.File
             }
         }
 
-        public Task<bool> RemoveOrder(uint id)
+        public Task<bool> RemoveOrder(Order order)
         {
             lock (OrderLock)
             {
-                if (OrderManager.Remove(id))
+                if (OrderManager.Remove(order.Id))
                 {
                     SaveData();
                     return Task.FromResult(true);
@@ -365,25 +365,25 @@ namespace Logic.File
             }
         }
 
-        public Task<bool> RemoveProduct(uint id)
+        public Task<bool> RemoveProduct(Product product)
         {
             lock (ProductLock)
             {
                 lock (OrderLock)
                 {
-                    if (ProductManager.Get(id) == null)
+                    if (ProductManager.Get(product.Id) == null)
                     {
                         return Task.FromResult(false);
                     }
                     foreach (Order order in OrderManager.GetAll())
                     {
-                        if (order.ProductIdQuantityMap.ContainsKey(id))
+                        if (order.ProductIdQuantityMap.ContainsKey(product.Id))
                         {
                             return Task.FromResult(false);
                         }
                     }
 
-                    if (ProductManager.Remove(id))
+                    if (ProductManager.Remove(product.Id))
                     {
                         SaveData();
                         return Task.FromResult(true);

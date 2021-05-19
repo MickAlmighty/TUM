@@ -21,8 +21,8 @@ namespace Logic
         Task<bool> Update(Client client);
         Task<bool> Update(Order order);
         Task<bool> Update(Product product);
-        Task<bool> RemoveClient(string username);
-        Task<bool> RemoveOrder(uint id);
-        Task<bool> RemoveProduct(uint id);
+        Task<bool> RemoveClient(Client client);
+        Task<bool> RemoveOrder(Order order);
+        Task<bool> RemoveProduct(Product product);
     }
 }

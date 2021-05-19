@@ -7,6 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Data.Transfer\Data.Transfer.csproj" />
     <ProjectReference Include="..\Logic\Logic.csproj" />
+    <ProjectReference Include="..\WebSockets\WebSockets.csproj" />
   </ItemGroup>
 
 </Project>

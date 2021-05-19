@@ -9,9 +9,13 @@ using System.Threading.Tasks;
 using Data;
 using Data.Transfer;
 
+using WebSockets;
+
+using Exception = System.Exception;
+
 namespace Logic.Client
 {
-    public class WebRepository : IDataRepository, WebReceiver
+    public class WebRepository : IDataRepository
     {
         private const int WEB_TIMEOUT = 5000;
 
@@ -27,164 +31,191 @@ namespace Logic.Client
 
         public async Task<bool> OpenRepository()
         {
-            await WebSocketClient.Connect(this, new Uri("ws://localhost:4444"), wsc => WebSocketConnection = wsc,
-                logMsg => Console.WriteLine($"CLIENT> {logMsg}"));
-            if (WebSocketConnection == null)
+            try
             {
+                WebSocketConnection = await WebSocketClient.ConnectAsync(new Uri("ws://localhost:4444"));
+                WebSocketConnection.OnMessage += (e, a) => OnMessage(a.Message);
+                WebSocketConnection.OnError += (e, a) => OnError(a.Exception);
+                WebSocketConnection.OnClose += (e, a) => OnClose();
+                return true;
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e);
                 return false;
             }
-            return true;
         }
 
         public void OnMessage(string message)
         {
-            Debug.WriteLine($"Server->Client: {message}");
+            Debug.WriteLine($"{WebSocketConnection}> {message}");
 
-            if (WebSerializer.TryParseRequest(message, out WebSimpleMessageType _))
+            if (WebSerializer.TryParseRequest(message, out WebSimpleMessageType simpleMessage))
             {
-                // the server will not ask the client for data
-                throw new NotImplementedException();
-            }
-
-            WebMessageDTO<object> msgDto = WebSerializer.DeserializeWebMessage(message);
-            switch (msgDto.MessageType)
-            {
-                case WebMessageType.ProvideAllClients:
-                case WebMessageType.ProvideAllProducts:
-                case WebMessageType.ProvideAllOrders:
-                case WebMessageType.ProvideClient:
-                case WebMessageType.ProvideProduct:
-                case WebMessageType.ProvideOrder:
-                    {
+                switch (simpleMessage)
+                {
+                    case WebSimpleMessageType.Failure:
+                    case WebSimpleMessageType.Success:
                         MessageQueue.Enqueue(message);
                         NewMessageEvent.Set();
                         break;
-                    }
-                case WebMessageType.OrderSent:
-                    {
-                        OrderSent orderSent = new OrderSent((msgDto.Data as OrderDTO)?.ToOrder());
-                        foreach (IObserver<OrderSent> observer in OrderSentObservers)
+                    default:
+                        // the server will not ask the client for data
+                        throw new NotImplementedException();
+                }
+            }
+            else
+            {
+                WebMessageDTO<object> msgDto = WebSerializer.DeserializeWebMessage(message);
+                switch (msgDto.MessageType)
+                {
+                    case WebMessageType.ProvideAllClients:
+                    case WebMessageType.ProvideAllProducts:
+                    case WebMessageType.ProvideAllOrders:
+                    case WebMessageType.ProvideClient:
+                    case WebMessageType.ProvideProduct:
+                    case WebMessageType.ProvideOrder:
                         {
-                            observer.OnNext(orderSent);
+                            MessageQueue.Enqueue(message);
+                            NewMessageEvent.Set();
+                            break;
                         }
-                        break;
-                    }
-                case WebMessageType.AddClient:
-                    {
-                        DataChanged<Data.Client> change =
-                            new DataChanged<Data.Client>(DataChangedAction.Add,
-                                new List<Data.Client> { (msgDto.Data as ClientDTO)?.ToClient() });
-                        foreach (IObserver<DataChanged<Data.Client>> observer in ClientObservers)
+                    case WebMessageType.OrderSent:
                         {
-                            observer.OnNext(change);
+                            OrderSent orderSent = new OrderSent((msgDto.Data as OrderDTO)?.ToOrder());
+                            foreach (IObserver<OrderSent> observer in OrderSentObservers)
+                            {
+                                observer.OnNext(orderSent);
+                            }
+
+                            break;
                         }
-                        break;
-                    }
-                case WebMessageType.UpdateClient:
-                    {
-                        DataChanged<Data.Client> change =
-                            new DataChanged<Data.Client>(DataChangedAction.Update,
-                                new List<Data.Client> { (msgDto.Data as ClientDTO)?.ToClient() });
-                        foreach (IObserver<DataChanged<Data.Client>> observer in ClientObservers)
+                    case WebMessageType.AddClient:
                         {
-                            observer.OnNext(change);
+                            DataChanged<Data.Client> change =
+                                new DataChanged<Data.Client>(DataChangedAction.Add,
+                                    new List<Data.Client> { (msgDto.Data as ClientDTO)?.ToClient() });
+                            foreach (IObserver<DataChanged<Data.Client>> observer in ClientObservers)
+                            {
+                                observer.OnNext(change);
+                            }
+
+                            break;
                         }
-                        break;
-                    }
-                case WebMessageType.RemoveClient:
-                    {
-                        DataChanged<Data.Client> change =
-                            new DataChanged<Data.Client>(DataChangedAction.Remove,
-                                new List<Data.Client> { (msgDto.Data as ClientDTO)?.ToClient() });
-                        foreach (IObserver<DataChanged<Data.Client>> observer in ClientObservers)
+                    case WebMessageType.UpdateClient:
                         {
-                            observer.OnNext(change);
+                            DataChanged<Data.Client> change =
+                                new DataChanged<Data.Client>(DataChangedAction.Update,
+                                    new List<Data.Client> { (msgDto.Data as ClientDTO)?.ToClient() });
+                            foreach (IObserver<DataChanged<Data.Client>> observer in ClientObservers)
+                            {
+                                observer.OnNext(change);
+                            }
+
+                            break;
                         }
-                        break;
-                    }
-                case WebMessageType.AddProduct:
-                    {
-                        DataChanged<Product> change =
-                            new DataChanged<Product>(DataChangedAction.Add,
-                                new List<Product> { (msgDto.Data as ProductDTO)?.ToProduct() });
-                        foreach (IObserver<DataChanged<Product>> observer in ProductObservers)
+                    case WebMessageType.RemoveClient:
                         {
-                            observer.OnNext(change);
+                            DataChanged<Data.Client> change =
+                                new DataChanged<Data.Client>(DataChangedAction.Remove,
+                                    new List<Data.Client> { (msgDto.Data as ClientDTO)?.ToClient() });
+                            foreach (IObserver<DataChanged<Data.Client>> observer in ClientObservers)
+                            {
+                                observer.OnNext(change);
+                            }
+
+                            break;
                         }
-                        break;
-                    }
-                case WebMessageType.UpdateProduct:
-                    {
-                        DataChanged<Product> change =
-                            new DataChanged<Product>(DataChangedAction.Update,
-                                new List<Product> { (msgDto.Data as ProductDTO)?.ToProduct() });
-                        foreach (IObserver<DataChanged<Product>> observer in ProductObservers)
+                    case WebMessageType.AddProduct:
                         {
-                            observer.OnNext(change);
+                            DataChanged<Product> change =
+                                new DataChanged<Product>(DataChangedAction.Add,
+                                    new List<Product> { (msgDto.Data as ProductDTO)?.ToProduct() });
+                            foreach (IObserver<DataChanged<Product>> observer in ProductObservers)
+                            {
+                                observer.OnNext(change);
+                            }
+
+                            break;
                         }
-                        break;
-                    }
-                case WebMessageType.RemoveProduct:
-                    {
-                        DataChanged<Product> change =
-                            new DataChanged<Product>(DataChangedAction.Remove,
-                                new List<Product> { (msgDto.Data as ProductDTO)?.ToProduct() });
-                        foreach (IObserver<DataChanged<Product>> observer in ProductObservers)
+                    case WebMessageType.UpdateProduct:
                         {
-                            observer.OnNext(change);
+                            DataChanged<Product> change =
+                                new DataChanged<Product>(DataChangedAction.Update,
+                                    new List<Product> { (msgDto.Data as ProductDTO)?.ToProduct() });
+                            foreach (IObserver<DataChanged<Product>> observer in ProductObservers)
+                            {
+                                observer.OnNext(change);
+                            }
+
+                            break;
                         }
-                        break;
-                    }
-                case WebMessageType.AddOrder:
-                    {
-                        DataChanged<Order> change =
-                            new DataChanged<Order>(DataChangedAction.Add,
-                                new List<Order> { (msgDto.Data as OrderDTO)?.ToOrder() });
-                        foreach (IObserver<DataChanged<Order>> observer in OrderObservers)
+                    case WebMessageType.RemoveProduct:
                         {
-                            observer.OnNext(change);
+                            DataChanged<Product> change =
+                                new DataChanged<Product>(DataChangedAction.Remove,
+                                    new List<Product> { (msgDto.Data as ProductDTO)?.ToProduct() });
+                            foreach (IObserver<DataChanged<Product>> observer in ProductObservers)
+                            {
+                                observer.OnNext(change);
+                            }
+
+                            break;
                         }
-                        break;
-                    }
-                case WebMessageType.UpdateOrder:
-                    {
-                        DataChanged<Order> change =
-                            new DataChanged<Order>(DataChangedAction.Update,
-                                new List<Order> { (msgDto.Data as OrderDTO)?.ToOrder() });
-                        foreach (IObserver<DataChanged<Order>> observer in OrderObservers)
+                    case WebMessageType.AddOrder:
                         {
-                            observer.OnNext(change);
+                            DataChanged<Order> change =
+                                new DataChanged<Order>(DataChangedAction.Add,
+                                    new List<Order> { (msgDto.Data as OrderDTO)?.ToOrder() });
+                            foreach (IObserver<DataChanged<Order>> observer in OrderObservers)
+                            {
+                                observer.OnNext(change);
+                            }
+
+                            break;
                         }
-                        break;
-                    }
-                case WebMessageType.RemoveOrder:
-                    {
-                        DataChanged<Order> change =
-                            new DataChanged<Order>(DataChangedAction.Remove,
-                                new List<Order> { (msgDto.Data as OrderDTO)?.ToOrder() });
-                        foreach (IObserver<DataChanged<Order>> observer in OrderObservers)
+                    case WebMessageType.UpdateOrder:
                         {
-                            observer.OnNext(change);
+                            DataChanged<Order> change =
+                                new DataChanged<Order>(DataChangedAction.Update,
+                                    new List<Order> { (msgDto.Data as OrderDTO)?.ToOrder() });
+                            foreach (IObserver<DataChanged<Order>> observer in OrderObservers)
+                            {
+                                observer.OnNext(change);
+                            }
+
+                            break;
                         }
-                        break;
-                    }
-                case WebMessageType.Error:
-                    {
-                        string errorMsg = msgDto.Data as string;
-                        Console.WriteLine($"The server has encountered an exception! {errorMsg}");
-                        break;
-                    }
+                    case WebMessageType.RemoveOrder:
+                        {
+                            DataChanged<Order> change =
+                                new DataChanged<Order>(DataChangedAction.Remove,
+                                    new List<Order> { (msgDto.Data as OrderDTO)?.ToOrder() });
+                            foreach (IObserver<DataChanged<Order>> observer in OrderObservers)
+                            {
+                                observer.OnNext(change);
+                            }
+
+                            break;
+                        }
+                    case WebMessageType.Error:
+                        {
+                            string errorMsg = msgDto.Data as string;
+                            Debug.WriteLine($"The server has encountered an exception! {errorMsg}");
+                            break;
+                        }
+                }
             }
         }
 
         public void OnClose()
         {
-            Console.WriteLine("The web socket connection has been closed.");
+            Debug.WriteLine($"Client web socket connection {WebSocketConnection} has been closed.");
         }
 
-        public void OnError()
+        public void OnError(Exception e)
         {
-            Console.WriteLine("An exception occurred during web socket connection.");
+            Debug.WriteLine($"Client web socket connection {WebSocketConnection} error: {e}");
         }
 
         private string ReadMessage()
@@ -261,7 +292,7 @@ namespace Logic.Client
             {
                 return true;
             }
-            Console.WriteLine($"Failed to add client! {response}");
+            Debug.WriteLine($"Failed to add client! {response}");
             return false;
         }
 
@@ -279,7 +310,7 @@ namespace Logic.Client
             {
                 return true;
             }
-            Console.WriteLine($"Failed to add order! {response}");
+            Debug.WriteLine($"Failed to add order! {response}");
             return false;
         }
 
@@ -296,7 +327,7 @@ namespace Logic.Client
             {
                 return true;
             }
-            Console.WriteLine($"Failed to add product! {response}");
+            Debug.WriteLine($"Failed to add product! {response}");
             return false;
         }
 
@@ -348,7 +379,7 @@ namespace Logic.Client
             {
                 return true;
             }
-            Console.WriteLine($"Failed to update client! {response}");
+            Debug.WriteLine($"Failed to update client! {response}");
             return false;
         }
 
@@ -361,7 +392,7 @@ namespace Logic.Client
             {
                 return true;
             }
-            Console.WriteLine($"Failed to update order! {response}");
+            Debug.WriteLine($"Failed to update order! {response}");
             return false;
         }
 
@@ -374,46 +405,46 @@ namespace Logic.Client
             {
                 return true;
             }
-            Console.WriteLine($"Failed to update product! {response}");
+            Debug.WriteLine($"Failed to update product! {response}");
             return false;
         }
 
-        public async Task<bool> RemoveClient(string username)
+        public async Task<bool> RemoveClient(Data.Client client)
         {
-            string msg = WebSerializer.SerializeWebMessage(WebMessageType.RemoveClient, username);
+            string msg = WebSerializer.SerializeWebMessage(WebMessageType.RemoveClient, new ClientDTO(client));
             await WebSocketConnection.SendAsync(msg);
             string response = ReadMessage();
             if (WebSerializer.TryParseRequest(response, out WebSimpleMessageType req) && req == WebSimpleMessageType.Success)
             {
                 return true;
             }
-            Console.WriteLine($"Failed to remove client! {response}");
+            Debug.WriteLine($"Failed to remove client! {response}");
             return false;
         }
 
-        public async Task<bool> RemoveOrder(uint id)
+        public async Task<bool> RemoveOrder(Order order)
         {
-            string msg = WebSerializer.SerializeWebMessage(WebMessageType.RemoveOrder, id);
+            string msg = WebSerializer.SerializeWebMessage(WebMessageType.RemoveOrder, new OrderDTO(order));
             await WebSocketConnection.SendAsync(msg);
             string response = ReadMessage();
             if (WebSerializer.TryParseRequest(response, out WebSimpleMessageType req) && req == WebSimpleMessageType.Success)
             {
                 return true;
             }
-            Console.WriteLine($"Failed to remove order! {response}");
+            Debug.WriteLine($"Failed to remove order! {response}");
             return false;
         }
 
-        public async Task<bool> RemoveProduct(uint id)
+        public async Task<bool> RemoveProduct(Product product)
         {
-            string msg = WebSerializer.SerializeWebMessage(WebMessageType.RemoveProduct, id);
+            string msg = WebSerializer.SerializeWebMessage(WebMessageType.RemoveProduct, new ProductDTO(product));
             await WebSocketConnection.SendAsync(msg);
             string response = ReadMessage();
             if (WebSerializer.TryParseRequest(response, out WebSimpleMessageType req) && req == WebSimpleMessageType.Success)
             {
                 return true;
             }
-            Console.WriteLine($"Failed to remove product! {response}");
+            Debug.WriteLine($"Failed to remove product! {response}");
             return false;
         }
 

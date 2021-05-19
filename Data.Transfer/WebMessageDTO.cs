@@ -5,6 +5,14 @@ namespace Data.Transfer
 {
     public class WebMessageDTO<T>
     {
+        public WebMessageDTO() { }
+
+        public WebMessageDTO(WebMessageType messageType, T data)
+        {
+            MessageType = messageType;
+            Data = data;
+        }
+
         [JsonConverter(typeof(StringEnumConverter))]
         public WebMessageType MessageType { get; set; }
         public T Data { get; set; }

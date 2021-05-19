@@ -145,8 +145,8 @@ namespace Logic.FileTest
             );
             await repo.CreateProduct(product.Name, product.Price, product.ProductType);
             string fileData = System.IO.File.ReadAllText(TEST_FILE);
-            await repo.RemoveClient(testClient.Username);
-            await repo.RemoveProduct((await repo.GetAllProducts()).First().Id);
+            await repo.RemoveClient(testClient);
+            await repo.RemoveProduct((await repo.GetAllProducts()).First());
             Assert.AreEqual(0, (await repo.GetAllClients()).Count);
             Assert.AreEqual(0, (await repo.GetAllProducts()).Count);
             bool clientsReplaced = false;

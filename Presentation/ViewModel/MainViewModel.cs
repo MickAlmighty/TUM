@@ -70,7 +70,7 @@ namespace Presentation.ViewModel
         }
         private async void ExecuteRemoveClient(Client client)
         {
-            await DataRepository.RemoveClient(client.Username);
+            await DataRepository.RemoveClient(client);
         }
         private void ExecuteCreateOrder()
         {
@@ -85,7 +85,7 @@ namespace Presentation.ViewModel
         }
         private async void ExecuteRemoveOrder(Order order)
         {
-            await DataRepository.RemoveOrder(order.Id);
+            await DataRepository.RemoveOrder(order);
         }
         private void ExecuteCreateProduct()
         {
@@ -97,7 +97,7 @@ namespace Presentation.ViewModel
         }
         private async void ExecuteRemoveProduct(Product product)
         {
-            await DataRepository.RemoveProduct(product.Id);
+            await DataRepository.RemoveProduct(product);
         }
 
         public ICommand Connect { get; }
@@ -177,135 +177,141 @@ namespace Presentation.ViewModel
 
         public void OnNext(OrderSent value)
         {
-            SyncContext.Post(o => { DialogOrderSentViewModel.OpenDialog(DialogIdentifier1, $"Order {value.Order.Id} of {value.Order.ClientUsername} was successfully delivered on {(value.Order.DeliveryDate.HasValue ? value.Order.DeliveryDate.Value.ToString() : "")}!"); }, null);
+            SyncContext.Post(d => { DialogOrderSentViewModel.OpenDialog(DialogIdentifier1, $"Order {value.Order.Id} of {value.Order.ClientUsername} was successfully delivered on {(value.Order.DeliveryDate.HasValue ? value.Order.DeliveryDate.Value.ToString() : "")}!"); }, null);
         }
 
         public void OnNext(DataChanged<Client> value)
         {
-            switch (value.Action)
-            {
-                case DataChangedAction.Add:
-                    foreach (Client c in value.NewItems)
-                    {
-                        Clients.Add(c);
-                    }
-                    break;
-                case DataChangedAction.Remove:
-                    foreach (Client c in Clients.Where(client => value.OldItems.FirstOrDefault(cl => cl.Username == client.Username) != null).ToList())
-                    {
-                        Clients.Remove(c);
-                    }
-                    break;
-                case DataChangedAction.Replace:
-                    foreach (Client c in Clients.Where(client => value.OldItems.FirstOrDefault(cl => cl.Username == client.Username) != null).ToList())
-                    {
-                        Clients.Remove(c);
-                    }
-                    foreach (Client c in value.NewItems)
-                    {
-                        Clients.Add(c);
-                    }
-                    break;
-                case DataChangedAction.Reset:
-                    Clients.Clear();
-                    break;
-                case DataChangedAction.Update:
-                    foreach (Client item in value.UpdatedItems)
-                    {
-                        int index = Clients.IndexOf(Clients.FirstOrDefault(c => c.Username == item.Username));
-                        Clients.RemoveAt(index);
-                        Clients.Insert(index, item);
-                    }
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            SyncContext.Post(d => {
+                switch (value.Action)
+                {
+                    case DataChangedAction.Add:
+                        foreach (Client c in value.NewItems)
+                        {
+                            Clients.Add(c);
+                        }
+                        break;
+                    case DataChangedAction.Remove:
+                        foreach (Client c in Clients.Where(client => value.OldItems.FirstOrDefault(cl => cl.Username == client.Username) != null).ToList())
+                        {
+                            Clients.Remove(c);
+                        }
+                        break;
+                    case DataChangedAction.Replace:
+                        foreach (Client c in Clients.Where(client => value.OldItems.FirstOrDefault(cl => cl.Username == client.Username) != null).ToList())
+                        {
+                            Clients.Remove(c);
+                        }
+                        foreach (Client c in value.NewItems)
+                        {
+                            Clients.Add(c);
+                        }
+                        break;
+                    case DataChangedAction.Reset:
+                        Clients.Clear();
+                        break;
+                    case DataChangedAction.Update:
+                        foreach (Client item in value.UpdatedItems)
+                        {
+                            int index = Clients.IndexOf(Clients.FirstOrDefault(c => c.Username == item.Username));
+                            Clients.RemoveAt(index);
+                            Clients.Insert(index, item);
+                        }
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }, null);
         }
 
         public void OnNext(DataChanged<Product> value)
         {
-            switch (value.Action)
-            {
-                case DataChangedAction.Add:
-                    foreach (Product p in value.NewItems)
-                    {
-                        Products.Add(p);
-                    }
-                    break;
-                case DataChangedAction.Remove:
-                    foreach (Product p in Products.Where(product => value.OldItems.FirstOrDefault(pr => pr.Id == product.Id) != null).ToList())
-                    {
-                        Products.Remove(p);
-                    }
-                    break;
-                case DataChangedAction.Replace:
-                    foreach (Product p in Products.Where(product => value.OldItems.FirstOrDefault(pr => pr.Id == product.Id) != null).ToList())
-                    {
-                        Products.Remove(p);
-                    }
-                    foreach (Product p in value.NewItems)
-                    {
-                        Products.Add(p);
-                    }
-                    break;
-                case DataChangedAction.Reset:
-                    Products.Clear();
-                    break;
-                case DataChangedAction.Update:
-                    foreach (Product item in value.UpdatedItems)
-                    {
-                        int index = Products.IndexOf(Products.FirstOrDefault(p => p.Id == item.Id));
-                        Products.RemoveAt(index);
-                        Products.Insert(index, item);
-                    }
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            SyncContext.Post(d => {
+                switch (value.Action)
+                {
+                    case DataChangedAction.Add:
+                        foreach (Product p in value.NewItems)
+                        {
+                            Products.Add(p);
+                        }
+                        break;
+                    case DataChangedAction.Remove:
+                        foreach (Product p in Products.Where(product => value.OldItems.FirstOrDefault(pr => pr.Id == product.Id) != null).ToList())
+                        {
+                            Products.Remove(p);
+                        }
+                        break;
+                    case DataChangedAction.Replace:
+                        foreach (Product p in Products.Where(product => value.OldItems.FirstOrDefault(pr => pr.Id == product.Id) != null).ToList())
+                        {
+                            Products.Remove(p);
+                        }
+                        foreach (Product p in value.NewItems)
+                        {
+                            Products.Add(p);
+                        }
+                        break;
+                    case DataChangedAction.Reset:
+                        Products.Clear();
+                        break;
+                    case DataChangedAction.Update:
+                        foreach (Product item in value.UpdatedItems)
+                        {
+                            int index = Products.IndexOf(Products.FirstOrDefault(p => p.Id == item.Id));
+                            Products.RemoveAt(index);
+                            Products.Insert(index, item);
+                        }
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }, null);
         }
 
         public void OnNext(DataChanged<Order> value)
         {
-            switch (value.Action)
-            {
-                case DataChangedAction.Add:
-                    foreach (Order o in value.NewItems)
-                    {
-                        Orders.Add(o);
-                    }
-                    break;
-                case DataChangedAction.Remove:
-                    foreach (Order o in Orders.Where(order => value.OldItems.FirstOrDefault(or => or.Id == order.Id) != null).ToList())
-                    {
-                        Orders.Remove(o);
-                    }
-                    break;
-                case DataChangedAction.Replace:
-                    foreach (Order o in Orders.Where(order => value.OldItems.FirstOrDefault(or => or.Id == order.Id) != null).ToList())
-                    {
-                        Orders.Remove(o);
-                    }
-                    foreach (Order o in value.NewItems)
-                    {
-                        Orders.Add(o);
-                    }
-                    break;
-                case DataChangedAction.Reset:
-                    Orders.Clear();
-                    break;
-                case DataChangedAction.Update:
-                    SyncContext.Post(_ => {
-                        foreach (Order item in value.UpdatedItems)
+            SyncContext.Post(d => {
+                switch (value.Action)
+                {
+                    case DataChangedAction.Add:
+                        foreach (Order o in value.NewItems)
                         {
-                            int index = Orders.IndexOf(Orders.FirstOrDefault(o => o.Id == item.Id));
-                            Orders.RemoveAt(index);
-                            Orders.Insert(index, item);
+                            Orders.Add(o);
                         }
-                    }, null);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+                        break;
+                    case DataChangedAction.Remove:
+                        foreach (Order o in Orders.Where(order => value.OldItems.FirstOrDefault(or => or.Id == order.Id) != null).ToList())
+                        {
+                            Orders.Remove(o);
+                        }
+                        break;
+                    case DataChangedAction.Replace:
+                        foreach (Order o in Orders.Where(order => value.OldItems.FirstOrDefault(or => or.Id == order.Id) != null).ToList())
+                        {
+                            Orders.Remove(o);
+                        }
+                        foreach (Order o in value.NewItems)
+                        {
+                            Orders.Add(o);
+                        }
+                        break;
+                    case DataChangedAction.Reset:
+                        Orders.Clear();
+                        break;
+                    case DataChangedAction.Update:
+                        SyncContext.Post(_ => {
+                            foreach (Order item in value.UpdatedItems)
+                            {
+                                int index = Orders.IndexOf(Orders.FirstOrDefault(o => o.Id == item.Id));
+                                Orders.RemoveAt(index);
+                                Orders.Insert(index, item);
+                            }
+                        }, null);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }, null);
         }
 
         void IObserver<DataChanged<Order>>.OnCompleted()

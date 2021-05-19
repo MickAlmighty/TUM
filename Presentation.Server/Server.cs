@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 using Data;
@@ -8,18 +9,23 @@ using Data.Transfer;
 
 using Logic;
 
+using WebSockets;
+
 namespace Presentation.Server
 {
-    internal class Server : WebReceiver, IObserver<OrderSent>
+    internal class Server : IObserver<OrderSent>
     {
+        private ServerWebSocketConnection ServerWebSocketConnection { get; set; }
+
         private WebSerializer WebSerializer { get; } = new WebSerializer();
-        private HashSet<WebSocketConnection> Connections { get; } = new HashSet<WebSocketConnection>();
 
         private IDataRepository DataRepository { get; }
+        private IDisposable OrderSentUnsubscriber { get; }
 
         public Server(IDataRepository dataRepository)
         {
             DataRepository = dataRepository;
+            OrderSentUnsubscriber = DataRepository.Subscribe(this);
         }
 
         public async Task RunServer()
@@ -29,17 +35,25 @@ namespace Presentation.Server
                 Console.WriteLine("Failed to open the data repository!");
                 return;
             }
-            await WebSocketServer.Server(this, 4444, wsc => {
-                Connections.Add(wsc);
-                Console.WriteLine("A new client has connected!");
-            });
+
+            ServerWebSocketConnection = WebSocketServer.CreateServer(4444);
+            ServerWebSocketConnection.OnClientConnected += ServerWebSocketConnection_OnClientConnected;
+            ServerWebSocketConnection.OnMessage += (e, a) => OnMessage(a.Connection, a.Message);
+            ServerWebSocketConnection.OnError += (e, a) => OnError(a.Connection, a.Exception);
+            ServerWebSocketConnection.OnClose += (e, a) => OnClose(a.Connection);
+            await ServerWebSocketConnection.RunServerLoop();
+        }
+
+        private void ServerWebSocketConnection_OnClientConnected(object sender, OnClientConnectedEventArgs args)
+        {
+            Console.WriteLine($"Client {args.ClientConnection} connected!");
         }
 
         private async Task ProcessClientMessage(WebSocketConnection connection, string message)
         {
+            Console.WriteLine($"{connection}> {message}");
             if (WebSerializer.TryParseRequest(message, out WebSimpleMessageType msgType))
             {
-                Console.WriteLine($"New client request: {msgType}.");
                 switch (msgType)
                 {
                     case WebSimpleMessageType.GetAllClients:
@@ -92,11 +106,8 @@ namespace Presentation.Server
                                     : WebSimpleMessageType.Failure.ToString());
                                 if (result)
                                 {
-                                    foreach (WebSocketConnection conn in Connections)
-                                    {
-                                        await conn.SendAsync(
-                                            WebSerializer.SerializeWebMessage(WebMessageType.AddClient, msgDto.Data));
-                                    }
+                                    await ServerWebSocketConnection.SendAsync(
+                                        WebSerializer.SerializeWebMessage(WebMessageType.AddClient, msgDto.Data));
                                 }
 
                                 break;
@@ -110,36 +121,45 @@ namespace Presentation.Server
                                     {
                                         result = await DataRepository.Update(clt.ToClient());
                                     }
-                                    catch (Exception) { }
+                                    catch (Exception e)
+                                    {
+                                        await connection.SendAsync(
+                                            WebSerializer.SerializeWebMessage(WebMessageType.Error, e.ToString()));
+                                    }
                                 }
                                 await connection.SendAsync(result
                                     ? WebSimpleMessageType.Success.ToString()
                                     : WebSimpleMessageType.Failure.ToString());
                                 if (result)
                                 {
-                                    foreach (WebSocketConnection conn in Connections)
-                                    {
-                                        await conn.SendAsync(
-                                            WebSerializer.SerializeWebMessage(WebMessageType.UpdateClient, msgDto.Data));
-                                    }
+                                    await ServerWebSocketConnection.SendAsync(
+                                        WebSerializer.SerializeWebMessage(WebMessageType.UpdateClient, msgDto.Data));
                                 }
 
                                 break;
                             }
                         case WebMessageType.RemoveClient:
                             {
-                                bool result = msgDto.Data is ClientDTO clt &&
-                                              await DataRepository.RemoveClient(clt.Username);
+                                bool result = false;
+                                if (msgDto.Data is ClientDTO clt)
+                                {
+                                    try
+                                    {
+                                        result = await DataRepository.RemoveClient(clt.ToClient());
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        await connection.SendAsync(
+                                            WebSerializer.SerializeWebMessage(WebMessageType.Error, e.ToString()));
+                                    }
+                                }
                                 await connection.SendAsync(result
                                     ? WebSimpleMessageType.Success.ToString()
                                     : WebSimpleMessageType.Failure.ToString());
                                 if (result)
                                 {
-                                    foreach (WebSocketConnection conn in Connections)
-                                    {
-                                        await conn.SendAsync(
-                                            WebSerializer.SerializeWebMessage(WebMessageType.RemoveClient, msgDto.Data));
-                                    }
+                                    await ServerWebSocketConnection.SendAsync(
+                                        WebSerializer.SerializeWebMessage(WebMessageType.RemoveClient, msgDto.Data));
                                 }
 
                                 break;
@@ -160,11 +180,8 @@ namespace Presentation.Server
                                 {
                                     ProductDTO dto = new ProductDTO((await DataRepository.GetAllProducts())
                                         .First(p => p.Name == prd.Name));
-                                    foreach (WebSocketConnection conn in Connections)
-                                    {
-                                        await conn.SendAsync(
-                                            WebSerializer.SerializeWebMessage(WebMessageType.AddProduct, dto));
-                                    }
+                                    await ServerWebSocketConnection.SendAsync(
+                                        WebSerializer.SerializeWebMessage(WebMessageType.AddProduct, dto));
                                 }
 
                                 break;
@@ -178,36 +195,45 @@ namespace Presentation.Server
                                     {
                                         result = await DataRepository.Update(prd.ToProduct());
                                     }
-                                    catch (Exception) { }
+                                    catch (Exception e)
+                                    {
+                                        await connection.SendAsync(
+                                            WebSerializer.SerializeWebMessage(WebMessageType.Error, e.ToString()));
+                                    }
                                 }
                                 await connection.SendAsync(result
                                     ? WebSimpleMessageType.Success.ToString()
                                     : WebSimpleMessageType.Failure.ToString());
                                 if (result)
                                 {
-                                    foreach (WebSocketConnection conn in Connections)
-                                    {
-                                        await conn.SendAsync(
-                                            WebSerializer.SerializeWebMessage(WebMessageType.UpdateProduct, msgDto.Data));
-                                    }
+                                    await ServerWebSocketConnection.SendAsync(
+                                        WebSerializer.SerializeWebMessage(WebMessageType.UpdateProduct, msgDto.Data));
                                 }
 
                                 break;
                             }
                         case WebMessageType.RemoveProduct:
                             {
-                                bool result = msgDto.Data is ProductDTO prd &&
-                                              await DataRepository.RemoveProduct(prd.Id);
+                                bool result = false;
+                                if (msgDto.Data is ProductDTO prd)
+                                {
+                                    try
+                                    {
+                                        result = await DataRepository.RemoveProduct(prd.ToProduct());
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        await connection.SendAsync(
+                                            WebSerializer.SerializeWebMessage(WebMessageType.Error, e.ToString()));
+                                    }
+                                }
                                 await connection.SendAsync(result
                                     ? WebSimpleMessageType.Success.ToString()
                                     : WebSimpleMessageType.Failure.ToString());
                                 if (result)
                                 {
-                                    foreach (WebSocketConnection conn in Connections)
-                                    {
-                                        await conn.SendAsync(
-                                            WebSerializer.SerializeWebMessage(WebMessageType.RemoveProduct, msgDto.Data));
-                                    }
+                                    await ServerWebSocketConnection.SendAsync(
+                                        WebSerializer.SerializeWebMessage(WebMessageType.RemoveProduct, msgDto.Data));
                                 }
 
                                 break;
@@ -229,11 +255,8 @@ namespace Presentation.Server
                                 {
                                     OrderDTO dto = new OrderDTO((await DataRepository.GetAllOrders())
                                         .First(o => o.ClientUsername == ord.ClientUsername && o.OrderDate == ord.OrderDate));
-                                    foreach (WebSocketConnection conn in Connections)
-                                    {
-                                        await conn.SendAsync(
-                                            WebSerializer.SerializeWebMessage(WebMessageType.AddOrder, dto));
-                                    }
+                                    await ServerWebSocketConnection.SendAsync(
+                                        WebSerializer.SerializeWebMessage(WebMessageType.AddOrder, dto));
                                 }
 
                                 break;
@@ -247,36 +270,45 @@ namespace Presentation.Server
                                     {
                                         result = await DataRepository.Update(ord.ToOrder());
                                     }
-                                    catch (Exception) { }
+                                    catch (Exception e)
+                                    {
+                                        await connection.SendAsync(
+                                            WebSerializer.SerializeWebMessage(WebMessageType.Error, e.ToString()));
+                                    }
                                 }
                                 await connection.SendAsync(result
                                     ? WebSimpleMessageType.Success.ToString()
                                     : WebSimpleMessageType.Failure.ToString());
                                 if (result)
                                 {
-                                    foreach (WebSocketConnection conn in Connections)
-                                    {
-                                        await conn.SendAsync(
-                                            WebSerializer.SerializeWebMessage(WebMessageType.UpdateOrder, msgDto.Data));
-                                    }
+                                    await ServerWebSocketConnection.SendAsync(
+                                        WebSerializer.SerializeWebMessage(WebMessageType.UpdateOrder, msgDto.Data));
                                 }
 
                                 break;
                             }
                         case WebMessageType.RemoveOrder:
                             {
-                                bool result = msgDto.Data is OrderDTO ord &&
-                                              await DataRepository.RemoveOrder(ord.Id);
+                                bool result = false;
+                                if (msgDto.Data is OrderDTO ord)
+                                {
+                                    try
+                                    {
+                                        result = await DataRepository.RemoveOrder(ord.ToOrder());
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        await connection.SendAsync(
+                                            WebSerializer.SerializeWebMessage(WebMessageType.Error, e.ToString()));
+                                    }
+                                }
                                 await connection.SendAsync(result
                                     ? WebSimpleMessageType.Success.ToString()
                                     : WebSimpleMessageType.Failure.ToString());
                                 if (result)
                                 {
-                                    foreach (WebSocketConnection conn in Connections)
-                                    {
-                                        await conn.SendAsync(
-                                            WebSerializer.SerializeWebMessage(WebMessageType.RemoveOrder, msgDto.Data));
-                                    }
+                                    await ServerWebSocketConnection.SendAsync(
+                                        WebSerializer.SerializeWebMessage(WebMessageType.RemoveOrder, msgDto.Data));
                                 }
 
                                 break;
@@ -357,12 +389,13 @@ namespace Presentation.Server
 
         public void OnClose(WebSocketConnection connection)
         {
-            Console.WriteLine("A client connection has been closed!");
+            Console.WriteLine($"Client {connection} has been closed!");
         }
 
-        public void OnError(WebSocketConnection connection)
+        public void OnError(WebSocketConnection connection, Exception exception)
         {
-            Console.WriteLine("A client has reported an error!");
+            Console.WriteLine($"Client {connection} has reported an error: {exception}");
+            Task.Run(connection.DisconnectAsync);
         }
 
         public void OnCompleted()
@@ -378,10 +411,7 @@ namespace Presentation.Server
         public void OnNext(OrderSent value)
         {
             string msg = WebSerializer.SerializeWebMessage(WebMessageType.OrderSent, new OrderDTO(value.Order));
-            foreach (WebSocketConnection connection in Connections)
-            {
-                connection.SendAsync(msg).Start();
-            }
+            Task.Run(() => ServerWebSocketConnection.SendAsync(msg));
         }
     }
 }
