@@ -15,7 +15,7 @@ using Exception = System.Exception;
 
 namespace Logic.Client
 {
-    public class WebRepository : IDataRepository
+    public class WebRepository : IDataRepository, IDisposable
     {
         private const int WEB_TIMEOUT = 5000;
 
@@ -470,6 +470,12 @@ namespace Logic.Client
         {
             OrderObservers.Add(observer);
             return new Unsubscriber<DataChanged<Order>>(OrderObservers, observer);
+        }
+
+        public void Dispose()
+        {
+            WebSocketConnection?.Dispose();
+            NewMessageEvent?.Dispose();
         }
     }
 }

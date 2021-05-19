@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 
 using Data;
@@ -13,7 +12,7 @@ using WebSockets;
 
 namespace Presentation.Server
 {
-    internal class Server : IObserver<OrderSent>
+    internal class Server : IDisposable, IObserver<OrderSent>
     {
         private ServerWebSocketConnection ServerWebSocketConnection { get; set; }
 
@@ -412,6 +411,23 @@ namespace Presentation.Server
         {
             string msg = WebSerializer.SerializeWebMessage(WebMessageType.OrderSent, new OrderDTO(value.Order));
             Task.Run(() => ServerWebSocketConnection.SendAsync(msg));
+        }
+
+        private void Dispose(bool disposing) {
+            if (disposing) {
+                OrderSentUnsubscriber?.Dispose();
+                ServerWebSocketConnection?.Dispose();
+                (DataRepository as IDisposable)?.Dispose();
+            }
+        }
+
+        public void Dispose() {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        ~Server() {
+            Dispose(false);
         }
     }
 }

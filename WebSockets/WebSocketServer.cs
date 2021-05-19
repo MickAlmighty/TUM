@@ -6,14 +6,12 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Exception = System.Exception;
-
 namespace WebSockets
 {
     // Reference: https://github.com/mpostol/NBlockchain/blob/master/P2PPrototocol/NodeJSAPI/WebSocketServer.cs
     public static class WebSocketServer
     {
-        public static ServerWebSocketConnection CreateServer(int p2p_port )
+        public static ServerWebSocketConnection CreateServer(int p2p_port)
         {
             Uri uri = new Uri($@"http://localhost:{p2p_port}/");
             return new ServerConnection(uri);
@@ -42,31 +40,25 @@ namespace WebSockets
                 }
             }
 
-            public override async Task DisconnectAsync()
+            public override Task DisconnectAsync()
             {
-                TokenSource.Cancel();
                 if (!ServerStarted || ServerStopEvent.WaitOne(0))
                 {
-                    return;
+                    return Task.CompletedTask;
                 }
+                TokenSource.Cancel();
                 ServerStopEvent.WaitOne();
-                foreach(WebSocketConnection conn in ClientConnections)
+                foreach (WebSocketConnection conn in ClientConnections)
                 {
-                    try
-                    {
-                        await conn.DisconnectAsync();
-                    }
-                    catch (Exception e)
-                    {
-                        InvokeOnError(new OnErrorEventHandlerArgs(this, e));
-                    }
+                    Task.Run(conn.DisconnectAsync);
                 }
                 ClientConnections.Clear();
+                return Task.CompletedTask;
             }
 
             protected override void Dispose(bool disposing)
             {
-                DisconnectAsync().Wait();
+                Task.Run(DisconnectAsync).Wait();
             }
 
             public override async Task RunServerLoop()
@@ -76,13 +68,21 @@ namespace WebSockets
                     return;
                 }
                 ServerStarted = true;
+                Task cancelTask = Task.Run(() => WaitHandle.WaitAny(new[] { TokenSource.Token.WaitHandle }));
                 using (HttpListener listener = new HttpListener())
                 {
                     listener.Prefixes.Add(Uri.ToString());
                     listener.Start();
                     while (!TokenSource.IsCancellationRequested)
                     {
-                        HttpListenerContext listenerContext = await listener.GetContextAsync();
+                        Task<HttpListenerContext> listenerContextTask = listener.GetContextAsync();
+                        int index = Task.WaitAny(cancelTask, listenerContextTask);
+                        if (index == 0)
+                        {
+                            break;
+                        }
+
+                        HttpListenerContext listenerContext = listenerContextTask.Result;
                         if (!listenerContext.Request.IsWebSocketRequest)
                         {
                             listenerContext.Response.StatusCode = 400;
@@ -90,8 +90,7 @@ namespace WebSockets
                         }
                         else
                         {
-                            HttpListenerWebSocketContext webSocketContext =
-                                await listenerContext.AcceptWebSocketAsync(null);
+                            HttpListenerWebSocketContext webSocketContext = await listenerContext.AcceptWebSocketAsync(null);
                             WebSocketConnection ws = new ClientConnection(webSocketContext.WebSocket,
                                 listenerContext.Request.RemoteEndPoint?.ToString());
                             ClientConnections.Add(ws);
@@ -105,6 +104,8 @@ namespace WebSockets
                         }
                     }
                 }
+
+                cancelTask.Wait();
                 ServerStopEvent.Set();
             }
 
