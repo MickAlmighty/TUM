@@ -1,36 +1,43 @@
 ﻿using Data;
+
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+
+using DataModel;
 
 namespace Logic
 {
-    public class ProductManager : DataManager<Product, uint>
+    public class ProductManager : DataManager<IProduct, uint>
     {
         public ProductManager() { }
-        public ProductManager(HashSet<Product> data) : base(data) { }
+        public ProductManager(HashSet<IProduct> data) : base(data) { }
 
-        public bool Create(string name, double price, ProductType productType)
+        public uint Create(string name, double price, ProductType productType)
         {
-            try
+            uint id = 0;
+            foreach (uint productId in DataSet.Select(p => p.Id).OrderBy(i => i))
             {
-                uint id = 0;
-                foreach (uint productId in DataSet.Select(p => p.Id).OrderBy(i => i))
+                if (productId == id)
                 {
-                    if (productId == id)
-                    {
-                        ++id;
-                    }
+                    ++id;
                 }
-                Product product = new Product(id, name, price, productType);
-                return Add(product);
             }
-            catch (Exception e)
+            IProduct product = new Product(id, name.Trim(), price, productType);
+            if (!product.IsValid())
             {
-                Debug.WriteLine($"{e.Message}\n{e.StackTrace}");
-                return false;
+                throw new ArgumentException($"Provided {nameof(IProduct)} data is invalid!");
             }
+            return Add(product);
+        }
+
+        public override bool Update(IProduct product)
+        {
+            if (!product.IsValid())
+            {
+                throw new ArgumentException($"Provided {nameof(IProduct)} is invalid!");
+            }
+            return base.Update(product);
         }
     }
 }

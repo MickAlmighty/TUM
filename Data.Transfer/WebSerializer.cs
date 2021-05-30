@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.Reflection;
 using System.Text.Json;
 
+using DataModel.Transfer;
+
 using Newtonsoft.Json;
 
 using JsonException = System.Text.Json.JsonException;

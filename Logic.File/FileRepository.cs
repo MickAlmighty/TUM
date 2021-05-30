@@ -7,11 +7,14 @@ using System.Threading.Tasks;
 
 using Data;
 
+using DataModel;
+using DataModel.Transfer;
+
 using Newtonsoft.Json;
 
 namespace Logic.File
 {
-    public class FileRepository : IDataRepository, IDisposable, IObserver<DataChanged<Order>>
+    public class FileRepository : IDataRepository, IDisposable, IObserver<DataChanged<IOrder>>
     {
         public FileRepository(string filePath = "data.json")
         {
@@ -36,7 +39,7 @@ namespace Logic.File
             Console.WriteLine($"Order subscription error: {error}.");
         }
 
-        public void OnNext(DataChanged<Order> value)
+        public void OnNext(DataChanged<IOrder> value)
         {
             if (value.Action == DataChangedAction.Add)
             {
@@ -48,7 +51,7 @@ namespace Logic.File
                     {
                         foreach (uint id in newOrders)
                         {
-                            Order order = OrderManager.Get(id);
+                            IOrder order = OrderManager.Get(id);
                             if (order != null && !order.DeliveryDate.HasValue)
                             {
                                 order.DeliveryDate = DateTime.Now;
@@ -80,17 +83,17 @@ namespace Logic.File
             }
         }
 
-        FileSystemWatcher DataPathWatcher
+        private FileSystemWatcher DataPathWatcher
         {
             get;
         }
 
-        string FileName
+        private string FileName
         {
             get;
         }
 
-        string FullFilePath
+        private string FullFilePath
         {
             get;
         }
@@ -100,15 +103,15 @@ namespace Logic.File
             RepositoryDTO dto = new RepositoryDTO();
             lock (ClientLock)
             {
-                dto.Clients = ClientManager.GetAll();
+                dto.Clients = ClientManager.GetAll().Select(c => new ClientDTO(c)).ToList();
             }
             lock (ProductLock)
             {
-                dto.Products = ProductManager.GetAll();
+                dto.Products = ProductManager.GetAll().Select(p => new ProductDTO(p)).ToList();
             }
             lock (OrderLock)
             {
-                dto.Orders = OrderManager.GetAll();
+                dto.Orders = OrderManager.GetAll().Select(o => new OrderDTO(o)).ToList();
             }
             lock (FileLock)
             {
@@ -143,9 +146,9 @@ namespace Logic.File
                         {
                             lock (OrderLock)
                             {
-                                ClientManager.ReplaceData(dto.Clients);
-                                OrderManager.ReplaceData(dto.Orders);
-                                ProductManager.ReplaceData(dto.Products);
+                                ClientManager.ReplaceData(new HashSet<IClient>(dto.Clients.Select(c => c.ToIClient())));
+                                OrderManager.ReplaceData(new HashSet<IOrder>(dto.Orders.Select(o => o.ToIOrder())));
+                                ProductManager.ReplaceData(new HashSet<IProduct>(dto.Products.Select(p => p.ToIProduct())));
                             }
                         }
                     }
@@ -196,66 +199,78 @@ namespace Logic.File
 
         private IDisposable OrderUnsubscriber { get; }
 
-        public Task<bool> CreateClient(string username, string firstName, string lastName, string street, uint streetNumber, string phoneNumber)
+        public Task<IClient> CreateClient(string username, string firstName, string lastName, string street, uint streetNumber, string phoneNumber)
         {
             lock (ClientLock)
             {
-                if (ClientManager.Create(username, firstName, lastName, street, streetNumber, phoneNumber))
+                string id;
+                try
                 {
-                    SaveData();
-                    return Task.FromResult(true);
+                    id = ClientManager.Create(username, firstName, lastName, street, streetNumber, phoneNumber);
                 }
-
-                return Task.FromResult(false);
+                catch (Exception)
+                {
+                    return null;
+                }
+                SaveData();
+                return Task.FromResult(ClientManager.Get(id));
             }
         }
 
-        public Task<bool> CreateOrder(string clientUsername, DateTime orderDate, Dictionary<uint, uint> productIdQuantityMap, DateTime? deliveryDate)
+        public Task<IOrder> CreateOrder(string clientUsername, DateTime orderDate, Dictionary<uint, uint> productIdQuantityMap, DateTime? deliveryDate)
         {
             lock (ClientLock)
             {
                 if (ClientManager.Get(clientUsername) == null)
                 {
-                    return Task.FromResult(false);
+                    return null;
                 }
                 lock (ProductLock)
                 {
                     double totalPrice = 0.0;
                     foreach (KeyValuePair<uint, uint> pair in productIdQuantityMap)
                     {
-                        Product product = ProductManager.Get(pair.Key);
+                        IProduct product = ProductManager.Get(pair.Key);
                         if (product == null)
                         {
-                            return Task.FromResult(false);
+                            return null;
                         }
                         totalPrice += product.Price * pair.Value;
                     }
                     lock (OrderLock)
                     {
-                        if (OrderManager.Create(clientUsername, orderDate, productIdQuantityMap, totalPrice,
-                            deliveryDate))
+                        uint id;
+                        try
                         {
-                            SaveData();
-                            return Task.FromResult(true);
+                            id = OrderManager.Create(clientUsername, orderDate, productIdQuantityMap, totalPrice,
+                                deliveryDate);
                         }
-
-                        return Task.FromResult(false);
+                        catch (Exception)
+                        {
+                            return null;
+                        }
+                        SaveData();
+                        return Task.FromResult(OrderManager.Get(id));
                     }
                 }
             }
         }
 
-        public Task<bool> CreateProduct(string name, double price, ProductType productType)
+        public Task<IProduct> CreateProduct(string name, double price, ProductType productType)
         {
             lock (ProductLock)
             {
-                if (ProductManager.Create(name, price, productType))
+                uint id;
+                try
                 {
-                    SaveData();
-                    return Task.FromResult(true);
+                    id = ProductManager.Create(name, price, productType);
                 }
-
-                return Task.FromResult(false);
+                catch (Exception)
+                {
+                    return null;
+                }
+                SaveData();
+                return Task.FromResult(ProductManager.Get(id));
             }
         }
 
@@ -271,7 +286,7 @@ namespace Logic.File
             return Task.FromResult(true);
         }
 
-        public Task<HashSet<Client>> GetAllClients()
+        public Task<HashSet<IClient>> GetAllClients()
         {
             lock (ClientLock)
             {
@@ -279,7 +294,7 @@ namespace Logic.File
             }
         }
 
-        public Task<HashSet<Order>> GetAllOrders()
+        public Task<HashSet<IOrder>> GetAllOrders()
         {
             lock (OrderLock)
             {
@@ -287,7 +302,7 @@ namespace Logic.File
             }
         }
 
-        public Task<HashSet<Product>> GetAllProducts()
+        public Task<HashSet<IProduct>> GetAllProducts()
         {
             lock (ProductLock)
             {
@@ -295,7 +310,7 @@ namespace Logic.File
             }
         }
 
-        public Task<Client> GetClient(string username)
+        public Task<IClient> GetClient(string username)
         {
             lock (ClientLock)
             {
@@ -303,7 +318,7 @@ namespace Logic.File
             }
         }
 
-        public Task<Order> GetOrder(uint id)
+        public Task<IOrder> GetOrder(uint id)
         {
             lock (OrderLock)
             {
@@ -311,7 +326,7 @@ namespace Logic.File
             }
         }
 
-        public Task<Product> GetProduct(uint id)
+        public Task<IProduct> GetProduct(uint id)
         {
             lock (ProductLock)
             {
@@ -319,7 +334,7 @@ namespace Logic.File
             }
         }
 
-        public Task<bool> RemoveClient(Client client)
+        public Task<bool> RemoveClient(IClient client)
         {
             lock (ClientLock)
             {
@@ -351,7 +366,7 @@ namespace Logic.File
             }
         }
 
-        public Task<bool> RemoveOrder(Order order)
+        public Task<bool> RemoveOrder(IOrder order)
         {
             lock (OrderLock)
             {
@@ -365,7 +380,7 @@ namespace Logic.File
             }
         }
 
-        public Task<bool> RemoveProduct(Product product)
+        public Task<bool> RemoveProduct(IProduct product)
         {
             lock (ProductLock)
             {
@@ -375,7 +390,7 @@ namespace Logic.File
                     {
                         return Task.FromResult(false);
                     }
-                    foreach (Order order in OrderManager.GetAll())
+                    foreach (IOrder order in OrderManager.GetAll())
                     {
                         if (order.ProductIdQuantityMap.ContainsKey(product.Id))
                         {
@@ -394,7 +409,7 @@ namespace Logic.File
             }
         }
 
-        public Task<bool> Update(Client client)
+        public Task<bool> Update(IClient client)
         {
             lock (ClientLock)
             {
@@ -411,7 +426,7 @@ namespace Logic.File
             }
         }
 
-        public Task<bool> Update(Order order)
+        public Task<bool> Update(IOrder order)
         {
             lock (ClientLock)
             {
@@ -424,7 +439,7 @@ namespace Logic.File
                     double totalPrice = 0.0;
                     foreach (KeyValuePair<uint, uint> pair in order.ProductIdQuantityMap)
                     {
-                        Product product = ProductManager.Get(pair.Key);
+                        IProduct product = ProductManager.Get(pair.Key);
                         if (product == null)
                         {
                             return Task.FromResult(false);
@@ -446,7 +461,24 @@ namespace Logic.File
             }
         }
 
-        public Task<bool> Update(Product product)
+        public Task<bool> UpdateClient(string username, string firstName, string lastName, string street, uint streetNumber,
+            string phoneNumber)
+        {
+            return Update(new Client(username, firstName, lastName, street, streetNumber, phoneNumber));
+        }
+
+        public Task<bool> UpdateOrder(uint id, string clientUsername, DateTime orderDate, Dictionary<uint, uint> productIdQuantityMap, double price,
+            DateTime? deliveryDate)
+        {
+            return Update(new Order(id, clientUsername, orderDate, productIdQuantityMap, price, deliveryDate));
+        }
+
+        public Task<bool> UpdateProduct(uint id, string name, double price, ProductType productType)
+        {
+            return Update(new Product(id, name, price, productType));
+        }
+
+        public Task<bool> Update(IProduct product)
         {
             lock (ProductLock)
             {
@@ -473,17 +505,17 @@ namespace Logic.File
             return new Unsubscriber<OrderSent>(OrderSentObservers, observer);
         }
 
-        public IDisposable Subscribe(IObserver<DataChanged<Client>> observer)
+        public IDisposable Subscribe(IObserver<DataChanged<IClient>> observer)
         {
             return ClientManager.Subscribe(observer);
         }
 
-        public IDisposable Subscribe(IObserver<DataChanged<Product>> observer)
+        public IDisposable Subscribe(IObserver<DataChanged<IProduct>> observer)
         {
             return ProductManager.Subscribe(observer);
         }
 
-        public IDisposable Subscribe(IObserver<DataChanged<Order>> observer)
+        public IDisposable Subscribe(IObserver<DataChanged<IOrder>> observer)
         {
             return OrderManager.Subscribe(observer);
         }

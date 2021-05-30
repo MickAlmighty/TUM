@@ -1,4 +1,4 @@
-﻿namespace Logic
+﻿namespace Data
 {
     public enum DataChangedAction
     {

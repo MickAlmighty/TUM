@@ -1,9 +1,11 @@
-﻿namespace Data.Transfer {
+﻿using Data;
+
+namespace DataModel.Transfer {
     public class ClientDTO {
 
         public ClientDTO() { }
 
-        public ClientDTO(Client client)
+        public ClientDTO(IClient client)
         {
             Username = client.Username;
             FirstName = client.FirstName;
@@ -13,7 +15,7 @@
             PhoneNumber = client.PhoneNumber;
         }
 
-        public Client ToClient()
+        public IClient ToIClient()
         {
             return new Client(Username, FirstName, LastName, Street, StreetNumber, PhoneNumber);
         }

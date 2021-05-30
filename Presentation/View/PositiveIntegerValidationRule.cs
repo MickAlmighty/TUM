@@ -4,7 +4,7 @@ using System.Windows.Controls;
 
 namespace Presentation.View
 {
-    class PositiveIntegerValidationRule : ValidationRule
+    internal class PositiveIntegerValidationRule : ValidationRule
     {
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {

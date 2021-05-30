@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Data;
 using Data.Transfer;
 
-using Logic;
+using DataModel.Transfer;
 
 using WebSockets;
 
@@ -96,19 +96,28 @@ namespace Presentation.Server
                     {
                         case WebMessageType.AddClient:
                             {
-                                bool result = msgDto.Data is ClientDTO clt &&
-                                              await DataRepository.CreateClient(
-                                                  clt.Username, clt.FirstName, clt.LastName,
-                                                  clt.Street, clt.StreetNumber, clt.PhoneNumber);
-                                await connection.SendAsync(result
-                                    ? WebSimpleMessageType.Success.ToString()
-                                    : WebSimpleMessageType.Failure.ToString());
-                                if (result)
+                                if (msgDto.Data is ClientDTO clt)
                                 {
-                                    await ServerWebSocketConnection.SendAsync(
-                                        WebSerializer.SerializeWebMessage(WebMessageType.AddClient, msgDto.Data));
+                                    IClient client = await DataRepository.CreateClient(
+                                        clt.Username, clt.FirstName, clt.LastName,
+                                        clt.Street, clt.StreetNumber, clt.PhoneNumber);
+                                    if (client == null)
+                                    {
+                                        await connection.SendAsync(WebSimpleMessageType.Failure.ToString());
+                                    }
+                                    else
+                                    {
+                                        ClientDTO newDto = new ClientDTO(client);
+                                        await connection.SendAsync(
+                                            WebSerializer.SerializeWebMessage(WebMessageType.ProvideClient, newDto));
+                                        await ServerWebSocketConnection.SendAsync(
+                                            WebSerializer.SerializeWebMessage(WebMessageType.AddClient, newDto));
+                                    }
                                 }
-
+                                else
+                                {
+                                    await connection.SendAsync(WebSimpleMessageType.Failure.ToString());
+                                }
                                 break;
                             }
                         case WebMessageType.UpdateClient:
@@ -118,7 +127,7 @@ namespace Presentation.Server
                                 {
                                     try
                                     {
-                                        result = await DataRepository.Update(clt.ToClient());
+                                        result = await DataRepository.Update(clt.ToIClient());
                                     }
                                     catch (Exception e)
                                     {
@@ -144,7 +153,7 @@ namespace Presentation.Server
                                 {
                                     try
                                     {
-                                        result = await DataRepository.RemoveClient(clt.ToClient());
+                                        result = await DataRepository.RemoveClient(clt.ToIClient());
                                     }
                                     catch (Exception e)
                                     {
@@ -165,24 +174,27 @@ namespace Presentation.Server
                             }
                         case WebMessageType.AddProduct:
                             {
-                                if (!(msgDto.Data is ProductDTO prd))
+                                if (msgDto.Data is ProductDTO prd)
+                                {
+                                    IProduct product = await DataRepository.CreateProduct(
+                                        prd.Name, prd.Price, prd.ProductType);
+                                    if (product == null)
+                                    {
+                                        await connection.SendAsync(WebSimpleMessageType.Failure.ToString());
+                                    }
+                                    else
+                                    {
+                                        ProductDTO newDto = new ProductDTO(product);
+                                        await connection.SendAsync(
+                                            WebSerializer.SerializeWebMessage(WebMessageType.ProvideProduct, newDto));
+                                        await ServerWebSocketConnection.SendAsync(
+                                            WebSerializer.SerializeWebMessage(WebMessageType.AddProduct, newDto));
+                                    }
+                                }
+                                else
                                 {
                                     await connection.SendAsync(WebSimpleMessageType.Failure.ToString());
-                                    break;
                                 }
-                                bool result = await DataRepository.CreateProduct(
-                                                  prd.Name, prd.Price, prd.ProductType);
-                                await connection.SendAsync(result
-                                    ? WebSimpleMessageType.Success.ToString()
-                                    : WebSimpleMessageType.Failure.ToString());
-                                if (result)
-                                {
-                                    ProductDTO dto = new ProductDTO((await DataRepository.GetAllProducts())
-                                        .First(p => p.Name == prd.Name));
-                                    await ServerWebSocketConnection.SendAsync(
-                                        WebSerializer.SerializeWebMessage(WebMessageType.AddProduct, dto));
-                                }
-
                                 break;
                             }
                         case WebMessageType.UpdateProduct:
@@ -192,7 +204,7 @@ namespace Presentation.Server
                                 {
                                     try
                                     {
-                                        result = await DataRepository.Update(prd.ToProduct());
+                                        result = await DataRepository.Update(prd.ToIProduct());
                                     }
                                     catch (Exception e)
                                     {
@@ -218,7 +230,7 @@ namespace Presentation.Server
                                 {
                                     try
                                     {
-                                        result = await DataRepository.RemoveProduct(prd.ToProduct());
+                                        result = await DataRepository.RemoveProduct(prd.ToIProduct());
                                     }
                                     catch (Exception e)
                                     {
@@ -239,25 +251,28 @@ namespace Presentation.Server
                             }
                         case WebMessageType.AddOrder:
                             {
-                                if (!(msgDto.Data is OrderDTO ord))
+                                if (msgDto.Data is OrderDTO ord)
+                                {
+                                    IOrder order = await DataRepository.CreateOrder(
+                                        ord.ClientUsername, ord.OrderDate,
+                                        ord.ProductIdQuantityMap, ord.DeliveryDate);
+                                    if (order == null)
+                                    {
+                                        await connection.SendAsync(WebSimpleMessageType.Failure.ToString());
+                                    }
+                                    else
+                                    {
+                                        OrderDTO newDto = new OrderDTO(order);
+                                        await connection.SendAsync(
+                                            WebSerializer.SerializeWebMessage(WebMessageType.ProvideOrder, newDto));
+                                        await ServerWebSocketConnection.SendAsync(
+                                            WebSerializer.SerializeWebMessage(WebMessageType.AddOrder, newDto));
+                                    }
+                                }
+                                else
                                 {
                                     await connection.SendAsync(WebSimpleMessageType.Failure.ToString());
-                                    break;
                                 }
-                                bool result = await DataRepository.CreateOrder(
-                                                  ord.ClientUsername, ord.OrderDate,
-                                                  ord.ProductIdQuantityMap, ord.DeliveryDate);
-                                await connection.SendAsync(result
-                                    ? WebSimpleMessageType.Success.ToString()
-                                    : WebSimpleMessageType.Failure.ToString());
-                                if (result)
-                                {
-                                    OrderDTO dto = new OrderDTO((await DataRepository.GetAllOrders())
-                                        .First(o => o.ClientUsername == ord.ClientUsername && o.OrderDate == ord.OrderDate));
-                                    await ServerWebSocketConnection.SendAsync(
-                                        WebSerializer.SerializeWebMessage(WebMessageType.AddOrder, dto));
-                                }
-
                                 break;
                             }
                         case WebMessageType.UpdateOrder:
@@ -267,7 +282,7 @@ namespace Presentation.Server
                                 {
                                     try
                                     {
-                                        result = await DataRepository.Update(ord.ToOrder());
+                                        result = await DataRepository.Update(ord.ToIOrder());
                                     }
                                     catch (Exception e)
                                     {
@@ -293,7 +308,7 @@ namespace Presentation.Server
                                 {
                                     try
                                     {
-                                        result = await DataRepository.RemoveOrder(ord.ToOrder());
+                                        result = await DataRepository.RemoveOrder(ord.ToIOrder());
                                     }
                                     catch (Exception e)
                                     {
@@ -319,7 +334,7 @@ namespace Presentation.Server
                                     await connection.SendAsync(WebSimpleMessageType.Failure.ToString());
                                     break;
                                 }
-                                Client client = await DataRepository.GetClient(username);
+                                IClient client = await DataRepository.GetClient(username);
                                 if (client == null)
                                 {
                                     await connection.SendAsync(WebSimpleMessageType.Failure.ToString());
@@ -339,7 +354,7 @@ namespace Presentation.Server
                                     await connection.SendAsync(WebSimpleMessageType.Failure.ToString());
                                     break;
                                 }
-                                Product product = await DataRepository.GetProduct(id);
+                                IProduct product = await DataRepository.GetProduct(id);
                                 if (product == null)
                                 {
                                     await connection.SendAsync(WebSimpleMessageType.Failure.ToString());
@@ -359,7 +374,7 @@ namespace Presentation.Server
                                     await connection.SendAsync(WebSimpleMessageType.Failure.ToString());
                                     break;
                                 }
-                                Order order = await DataRepository.GetOrder(id);
+                                IOrder order = await DataRepository.GetOrder(id);
                                 if (order == null)
                                 {
                                     await connection.SendAsync(WebSimpleMessageType.Failure.ToString());
@@ -413,20 +428,24 @@ namespace Presentation.Server
             Task.Run(() => ServerWebSocketConnection.SendAsync(msg));
         }
 
-        private void Dispose(bool disposing) {
-            if (disposing) {
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
                 OrderSentUnsubscriber?.Dispose();
                 ServerWebSocketConnection?.Dispose();
                 (DataRepository as IDisposable)?.Dispose();
             }
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        ~Server() {
+        ~Server()
+        {
             Dispose(false);
         }
     }

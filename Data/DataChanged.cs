@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using Data;
-
-namespace Logic
+namespace Data
 {
     public class DataChanged<DataType> where DataType : IUpdatable<DataType>
     {

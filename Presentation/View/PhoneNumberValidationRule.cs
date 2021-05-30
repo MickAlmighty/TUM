@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Globalization;
-using System.Text.RegularExpressions;
 using System.Windows.Controls;
+
+using Logic;
 
 namespace Presentation.View
 {
-    class PhoneNumberValidationRule : ValidationRule
+    internal class PhoneNumberValidationRule : ValidationRule
     {
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
@@ -14,7 +15,7 @@ namespace Presentation.View
             {
                 return new ValidationResult(false, null);
             }
-            if (!Regex.IsMatch(strValue, @"^((\+[0-9]{1,3}\ )?[0-9]{3}\ [0-9]{3}\ [0-9]{3,4})|((\+[0-9]{1,3}-)?[0-9]{3}-[0-9]{3}-[0-9]{3,4})$"))
+            if (!DataValidationUtil.IsPhoneNumberValid(strValue))
             {
                 return new ValidationResult(false, "Invalid phone number format");
             }

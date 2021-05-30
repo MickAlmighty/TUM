@@ -1,7 +1,5 @@
 ﻿using Data;
 
-using Logic;
-
 using Presentation.Model;
 
 using System;
@@ -12,7 +10,7 @@ using System.Windows.Input;
 
 namespace Presentation.ViewModel
 {
-    internal class MainViewModel : ViewModelBase, ILoadingPresenter, IObserver<OrderSent>, IObserver<DataChanged<Client>>, IObserver<DataChanged<Product>>, IObserver<DataChanged<Order>>
+    internal class MainViewModel : ViewModelBase, ILoadingPresenter, IObserver<OrderSent>, IObserver<DataChanged<IClient>>, IObserver<DataChanged<IProduct>>, IObserver<DataChanged<IOrder>>
     {
         public MainViewModel(IDialogHost dialogHost, IDataRepository dataRepository, object dialogIdentifier0, object dialogIdentifier1)
         {
@@ -26,14 +24,14 @@ namespace Presentation.ViewModel
             DialogOrderSentViewModel = new DialogInformationViewModel(dialogHost);
             Connect = new RelayCommand(ExecuteConnect);
             CreateClient = new RelayCommand(ExecuteCreateClient);
-            EditClient = new RelayCommand<Client>(ExecuteEditClient);
-            RemoveClient = new RelayCommand<Client>(ExecuteRemoveClient);
+            EditClient = new RelayCommand<IClient>(ExecuteEditClient);
+            RemoveClient = new RelayCommand<IClient>(ExecuteRemoveClient);
             CreateOrder = new RelayCommand(ExecuteCreateOrder);
-            EditOrder = new RelayCommand<Order>(ExecuteEditOrder);
-            RemoveOrder = new RelayCommand<Order>(ExecuteRemoveOrder);
+            EditOrder = new RelayCommand<IOrder>(ExecuteEditOrder);
+            RemoveOrder = new RelayCommand<IOrder>(ExecuteRemoveOrder);
             CreateProduct = new RelayCommand(ExecuteCreateProduct);
-            EditProduct = new RelayCommand<Product>(ExecuteEditProduct);
-            RemoveProduct = new RelayCommand<Product>(ExecuteRemoveProduct);
+            EditProduct = new RelayCommand<IProduct>(ExecuteEditProduct);
+            RemoveProduct = new RelayCommand<IProduct>(ExecuteRemoveProduct);
         }
 
 
@@ -49,16 +47,16 @@ namespace Presentation.ViewModel
             {
                 throw new ApplicationException("Failed to open the data repository!");
             }
-            Clients = new ObservableCollection<Client>(await DataRepository.GetAllClients());
-            Orders = new ObservableCollection<Order>(await DataRepository.GetAllOrders());
-            Products = new ObservableCollection<Product>(await DataRepository.GetAllProducts());
+            Clients = new ObservableCollection<IClient>(await DataRepository.GetAllClients());
+            Orders = new ObservableCollection<IOrder>(await DataRepository.GetAllOrders());
+            Products = new ObservableCollection<IProduct>(await DataRepository.GetAllProducts());
             RaisePropertyChanged(nameof(Clients));
             RaisePropertyChanged(nameof(Orders));
             RaisePropertyChanged(nameof(Products));
             OrderSentUnsubscriber = DataRepository.Subscribe((IObserver<OrderSent>)this);
-            ClientUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<Client>>)this);
-            ProductUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<Product>>)this);
-            OrderUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<Order>>)this);
+            ClientUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<IClient>>)this);
+            ProductUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<IProduct>>)this);
+            OrderUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<IOrder>>)this);
             StopLoading();
         }
 
@@ -66,11 +64,11 @@ namespace Presentation.ViewModel
         {
             DialogClientEditViewModel.OpenDialog(DialogIdentifier0);
         }
-        private void ExecuteEditClient(Client client)
+        private void ExecuteEditClient(IClient client)
         {
             DialogClientEditViewModel.OpenDialog(client, DialogIdentifier0);
         }
-        private async void ExecuteRemoveClient(Client client)
+        private async void ExecuteRemoveClient(IClient client)
         {
             StartLoading();
             await DataRepository.RemoveClient(client);
@@ -85,11 +83,11 @@ namespace Presentation.ViewModel
                 StopLoading();
             }
         }
-        private void ExecuteEditOrder(Order order)
+        private void ExecuteEditOrder(IOrder order)
         {
             DialogOrderEditViewModel.OpenDialog(order, DialogIdentifier0);
         }
-        private async void ExecuteRemoveOrder(Order order)
+        private async void ExecuteRemoveOrder(IOrder order)
         {
             StartLoading();
             await DataRepository.RemoveOrder(order);
@@ -99,11 +97,11 @@ namespace Presentation.ViewModel
         {
             DialogProductEditViewModel.OpenDialog(DialogIdentifier0);
         }
-        private void ExecuteEditProduct(Product product)
+        private void ExecuteEditProduct(IProduct product)
         {
             DialogProductEditViewModel.OpenDialog(product, DialogIdentifier0);
         }
-        private async void ExecuteRemoveProduct(Product product)
+        private async void ExecuteRemoveProduct(IProduct product)
         {
             StartLoading();
             await DataRepository.RemoveProduct(product);
@@ -151,19 +149,19 @@ namespace Presentation.ViewModel
             set;
         }
 
-        public ObservableCollection<Client> Clients
+        public ObservableCollection<IClient> Clients
         {
             get;
             private set;
         }
 
-        public ObservableCollection<Order> Orders
+        public ObservableCollection<IOrder> Orders
         {
             get;
             private set;
         }
 
-        public ObservableCollection<Product> Products
+        public ObservableCollection<IProduct> Products
         {
             get;
             private set;
@@ -208,32 +206,39 @@ namespace Presentation.ViewModel
 
         public void OnNext(OrderSent value)
         {
-            SyncContext.Post(d => { DialogOrderSentViewModel.OpenDialog(DialogIdentifier1, $"Order {value.Order.Id} of {value.Order.ClientUsername} was successfully delivered on {(value.Order.DeliveryDate.HasValue ? value.Order.DeliveryDate.Value.ToString() : "")}!"); }, null);
+            SyncContext.Post(d => {
+                IOrder order = Orders.First(o => o.Id == value.Order.Id);
+                order.DeliveryDate = value.Order.DeliveryDate;
+                int index = Orders.IndexOf(order);
+                Orders.RemoveAt(index);
+                Orders.Insert(index, order);
+                DialogOrderSentViewModel.OpenDialog(DialogIdentifier1, $"Order {value.Order.Id} of {value.Order.ClientUsername} was successfully delivered on {(value.Order.DeliveryDate.HasValue ? value.Order.DeliveryDate.Value.ToString() : "")}!");
+            }, null);
         }
 
-        public void OnNext(DataChanged<Client> value)
+        public void OnNext(DataChanged<IClient> value)
         {
             SyncContext.Post(d => {
                 switch (value.Action)
                 {
                     case DataChangedAction.Add:
-                        foreach (Client c in value.NewItems)
+                        foreach (IClient c in value.NewItems)
                         {
                             Clients.Add(c);
                         }
                         break;
                     case DataChangedAction.Remove:
-                        foreach (Client c in Clients.Where(client => value.OldItems.FirstOrDefault(cl => cl.Username == client.Username) != null).ToList())
+                        foreach (IClient c in Clients.Where(client => value.OldItems.FirstOrDefault(cl => cl.Username == client.Username) != null).ToList())
                         {
                             Clients.Remove(c);
                         }
                         break;
                     case DataChangedAction.Replace:
-                        foreach (Client c in Clients.Where(client => value.OldItems.FirstOrDefault(cl => cl.Username == client.Username) != null).ToList())
+                        foreach (IClient c in Clients.Where(client => value.OldItems.FirstOrDefault(cl => cl.Username == client.Username) != null).ToList())
                         {
                             Clients.Remove(c);
                         }
-                        foreach (Client c in value.NewItems)
+                        foreach (IClient c in value.NewItems)
                         {
                             Clients.Add(c);
                         }
@@ -242,7 +247,7 @@ namespace Presentation.ViewModel
                         Clients.Clear();
                         break;
                     case DataChangedAction.Update:
-                        foreach (Client item in value.UpdatedItems)
+                        foreach (IClient item in value.UpdatedItems)
                         {
                             int index = Clients.IndexOf(Clients.FirstOrDefault(c => c.Username == item.Username));
                             Clients.RemoveAt(index);
@@ -255,29 +260,29 @@ namespace Presentation.ViewModel
             }, null);
         }
 
-        public void OnNext(DataChanged<Product> value)
+        public void OnNext(DataChanged<IProduct> value)
         {
             SyncContext.Post(d => {
                 switch (value.Action)
                 {
                     case DataChangedAction.Add:
-                        foreach (Product p in value.NewItems)
+                        foreach (IProduct p in value.NewItems)
                         {
                             Products.Add(p);
                         }
                         break;
                     case DataChangedAction.Remove:
-                        foreach (Product p in Products.Where(product => value.OldItems.FirstOrDefault(pr => pr.Id == product.Id) != null).ToList())
+                        foreach (IProduct p in Products.Where(product => value.OldItems.FirstOrDefault(pr => pr.Id == product.Id) != null).ToList())
                         {
                             Products.Remove(p);
                         }
                         break;
                     case DataChangedAction.Replace:
-                        foreach (Product p in Products.Where(product => value.OldItems.FirstOrDefault(pr => pr.Id == product.Id) != null).ToList())
+                        foreach (IProduct p in Products.Where(product => value.OldItems.FirstOrDefault(pr => pr.Id == product.Id) != null).ToList())
                         {
                             Products.Remove(p);
                         }
-                        foreach (Product p in value.NewItems)
+                        foreach (IProduct p in value.NewItems)
                         {
                             Products.Add(p);
                         }
@@ -286,7 +291,7 @@ namespace Presentation.ViewModel
                         Products.Clear();
                         break;
                     case DataChangedAction.Update:
-                        foreach (Product item in value.UpdatedItems)
+                        foreach (IProduct item in value.UpdatedItems)
                         {
                             int index = Products.IndexOf(Products.FirstOrDefault(p => p.Id == item.Id));
                             Products.RemoveAt(index);
@@ -299,29 +304,29 @@ namespace Presentation.ViewModel
             }, null);
         }
 
-        public void OnNext(DataChanged<Order> value)
+        public void OnNext(DataChanged<IOrder> value)
         {
             SyncContext.Post(d => {
                 switch (value.Action)
                 {
                     case DataChangedAction.Add:
-                        foreach (Order o in value.NewItems)
+                        foreach (IOrder o in value.NewItems)
                         {
                             Orders.Add(o);
                         }
                         break;
                     case DataChangedAction.Remove:
-                        foreach (Order o in Orders.Where(order => value.OldItems.FirstOrDefault(or => or.Id == order.Id) != null).ToList())
+                        foreach (IOrder o in Orders.Where(order => value.OldItems.FirstOrDefault(or => or.Id == order.Id) != null).ToList())
                         {
                             Orders.Remove(o);
                         }
                         break;
                     case DataChangedAction.Replace:
-                        foreach (Order o in Orders.Where(order => value.OldItems.FirstOrDefault(or => or.Id == order.Id) != null).ToList())
+                        foreach (IOrder o in Orders.Where(order => value.OldItems.FirstOrDefault(or => or.Id == order.Id) != null).ToList())
                         {
                             Orders.Remove(o);
                         }
-                        foreach (Order o in value.NewItems)
+                        foreach (IOrder o in value.NewItems)
                         {
                             Orders.Add(o);
                         }
@@ -331,7 +336,7 @@ namespace Presentation.ViewModel
                         break;
                     case DataChangedAction.Update:
                         SyncContext.Post(_ => {
-                            foreach (Order item in value.UpdatedItems)
+                            foreach (IOrder item in value.UpdatedItems)
                             {
                                 int index = Orders.IndexOf(Orders.FirstOrDefault(o => o.Id == item.Id));
                                 Orders.RemoveAt(index);
@@ -345,34 +350,34 @@ namespace Presentation.ViewModel
             }, null);
         }
 
-        void IObserver<DataChanged<Order>>.OnCompleted()
+        void IObserver<DataChanged<IOrder>>.OnCompleted()
         {
-            Console.WriteLine($"{nameof(Order)} subscription was completed.");
+            Console.WriteLine($"{nameof(IOrder)} subscription was completed.");
         }
 
-        void IObserver<DataChanged<Order>>.OnError(Exception error)
+        void IObserver<DataChanged<IOrder>>.OnError(Exception error)
         {
-            Console.WriteLine($"An exception occurred during {nameof(Order)} subscription: {error}");
+            Console.WriteLine($"An exception occurred during {nameof(IOrder)} subscription: {error}");
         }
 
-        void IObserver<DataChanged<Product>>.OnCompleted()
+        void IObserver<DataChanged<IProduct>>.OnCompleted()
         {
-            Console.WriteLine($"{nameof(Product)} subscription was completed.");
+            Console.WriteLine($"{nameof(IProduct)} subscription was completed.");
         }
 
-        void IObserver<DataChanged<Product>>.OnError(Exception error)
+        void IObserver<DataChanged<IProduct>>.OnError(Exception error)
         {
-            Console.WriteLine($"An exception occurred during {nameof(Product)} subscription: {error}");
+            Console.WriteLine($"An exception occurred during {nameof(IProduct)} subscription: {error}");
         }
 
-        void IObserver<DataChanged<Client>>.OnCompleted()
+        void IObserver<DataChanged<IClient>>.OnCompleted()
         {
-            Console.WriteLine($"{nameof(Client)} subscription was completed.");
+            Console.WriteLine($"{nameof(IClient)} subscription was completed.");
         }
 
-        void IObserver<DataChanged<Client>>.OnError(Exception error)
+        void IObserver<DataChanged<IClient>>.OnError(Exception error)
         {
-            Console.WriteLine($"An exception occurred during {nameof(Client)} subscription: {error}");
+            Console.WriteLine($"An exception occurred during {nameof(IClient)} subscription: {error}");
         }
 
         void IObserver<OrderSent>.OnCompleted()

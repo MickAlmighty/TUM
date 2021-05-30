@@ -1,5 +1,4 @@
 ﻿using Data;
-using Logic;
 using Presentation.Model;
 using System;
 using System.Collections.Generic;
@@ -10,20 +9,20 @@ using System.Windows.Input;
 
 namespace Presentation.ViewModel
 {
-    public class DialogOrderEditViewModel : DialogDataEditViewModel<Order>
+    public class DialogOrderEditViewModel : DialogDataEditViewModel<IOrder>
     {
         public class ProductQuantityViewModel : ViewModelBase
         {
             private uint _Quantity;
 
-            public ProductQuantityViewModel(Product product, uint quantity)
+            public ProductQuantityViewModel(IProduct product, uint quantity)
             {
                 Product = product;
                 Quantity = quantity;
 
             }
 
-            public Product Product
+            public IProduct Product
             {
                 get;
             }
@@ -51,7 +50,7 @@ namespace Presentation.ViewModel
         public DialogOrderEditViewModel(IDialogHost dialogHost, ILoadingPresenter loadingPresenter, IDataRepository dataRepository)
             : base(dialogHost, loadingPresenter, dataRepository)
         {
-            AddProduct = new RelayCommand<Product>(ExecuteAddProduct, CanAddProduct);
+            AddProduct = new RelayCommand<IProduct>(ExecuteAddProduct, CanAddProduct);
             IncrementQuantity = new RelayCommand<ProductQuantityViewModel>(ExecuteIncrementQuantity);
             DecrementQuantity = new RelayCommand<ProductQuantityViewModel>(ExecuteDecrementQuantity);
         }
@@ -60,12 +59,12 @@ namespace Presentation.ViewModel
         public ICommand IncrementQuantity { get; }
         public ICommand DecrementQuantity { get; }
 
-        private void ExecuteAddProduct(Product product)
+        private void ExecuteAddProduct(IProduct product)
         {
             ProductQuantities.Add(new ProductQuantityViewModel(product, 1U));
         }
 
-        private bool CanAddProduct(Product product)
+        private bool CanAddProduct(IProduct product)
         {
             return ProductQuantities.FirstOrDefault(pq => pq.Product == product) == null;
         }
@@ -157,10 +156,10 @@ namespace Presentation.ViewModel
             get;
         } = new ObservableCollection<ProductQuantityViewModel>();
 
-        public ObservableCollection<Product> Products
+        public ObservableCollection<IProduct> Products
         {
             get;
-        } = new ObservableCollection<Product>();
+        } = new ObservableCollection<IProduct>();
 
         public int ProductIndex
         {
@@ -191,18 +190,18 @@ namespace Presentation.ViewModel
         protected override async void ApplyEdit()
         {
             LoadingPresenter.StartLoading();
-            await DataRepository.Update(new Order(_Id, ClientUsernames[ClientUsernameIndex], OrderDate, GetProductIdQuantityMap(), GetPrice(), Delivered ? DeliveryDate : (DateTime?)null));
+            await DataRepository.UpdateOrder(_Id, ClientUsernames[ClientUsernameIndex], OrderDate, GetProductIdQuantityMap(), GetPrice(), Delivered ? DeliveryDate : (DateTime?)null);
             LoadingPresenter.StopLoading();
         }
 
-        protected override async void InjectProperties(Order toUpdate)
+        protected override async void InjectProperties(IOrder toUpdate)
         {
             await UpdateDataSets();
             _Id = toUpdate.Id;
             ProductQuantities.Clear();
             foreach (KeyValuePair<uint, uint> pair in toUpdate.ProductIdQuantityMap)
             {
-                Product product = Products.First(p => p.Id == pair.Key);
+                IProduct product = Products.First(p => p.Id == pair.Key);
                 ProductQuantities.Add(new ProductQuantityViewModel(product, pair.Value));
             }
             OrderDate = toUpdate.OrderDate;
@@ -261,7 +260,7 @@ namespace Presentation.ViewModel
         {
             ClientUsernames = (await DataRepository.GetAllClients()).Select(c => c.Username).ToArray();
             Products.Clear();
-            foreach (Product product in (await DataRepository.GetAllProducts()))
+            foreach (IProduct product in (await DataRepository.GetAllProducts()))
             {
                 Products.Add(product);
             }

@@ -1,13 +1,15 @@
-﻿using Newtonsoft.Json;
+﻿using Data;
+
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Data.Transfer
+namespace DataModel.Transfer
 {
     public class ProductDTO
     {
         public ProductDTO() { }
 
-        public ProductDTO(Product product)
+        public ProductDTO(IProduct product)
         {
             Id = product.Id;
             Name = product.Name;
@@ -15,7 +17,7 @@ namespace Data.Transfer
             ProductType = product.ProductType;
         }
 
-        public Product ToProduct()
+        public IProduct ToIProduct()
         {
             return new Product(Id, Name, Price, ProductType);
         }

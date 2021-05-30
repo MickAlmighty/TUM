@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Data.Transfer
+using Data;
+
+namespace DataModel.Transfer
 {
     public class OrderDTO
     {
         public OrderDTO() { }
 
-        public OrderDTO(Order order)
+        public OrderDTO(IOrder order)
         {
             Id = order.Id;
             ClientUsername = order.ClientUsername;
@@ -17,7 +19,7 @@ namespace Data.Transfer
             DeliveryDate = order.DeliveryDate;
         }
 
-        public Order ToOrder()
+        public IOrder ToIOrder()
         {
             return new Order(Id, ClientUsername, OrderDate, ProductIdQuantityMap, Price, DeliveryDate);
         }

@@ -72,22 +72,23 @@ namespace Logic
             }
         }
 
-        public bool Add(DataType data)
+        public KeyType Add(DataType data)
         {
             if (data == null)
             {
                 throw new ArgumentNullException(typeof(DataType).Name);
             }
-            if (DataSet.FirstOrDefault(d => GetId(d).Equals(GetId(data))) != null)
+            KeyType id = GetId(data);
+            if (DataSet.FirstOrDefault(d => GetId(d).Equals(id)) != null)
             {
-                return false;
+                throw new ArgumentException($"{typeof(DataType)} with ID {id} already exists!");
             }
             DataSet.Add(data);
             foreach (IObserver<DataChanged<DataType>> observer in Observers.ToList())
             {
                 observer.OnNext(new DataChanged<DataType>(DataChangedAction.Add, new List<DataType> { data }));
             }
-            return true;
+            return id;
         }
 
         public DataType Get(KeyType key)
@@ -95,16 +96,19 @@ namespace Logic
             return DataSet.FirstOrDefault(d => GetId(d).Equals(key));
         }
 
-        public bool Update(DataType data)
+        public virtual bool Update(DataType data)
         {
             if (data == null)
             {
-                throw new ArgumentNullException(typeof(DataType).Name);
+                return false;
+                // throw new ArgumentNullException(typeof(DataType).Name);
             }
-            DataType targetData = DataSet.FirstOrDefault(d => GetId(d).Equals(GetId(data)));
+            KeyType id = GetId(data);
+            DataType targetData = DataSet.FirstOrDefault(d => GetId(d).Equals(id));
             if (targetData == null)
             {
                 return false;
+                // throw new ArgumentException($"{typeof(DataType)} with ID {id} does not exist!");
             }
             if (!ReferenceEquals(targetData, data))
             {

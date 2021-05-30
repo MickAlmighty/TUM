@@ -1,17 +1,15 @@
 ﻿using System;
 
-using Data;
-
-namespace Logic
+namespace Data
 {
     public class OrderSent : EventArgs
     {
-        public OrderSent(Order order)
+        public OrderSent(IOrder order)
         {
             Order = order;
         }
 
-        public Order Order
+        public IOrder Order
         {
             get;
         }

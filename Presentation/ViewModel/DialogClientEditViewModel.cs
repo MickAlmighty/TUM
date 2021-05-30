@@ -4,7 +4,7 @@ using Presentation.Model;
 
 namespace Presentation.ViewModel
 {
-    public class DialogClientEditViewModel : DialogDataEditViewModel<Client>
+    public class DialogClientEditViewModel : DialogDataEditViewModel<IClient>
     {
         private string _Username, _FirstName, _LastName, _Street, _StreetNumber, _PhoneNumber;
 
@@ -99,11 +99,11 @@ namespace Presentation.ViewModel
         protected override async void ApplyEdit()
         {
             LoadingPresenter.StartLoading();
-            await DataRepository.Update(new Client(Username, FirstName, LastName, Street, uint.Parse(StreetNumber), PhoneNumber));
+            await DataRepository.UpdateClient(Username, FirstName, LastName, Street, uint.Parse(StreetNumber), PhoneNumber);
             LoadingPresenter.StopLoading();
         }
 
-        protected override void InjectProperties(Client toUpdate)
+        protected override void InjectProperties(IClient toUpdate)
         {
             Username = toUpdate.Username;
             FirstName = toUpdate.FirstName;

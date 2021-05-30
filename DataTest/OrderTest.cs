@@ -15,7 +15,7 @@ namespace DataTest
         private const double PRICE = 50.0;
         private readonly DateTime? DELIVERY_DATE = null;
 
-        private Order CreateOrder()
+        private IOrder CreateOrder()
         {
             return new Order(ID, CLIENT_USERNAME, ORDER_DATE, PRODUCT_ID_QUANTITY_MAP, PRICE, DELIVERY_DATE);
         }
@@ -27,37 +27,9 @@ namespace DataTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentNullException))]
-        public void Construction_NullUsername_Throws()
-        {
-            new Order(ID, null, ORDER_DATE, PRODUCT_ID_QUANTITY_MAP, PRICE, DELIVERY_DATE);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void Construction_InvalidProductIdQuantityMap_Throws()
-        {
-            new Order(ID, CLIENT_USERNAME, ORDER_DATE, new Dictionary<uint, uint> { { 1U, 0U }, { 5U, 0U } }, PRICE, DELIVERY_DATE);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
-        public void Construction_InvalidPrice_Throws()
-        {
-            new Order(ID, CLIENT_USERNAME, ORDER_DATE, PRODUCT_ID_QUANTITY_MAP, 0.0, DELIVERY_DATE);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public void Construction_DeliveryDateBeforeOrderDate_Throws()
-        {
-            new Order(ID, CLIENT_USERNAME, ORDER_DATE, PRODUCT_ID_QUANTITY_MAP, PRICE, ORDER_DATE.AddDays(-1.0));
-        }
-
-        [TestMethod]
         public void Update_ValidId_UpdatesProperly()
         {
-            Order a = CreateOrder(), b = new Order(ID, CLIENT_USERNAME + "1", ORDER_DATE.AddDays(1.0), PRODUCT_ID_QUANTITY_MAP, PRICE + 1.0, ORDER_DATE.AddDays(2.0));
+            IOrder a = CreateOrder(), b = new Order(ID, CLIENT_USERNAME + "1", ORDER_DATE.AddDays(1.0), PRODUCT_ID_QUANTITY_MAP, PRICE + 1.0, ORDER_DATE.AddDays(2.0));
             a.Update(b);
             Assert.AreEqual(a.ClientUsername, b.ClientUsername);
             Assert.AreEqual(a.OrderDate, b.OrderDate);
@@ -69,8 +41,14 @@ namespace DataTest
         [ExpectedException(typeof(ArgumentException))]
         public void Update_InvalidId_Throws()
         {
-            Order a = CreateOrder(), b = new Order(ID + 1U, CLIENT_USERNAME, ORDER_DATE, PRODUCT_ID_QUANTITY_MAP, PRICE, DELIVERY_DATE);
+            IOrder a = CreateOrder(), b = new Order(ID + 1U, CLIENT_USERNAME, ORDER_DATE, PRODUCT_ID_QUANTITY_MAP, PRICE, DELIVERY_DATE);
             a.Update(b);
+        }
+
+        private class Order : IOrder
+        {
+            public Order(uint id, string clientUsername, DateTime orderDate, Dictionary<uint, uint> productIdQuantityMap, double price, DateTime? deliveryDate)
+                : base(id, clientUsername, orderDate, productIdQuantityMap, price, deliveryDate) { }
         }
     }
 }

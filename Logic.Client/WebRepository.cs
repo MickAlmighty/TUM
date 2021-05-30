@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 using Data;
 using Data.Transfer;
 
+using DataModel;
+using DataModel.Transfer;
+
 using WebSockets;
 
 using Exception = System.Exception;
@@ -25,9 +28,9 @@ namespace Logic.Client
         private ManualResetEvent NewMessageEvent { get; } = new ManualResetEvent(false);
 
         private HashSet<IObserver<OrderSent>> OrderSentObservers { get; } = new HashSet<IObserver<OrderSent>>();
-        private HashSet<IObserver<DataChanged<Data.Client>>> ClientObservers { get; } = new HashSet<IObserver<DataChanged<Data.Client>>>();
-        private HashSet<IObserver<DataChanged<Product>>> ProductObservers { get; } = new HashSet<IObserver<DataChanged<Product>>>();
-        private HashSet<IObserver<DataChanged<Order>>> OrderObservers { get; } = new HashSet<IObserver<DataChanged<Order>>>();
+        private HashSet<IObserver<DataChanged<IClient>>> ClientObservers { get; } = new HashSet<IObserver<DataChanged<IClient>>>();
+        private HashSet<IObserver<DataChanged<IProduct>>> ProductObservers { get; } = new HashSet<IObserver<DataChanged<IProduct>>>();
+        private HashSet<IObserver<DataChanged<IOrder>>> OrderObservers { get; } = new HashSet<IObserver<DataChanged<IOrder>>>();
 
         public async Task<bool> OpenRepository()
         {
@@ -82,7 +85,7 @@ namespace Logic.Client
                         }
                     case WebMessageType.OrderSent:
                         {
-                            OrderSent orderSent = new OrderSent((msgDto.Data as OrderDTO)?.ToOrder());
+                            OrderSent orderSent = new OrderSent((msgDto.Data as OrderDTO)?.ToIOrder());
                             foreach (IObserver<OrderSent> observer in OrderSentObservers)
                             {
                                 observer.OnNext(orderSent);
@@ -92,10 +95,10 @@ namespace Logic.Client
                         }
                     case WebMessageType.AddClient:
                         {
-                            DataChanged<Data.Client> change =
-                                new DataChanged<Data.Client>(DataChangedAction.Add,
-                                    new List<Data.Client> { (msgDto.Data as ClientDTO)?.ToClient() });
-                            foreach (IObserver<DataChanged<Data.Client>> observer in ClientObservers)
+                            DataChanged<IClient> change =
+                                new DataChanged<IClient>(DataChangedAction.Add,
+                                    new List<IClient> { (msgDto.Data as ClientDTO)?.ToIClient() });
+                            foreach (IObserver<DataChanged<IClient>> observer in ClientObservers)
                             {
                                 observer.OnNext(change);
                             }
@@ -104,10 +107,10 @@ namespace Logic.Client
                         }
                     case WebMessageType.UpdateClient:
                         {
-                            DataChanged<Data.Client> change =
-                                new DataChanged<Data.Client>(DataChangedAction.Update,
-                                    new List<Data.Client> { (msgDto.Data as ClientDTO)?.ToClient() });
-                            foreach (IObserver<DataChanged<Data.Client>> observer in ClientObservers)
+                            DataChanged<IClient> change =
+                                new DataChanged<IClient>(DataChangedAction.Update,
+                                    new List<IClient> { (msgDto.Data as ClientDTO)?.ToIClient() });
+                            foreach (IObserver<DataChanged<IClient>> observer in ClientObservers)
                             {
                                 observer.OnNext(change);
                             }
@@ -116,10 +119,10 @@ namespace Logic.Client
                         }
                     case WebMessageType.RemoveClient:
                         {
-                            DataChanged<Data.Client> change =
-                                new DataChanged<Data.Client>(DataChangedAction.Remove,
-                                    new List<Data.Client> { (msgDto.Data as ClientDTO)?.ToClient() });
-                            foreach (IObserver<DataChanged<Data.Client>> observer in ClientObservers)
+                            DataChanged<IClient> change =
+                                new DataChanged<IClient>(DataChangedAction.Remove,
+                                    new List<IClient> { (msgDto.Data as ClientDTO)?.ToIClient() });
+                            foreach (IObserver<DataChanged<IClient>> observer in ClientObservers)
                             {
                                 observer.OnNext(change);
                             }
@@ -128,10 +131,10 @@ namespace Logic.Client
                         }
                     case WebMessageType.AddProduct:
                         {
-                            DataChanged<Product> change =
-                                new DataChanged<Product>(DataChangedAction.Add,
-                                    new List<Product> { (msgDto.Data as ProductDTO)?.ToProduct() });
-                            foreach (IObserver<DataChanged<Product>> observer in ProductObservers)
+                            DataChanged<IProduct> change =
+                                new DataChanged<IProduct>(DataChangedAction.Add,
+                                    new List<IProduct> { (msgDto.Data as ProductDTO)?.ToIProduct() });
+                            foreach (IObserver<DataChanged<IProduct>> observer in ProductObservers)
                             {
                                 observer.OnNext(change);
                             }
@@ -140,10 +143,10 @@ namespace Logic.Client
                         }
                     case WebMessageType.UpdateProduct:
                         {
-                            DataChanged<Product> change =
-                                new DataChanged<Product>(DataChangedAction.Update,
-                                    new List<Product> { (msgDto.Data as ProductDTO)?.ToProduct() });
-                            foreach (IObserver<DataChanged<Product>> observer in ProductObservers)
+                            DataChanged<IProduct> change =
+                                new DataChanged<IProduct>(DataChangedAction.Update,
+                                    new List<IProduct> { (msgDto.Data as ProductDTO)?.ToIProduct() });
+                            foreach (IObserver<DataChanged<IProduct>> observer in ProductObservers)
                             {
                                 observer.OnNext(change);
                             }
@@ -152,10 +155,10 @@ namespace Logic.Client
                         }
                     case WebMessageType.RemoveProduct:
                         {
-                            DataChanged<Product> change =
-                                new DataChanged<Product>(DataChangedAction.Remove,
-                                    new List<Product> { (msgDto.Data as ProductDTO)?.ToProduct() });
-                            foreach (IObserver<DataChanged<Product>> observer in ProductObservers)
+                            DataChanged<IProduct> change =
+                                new DataChanged<IProduct>(DataChangedAction.Remove,
+                                    new List<IProduct> { (msgDto.Data as ProductDTO)?.ToIProduct() });
+                            foreach (IObserver<DataChanged<IProduct>> observer in ProductObservers)
                             {
                                 observer.OnNext(change);
                             }
@@ -164,10 +167,10 @@ namespace Logic.Client
                         }
                     case WebMessageType.AddOrder:
                         {
-                            DataChanged<Order> change =
-                                new DataChanged<Order>(DataChangedAction.Add,
-                                    new List<Order> { (msgDto.Data as OrderDTO)?.ToOrder() });
-                            foreach (IObserver<DataChanged<Order>> observer in OrderObservers)
+                            DataChanged<IOrder> change =
+                                new DataChanged<IOrder>(DataChangedAction.Add,
+                                    new List<IOrder> { (msgDto.Data as OrderDTO)?.ToIOrder() });
+                            foreach (IObserver<DataChanged<IOrder>> observer in OrderObservers)
                             {
                                 observer.OnNext(change);
                             }
@@ -176,10 +179,10 @@ namespace Logic.Client
                         }
                     case WebMessageType.UpdateOrder:
                         {
-                            DataChanged<Order> change =
-                                new DataChanged<Order>(DataChangedAction.Update,
-                                    new List<Order> { (msgDto.Data as OrderDTO)?.ToOrder() });
-                            foreach (IObserver<DataChanged<Order>> observer in OrderObservers)
+                            DataChanged<IOrder> change =
+                                new DataChanged<IOrder>(DataChangedAction.Update,
+                                    new List<IOrder> { (msgDto.Data as OrderDTO)?.ToIOrder() });
+                            foreach (IObserver<DataChanged<IOrder>> observer in OrderObservers)
                             {
                                 observer.OnNext(change);
                             }
@@ -188,10 +191,10 @@ namespace Logic.Client
                         }
                     case WebMessageType.RemoveOrder:
                         {
-                            DataChanged<Order> change =
-                                new DataChanged<Order>(DataChangedAction.Remove,
-                                    new List<Order> { (msgDto.Data as OrderDTO)?.ToOrder() });
-                            foreach (IObserver<DataChanged<Order>> observer in OrderObservers)
+                            DataChanged<IOrder> change =
+                                new DataChanged<IOrder>(DataChangedAction.Remove,
+                                    new List<IOrder> { (msgDto.Data as OrderDTO)?.ToIOrder() });
+                            foreach (IObserver<DataChanged<IOrder>> observer in OrderObservers)
                             {
                                 observer.OnNext(change);
                             }
@@ -242,7 +245,7 @@ namespace Logic.Client
             return null;
         }
 
-        public async Task<HashSet<Data.Client>> GetAllClients()
+        public async Task<HashSet<IClient>> GetAllClients()
         {
             await WebSocketConnection.SendAsync(WebSimpleMessageType.GetAllClients.ToString());
             WebMessageDTO<object> msg = WebSerializer.DeserializeWebMessage(ReadMessage());
@@ -250,10 +253,10 @@ namespace Logic.Client
             {
                 throw new ApplicationException("Provided client data object is invalid!");
             }
-            return new HashSet<Data.Client>(clientData.Select(c => c.ToClient()));
+            return new HashSet<IClient>(clientData.Select(c => c.ToIClient()));
         }
 
-        public async Task<HashSet<Order>> GetAllOrders()
+        public async Task<HashSet<IOrder>> GetAllOrders()
         {
             await WebSocketConnection.SendAsync(WebSimpleMessageType.GetAllOrders.ToString());
             WebMessageDTO<object> msg = WebSerializer.DeserializeWebMessage(ReadMessage());
@@ -261,10 +264,10 @@ namespace Logic.Client
             {
                 throw new ApplicationException("Provided order data object is invalid!");
             }
-            return new HashSet<Order>(orderData.Select(o => o.ToOrder()));
+            return new HashSet<IOrder>(orderData.Select(o => o.ToIOrder()));
         }
 
-        public async Task<HashSet<Product>> GetAllProducts()
+        public async Task<HashSet<IProduct>> GetAllProducts()
         {
             await WebSocketConnection.SendAsync(WebSimpleMessageType.GetAllProducts.ToString());
             WebMessageDTO<object> msg = WebSerializer.DeserializeWebMessage(ReadMessage());
@@ -272,10 +275,10 @@ namespace Logic.Client
             {
                 throw new ApplicationException("Provided product data object is invalid!");
             }
-            return new HashSet<Product>(productData.Select(p => p.ToProduct()));
+            return new HashSet<IProduct>(productData.Select(p => p.ToIProduct()));
         }
 
-        public async Task<bool> CreateClient(string username, string firstName, string lastName, string street, uint streetNumber,
+        public async Task<IClient> CreateClient(string username, string firstName, string lastName, string street, uint streetNumber,
             string phoneNumber)
         {
             string msg = WebSerializer.SerializeWebMessage(WebMessageType.AddClient, new ClientDTO {
@@ -287,16 +290,26 @@ namespace Logic.Client
                 PhoneNumber = phoneNumber
             });
             await WebSocketConnection.SendAsync(msg);
-            string response = ReadMessage();
-            if (WebSerializer.TryParseRequest(response, out WebSimpleMessageType req) && req == WebSimpleMessageType.Success)
+            string responseMsg;
+            try
             {
-                return true;
+                responseMsg = ReadMessage();
             }
-            Debug.WriteLine($"Failed to add client! {response}");
-            return false;
+            catch (Exception e)
+            {
+                Debug.WriteLine($"Failed to add client! {e}");
+                return null;
+            }
+            WebMessageDTO<object> response = WebSerializer.DeserializeWebMessage(responseMsg);
+            if (!(response.Data is ClientDTO clientData))
+            {
+                throw new ApplicationException("Provided client data object is invalid!");
+            }
+
+            return clientData.ToIClient();
         }
 
-        public async Task<bool> CreateOrder(string clientUsername, DateTime orderDate, Dictionary<uint, uint> productIdQuantityMap, DateTime? deliveryDate)
+        public async Task<IOrder> CreateOrder(string clientUsername, DateTime orderDate, Dictionary<uint, uint> productIdQuantityMap, DateTime? deliveryDate)
         {
             string msg = WebSerializer.SerializeWebMessage(WebMessageType.AddOrder, new OrderDTO {
                 ClientUsername = clientUsername,
@@ -305,16 +318,26 @@ namespace Logic.Client
                 DeliveryDate = deliveryDate
             });
             await WebSocketConnection.SendAsync(msg);
-            string response = ReadMessage();
-            if (WebSerializer.TryParseRequest(response, out WebSimpleMessageType req) && req == WebSimpleMessageType.Success)
+            string responseMsg;
+            try
             {
-                return true;
+                responseMsg = ReadMessage();
             }
-            Debug.WriteLine($"Failed to add order! {response}");
-            return false;
+            catch (Exception e)
+            {
+                Debug.WriteLine($"Failed to add order! {e}");
+                return null;
+            }
+            WebMessageDTO<object> response = WebSerializer.DeserializeWebMessage(responseMsg);
+            if (!(response.Data is OrderDTO orderData))
+            {
+                throw new ApplicationException("Provided order data object is invalid!");
+            }
+
+            return orderData.ToIOrder();
         }
 
-        public async Task<bool> CreateProduct(string name, double price, ProductType productType)
+        public async Task<IProduct> CreateProduct(string name, double price, ProductType productType)
         {
             string msg = WebSerializer.SerializeWebMessage(WebMessageType.AddProduct, new ProductDTO {
                 Name = name,
@@ -322,16 +345,26 @@ namespace Logic.Client
                 ProductType = productType
             });
             await WebSocketConnection.SendAsync(msg);
-            string response = ReadMessage();
-            if (WebSerializer.TryParseRequest(response, out WebSimpleMessageType req) && req == WebSimpleMessageType.Success)
+            string responseMsg;
+            try
             {
-                return true;
+                responseMsg = ReadMessage();
             }
-            Debug.WriteLine($"Failed to add product! {response}");
-            return false;
+            catch (Exception e)
+            {
+                Debug.WriteLine($"Failed to add product! {e}");
+                return null;
+            }
+            WebMessageDTO<object> response = WebSerializer.DeserializeWebMessage(responseMsg);
+            if (!(response.Data is ProductDTO productData))
+            {
+                throw new ApplicationException("Provided product data object is invalid!");
+            }
+
+            return productData.ToIProduct();
         }
 
-        public async Task<Data.Client> GetClient(string username)
+        public async Task<IClient> GetClient(string username)
         {
             string msg = WebSerializer.SerializeWebMessage(WebMessageType.GetClient, username);
             await WebSocketConnection.SendAsync(msg);
@@ -341,10 +374,10 @@ namespace Logic.Client
                 throw new ApplicationException("Provided client data object is invalid!");
             }
 
-            return clientData.ToClient();
+            return clientData.ToIClient();
         }
 
-        public async Task<Order> GetOrder(uint id)
+        public async Task<IOrder> GetOrder(uint id)
         {
             string msg = WebSerializer.SerializeWebMessage(WebMessageType.GetOrder, id);
             await WebSocketConnection.SendAsync(msg);
@@ -354,10 +387,10 @@ namespace Logic.Client
                 throw new ApplicationException("Provided order data object is invalid!");
             }
 
-            return orderData.ToOrder();
+            return orderData.ToIOrder();
         }
 
-        public async Task<Product> GetProduct(uint id)
+        public async Task<IProduct> GetProduct(uint id)
         {
             string msg = WebSerializer.SerializeWebMessage(WebMessageType.GetProduct, id);
             await WebSocketConnection.SendAsync(msg);
@@ -367,10 +400,10 @@ namespace Logic.Client
                 throw new ApplicationException("Provided product data object is invalid!");
             }
 
-            return productData.ToProduct();
+            return productData.ToIProduct();
         }
 
-        public async Task<bool> Update(Data.Client client)
+        public async Task<bool> Update(IClient client)
         {
             string msg = WebSerializer.SerializeWebMessage(WebMessageType.UpdateClient, new ClientDTO(client));
             await WebSocketConnection.SendAsync(msg);
@@ -383,7 +416,7 @@ namespace Logic.Client
             return false;
         }
 
-        public async Task<bool> Update(Order order)
+        public async Task<bool> Update(IOrder order)
         {
             string msg = WebSerializer.SerializeWebMessage(WebMessageType.UpdateOrder, new OrderDTO(order));
             await WebSocketConnection.SendAsync(msg);
@@ -396,7 +429,24 @@ namespace Logic.Client
             return false;
         }
 
-        public async Task<bool> Update(Product product)
+        public async Task<bool> UpdateClient(string username, string firstName, string lastName, string street, uint streetNumber,
+            string phoneNumber)
+        {
+            return await Update(new DataModel.Client(username, firstName, lastName, street, streetNumber, phoneNumber));
+        }
+
+        public async Task<bool> UpdateOrder(uint id, string clientUsername, DateTime orderDate, Dictionary<uint, uint> productIdQuantityMap,
+            double price, DateTime? deliveryDate)
+        {
+            return await Update(new Order(id, clientUsername, orderDate, productIdQuantityMap, price, deliveryDate));
+        }
+
+        public async Task<bool> UpdateProduct(uint id, string name, double price, ProductType productType)
+        {
+            return await Update(new Product(id, name, price, productType));
+        }
+
+        public async Task<bool> Update(IProduct product)
         {
             string msg = WebSerializer.SerializeWebMessage(WebMessageType.UpdateProduct, new ProductDTO(product));
             await WebSocketConnection.SendAsync(msg);
@@ -409,7 +459,7 @@ namespace Logic.Client
             return false;
         }
 
-        public async Task<bool> RemoveClient(Data.Client client)
+        public async Task<bool> RemoveClient(IClient client)
         {
             string msg = WebSerializer.SerializeWebMessage(WebMessageType.RemoveClient, new ClientDTO(client));
             await WebSocketConnection.SendAsync(msg);
@@ -422,7 +472,7 @@ namespace Logic.Client
             return false;
         }
 
-        public async Task<bool> RemoveOrder(Order order)
+        public async Task<bool> RemoveOrder(IOrder order)
         {
             string msg = WebSerializer.SerializeWebMessage(WebMessageType.RemoveOrder, new OrderDTO(order));
             await WebSocketConnection.SendAsync(msg);
@@ -435,7 +485,7 @@ namespace Logic.Client
             return false;
         }
 
-        public async Task<bool> RemoveProduct(Product product)
+        public async Task<bool> RemoveProduct(IProduct product)
         {
             string msg = WebSerializer.SerializeWebMessage(WebMessageType.RemoveProduct, new ProductDTO(product));
             await WebSocketConnection.SendAsync(msg);
@@ -454,22 +504,22 @@ namespace Logic.Client
             return new Unsubscriber<OrderSent>(OrderSentObservers, observer);
         }
 
-        public IDisposable Subscribe(IObserver<DataChanged<Data.Client>> observer)
+        public IDisposable Subscribe(IObserver<DataChanged<IClient>> observer)
         {
             ClientObservers.Add(observer);
-            return new Unsubscriber<DataChanged<Data.Client>>(ClientObservers, observer);
+            return new Unsubscriber<DataChanged<IClient>>(ClientObservers, observer);
         }
 
-        public IDisposable Subscribe(IObserver<DataChanged<Product>> observer)
+        public IDisposable Subscribe(IObserver<DataChanged<IProduct>> observer)
         {
             ProductObservers.Add(observer);
-            return new Unsubscriber<DataChanged<Product>>(ProductObservers, observer);
+            return new Unsubscriber<DataChanged<IProduct>>(ProductObservers, observer);
         }
 
-        public IDisposable Subscribe(IObserver<DataChanged<Order>> observer)
+        public IDisposable Subscribe(IObserver<DataChanged<IOrder>> observer)
         {
             OrderObservers.Add(observer);
-            return new Unsubscriber<DataChanged<Order>>(OrderObservers, observer);
+            return new Unsubscriber<DataChanged<IOrder>>(OrderObservers, observer);
         }
 
         public void Dispose()

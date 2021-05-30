@@ -1,6 +1,9 @@
 ﻿using Data;
+
 using Logic;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -121,8 +124,25 @@ namespace LogicTest
             TestDataType data = new TestDataType();
             TestDataObserver obs = new TestDataObserver();
             using IDisposable unsubscriber = dm.Subscribe(obs);
-            Assert.IsTrue(dm.Add(data));
-            Assert.IsFalse(dm.Add(data));
+            try
+            {
+                dm.Add(data);
+            }
+            catch (Exception)
+            {
+                Assert.Fail();
+            }
+
+            try
+            {
+                dm.Add(data);
+                Assert.Fail();
+            }
+            catch (Exception)
+            {
+                // ignored
+            }
+
             Assert.AreEqual(0, obs.CompleteCount);
             Assert.AreEqual(0, obs.Errors.Count);
             Assert.AreEqual(1, obs.Next.Count);

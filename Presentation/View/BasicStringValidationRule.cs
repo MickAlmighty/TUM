@@ -2,14 +2,16 @@
 using System.Globalization;
 using System.Windows.Controls;
 
+using Logic;
+
 namespace Presentation.View
 {
-    class BasicStringValidationRule : ValidationRule
+    internal class BasicStringValidationRule : ValidationRule
     {
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
             string strValue = Convert.ToString(value);
-            if (string.IsNullOrEmpty(strValue))
+            if (!strValue.IsTrimmedNonEmpty())
             {
                 return new ValidationResult(false, null);
             }

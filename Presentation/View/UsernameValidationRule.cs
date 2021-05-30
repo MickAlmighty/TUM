@@ -2,9 +2,11 @@
 using System.Globalization;
 using System.Windows.Controls;
 
+using Logic;
+
 namespace Presentation.View
 {
-    class UsernameValidationRule : ValidationRule
+    internal class UsernameValidationRule : ValidationRule
     {
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
@@ -13,7 +15,7 @@ namespace Presentation.View
             {
                 return new ValidationResult(false, null);
             }
-            if (strValue.Length < 3)
+            if (!DataValidationUtil.IsUsernameValid(strValue))
             {
                 return new ValidationResult(false, "Username is too short");
             }

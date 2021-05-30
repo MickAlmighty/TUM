@@ -5,13 +5,13 @@ using System.Windows.Data;
 
 namespace Presentation.View
 {
-    public class InvertedBoolToVisibilityConverter : IValueConverter
+    internal class InvertedBoolToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is bool)
+            if (value is bool b)
             {
-                if ((bool)value)
+                if (b)
                 {
                     return Visibility.Collapsed;
                 }

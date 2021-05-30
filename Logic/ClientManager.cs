@@ -1,27 +1,35 @@
-﻿using Data;
-using System;
+﻿using System;
+
+using Data;
+
 using System.Collections.Generic;
-using System.Diagnostics;
+
+using DataModel;
 
 namespace Logic
 {
-    public class ClientManager : DataManager<Client, string>
+    public class ClientManager : DataManager<IClient, string>
     {
         public ClientManager() { }
-        public ClientManager(HashSet<Client> data) : base(data) { }
+        public ClientManager(HashSet<IClient> data) : base(data) { }
 
-        public bool Create(string username, string firstName, string lastName, string street, uint streetNumber, string phoneNumber)
+        public string Create(string username, string firstName, string lastName, string street, uint streetNumber, string phoneNumber)
         {
-            try
+            IClient client = new Client(username.Trim(), firstName.Trim(), lastName.Trim(), street.Trim(), streetNumber, phoneNumber.Trim());
+            if (!client.IsValid())
             {
-                Client client = new Client(username, firstName, lastName, street, streetNumber, phoneNumber);
-                return Add(client);
+                throw new ArgumentException($"Provided {nameof(IClient)} data is invalid!");
             }
-            catch (Exception e)
+            return Add(client);
+        }
+
+        public override bool Update(IClient client)
+        {
+            if (!client.IsValid())
             {
-                Debug.WriteLine($"{e.Message}\n{e.StackTrace}");
-                return false;
+                throw new ArgumentException($"Provided {nameof(IClient)} is invalid!");
             }
+            return base.Update(client);
         }
     }
 }

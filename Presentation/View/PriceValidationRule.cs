@@ -2,9 +2,11 @@
 using System.Globalization;
 using System.Windows.Controls;
 
+using Logic;
+
 namespace Presentation.View
 {
-    class PriceValidationRule : ValidationRule
+    internal class PriceValidationRule : ValidationRule
     {
         public override ValidationResult Validate(object value, CultureInfo cultureInfo)
         {
@@ -15,7 +17,7 @@ namespace Presentation.View
             }
             if (double.TryParse(strValue, out double price))
             {
-                if (price <= 0.0)
+                if (!DataValidationUtil.IsPriceValid(price))
                 {
                     return new ValidationResult(false, "Price must be positive");
                 }

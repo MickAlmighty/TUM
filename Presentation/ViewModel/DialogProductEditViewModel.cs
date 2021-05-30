@@ -1,12 +1,13 @@
 ﻿using Data;
-using Logic;
+
 using Presentation.Model;
+
 using System;
 using System.Linq;
 
 namespace Presentation.ViewModel
 {
-    public class DialogProductEditViewModel : DialogDataEditViewModel<Product>
+    public class DialogProductEditViewModel : DialogDataEditViewModel<IProduct>
     {
         private uint _Id;
         private string _Name, _Price;
@@ -25,7 +26,7 @@ namespace Presentation.ViewModel
         protected override async void ApplyEdit()
         {
             LoadingPresenter.StartLoading();
-            await DataRepository.Update(new Product(_Id, Name, double.Parse(Price), ProductTypes[ProductTypeIndex]));
+            await DataRepository.UpdateProduct(_Id, Name, double.Parse(Price), ProductTypes[ProductTypeIndex]);
             LoadingPresenter.StopLoading();
         }
 
@@ -73,7 +74,7 @@ namespace Presentation.ViewModel
             }
         }
 
-        protected override void InjectProperties(Product toUpdate)
+        protected override void InjectProperties(IProduct toUpdate)
         {
             _Id = toUpdate.Id;
             Name = toUpdate.Name;

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 using Data.Transfer;
 
+using DataModel.Transfer;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Data.TransferTest

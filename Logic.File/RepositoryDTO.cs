@@ -1,24 +1,24 @@
 ﻿using System.Collections.Generic;
 
-using Data;
+using DataModel.Transfer;
 
 namespace Logic.File
 {
     internal class RepositoryDTO
     {
-        public HashSet<Client> Clients
+        public List<ClientDTO> Clients
         {
             get;
             set;
         }
 
-        public HashSet<Order> Orders
+        public List<OrderDTO> Orders
         {
             get;
             set;
         }
 
-        public HashSet<Product> Products
+        public List<ProductDTO> Products
         {
             get;
             set;

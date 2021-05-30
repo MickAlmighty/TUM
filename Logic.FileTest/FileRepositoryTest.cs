@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 using Data;
 
+using DataModel;
+
 using Logic.File;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -18,11 +20,11 @@ namespace Logic.FileTest
         private const string TEST_FILE = "test.json";
         private const int UPDATE_TIMEOUT = 5000;
 
-        private Client CreateClient()
+        private IClient CreateClient()
         {
             return new Client("asdf", "asdf", "asdf", "asdf", 1U, "100 100 100");
         }
-        private Product CreateProduct()
+        private IProduct CreateProduct()
         {
             return new Product(0U, "Product", 20.00, ProductType.Toy);
         }
@@ -31,17 +33,15 @@ namespace Logic.FileTest
         public void SaveData_ReturnsTrueAndCreatesFile()
         {
             System.IO.File.Delete(TEST_FILE);
-            using (FileRepository repo = new FileRepository(TEST_FILE))
-            {
-                Assert.IsTrue(repo.SaveData());
-                Assert.IsTrue(System.IO.File.Exists(TEST_FILE));
-            }
+            using FileRepository repo = new FileRepository(TEST_FILE);
+            Assert.IsTrue(repo.SaveData());
+            Assert.IsTrue(System.IO.File.Exists(TEST_FILE));
         }
 
         [TestMethod]
         public async Task LoadData_ReturnsTrueAndRestoresClient()
         {
-            Client testClient = CreateClient();
+            IClient testClient = CreateClient();
             System.IO.File.Delete(TEST_FILE);
             using (FileRepository repo = new FileRepository(TEST_FILE))
             {
@@ -51,12 +51,11 @@ namespace Logic.FileTest
                     testClient.LastName,
                     testClient.Street,
                     testClient.StreetNumber,
-                    testClient.PhoneNumber
-                    );
+                    testClient.PhoneNumber);
             }
             using (FileRepository repo = new FileRepository(TEST_FILE))
             {
-                Client client = await repo.GetClient(testClient.Username);
+                IClient client = await repo.GetClient(testClient.Username);
                 Assert.IsNotNull(client);
                 Assert.AreEqual(testClient.FirstName, client.FirstName);
                 Assert.AreEqual(testClient.LastName, client.LastName);
@@ -66,41 +65,41 @@ namespace Logic.FileTest
             }
         }
 
-        private class TestObserver : IObserver<DataChanged<Client>>, IObserver<DataChanged<Product>>
+        private class TestObserver : IObserver<DataChanged<IClient>>, IObserver<DataChanged<IProduct>>
         {
-            public int ClientCompleteCount { get; private set; }
-            public Queue<Exception> ClientErrors { get; } = new Queue<Exception>();
-            public Queue<DataChanged<Client>> ClientNext { get; } = new Queue<DataChanged<Client>>();
-            public int ProductCompleteCount { get; private set; }
-            public Queue<Exception> ProductErrors { get; } = new Queue<Exception>();
-            public Queue<DataChanged<Product>> ProductNext { get; } = new Queue<DataChanged<Product>>();
+            private int ClientCompleteCount { get; set; }
+            private Queue<Exception> ClientErrors { get; } = new Queue<Exception>();
+            private Queue<DataChanged<IClient>> ClientNext { get; } = new Queue<DataChanged<IClient>>();
+            private int ProductCompleteCount { get; set; }
+            private Queue<Exception> ProductErrors { get; } = new Queue<Exception>();
+            private Queue<DataChanged<IProduct>> ProductNext { get; } = new Queue<DataChanged<IProduct>>();
 
-            void IObserver<DataChanged<Client>>.OnCompleted()
+            void IObserver<DataChanged<IClient>>.OnCompleted()
             {
                 ++ClientCompleteCount;
             }
 
-            void IObserver<DataChanged<Client>>.OnError(Exception error)
+            void IObserver<DataChanged<IClient>>.OnError(Exception error)
             {
                 ClientErrors.Enqueue(error);
             }
 
-            public void OnNext(DataChanged<Client> value)
+            public void OnNext(DataChanged<IClient> value)
             {
                 ClientNext.Enqueue(value);
             }
 
-            void IObserver<DataChanged<Product>>.OnCompleted()
+            void IObserver<DataChanged<IProduct>>.OnCompleted()
             {
                 ++ProductCompleteCount;
             }
 
-            void IObserver<DataChanged<Product>>.OnError(Exception error)
+            void IObserver<DataChanged<IProduct>>.OnError(Exception error)
             {
                 ProductErrors.Enqueue(error);
             }
 
-            public void OnNext(DataChanged<Product> value)
+            public void OnNext(DataChanged<IProduct> value)
             {
                 ProductNext.Enqueue(value);
             }
@@ -112,7 +111,7 @@ namespace Logic.FileTest
                     return false;
                 }
 
-                DataChanged<Client> change = ClientNext.Dequeue();
+                DataChanged<IClient> change = ClientNext.Dequeue();
                 return change.Action == DataChangedAction.Replace && change.NewItems?.FirstOrDefault() != null;
             }
 
@@ -123,7 +122,7 @@ namespace Logic.FileTest
                     return false;
                 }
 
-                DataChanged<Product> change = ProductNext.Dequeue();
+                DataChanged<IProduct> change = ProductNext.Dequeue();
                 return change.Action == DataChangedAction.Replace && change.NewItems?.FirstOrDefault() != null;
             }
         }
@@ -131,8 +130,8 @@ namespace Logic.FileTest
         [TestMethod]
         public async Task FileRepository_FileChanged_UpdatesData()
         {
-            Client testClient = CreateClient();
-            Product product = CreateProduct();
+            IClient testClient = CreateClient();
+            IProduct product = CreateProduct();
             System.IO.File.Delete(TEST_FILE);
             using FileRepository repo = new FileRepository(TEST_FILE);
             await repo.CreateClient(
@@ -141,8 +140,7 @@ namespace Logic.FileTest
                 testClient.LastName,
                 testClient.Street,
                 testClient.StreetNumber,
-                testClient.PhoneNumber
-            );
+                testClient.PhoneNumber);
             await repo.CreateProduct(product.Name, product.Price, product.ProductType);
             string fileData = System.IO.File.ReadAllText(TEST_FILE);
             await repo.RemoveClient(testClient);
@@ -152,8 +150,8 @@ namespace Logic.FileTest
             bool clientsReplaced = false;
             bool productsReplaced = false;
             TestObserver obs = new TestObserver();
-            using IDisposable clientUnsubscriber = repo.Subscribe((IObserver<DataChanged<Client>>)obs);
-            using IDisposable productUnsubscriber = repo.Subscribe((IObserver<DataChanged<Product>>)obs);
+            using IDisposable clientUnsubscriber = repo.Subscribe((IObserver<DataChanged<IClient>>)obs);
+            using IDisposable productUnsubscriber = repo.Subscribe((IObserver<DataChanged<IProduct>>)obs);
             System.IO.File.WriteAllText(TEST_FILE, fileData);
             SpinWait.SpinUntil(() => {
                 clientsReplaced |= obs.ClientsReplaced();

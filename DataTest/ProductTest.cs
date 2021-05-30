@@ -12,35 +12,15 @@ namespace DataTest
         private const double PRICE = 50.0;
         private const ProductType TYPE = ProductType.Toy;
 
-        private Product CreateProduct()
+        private IProduct CreateProduct()
         {
             return new Product(ID, NAME, PRICE, TYPE);
         }
 
         [TestMethod]
-        public void Construction_ValidValues_NoException()
-        {
-            CreateProduct();
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
-        public void Construction_InvalidName_Throws()
-        {
-            new Product(ID, "", PRICE, TYPE);
-        }
-
-        [TestMethod]
-        [ExpectedException(typeof(ArgumentOutOfRangeException))]
-        public void Construction_InvalidPrice_Throws()
-        {
-            new Product(ID, NAME, 0.0, TYPE);
-        }
-
-        [TestMethod]
         public void Update_ValidId_UpdatesProperly()
         {
-            Product a = CreateProduct(), b = new Product(ID, NAME + "1", PRICE + 1.0, TYPE + 1);
+            IProduct a = CreateProduct(), b = new Product(ID, NAME + "1", PRICE + 1.0, TYPE + 1);
             a.Update(b);
             Assert.AreEqual(a.Name, b.Name);
             Assert.AreEqual(a.Price, b.Price);
@@ -51,8 +31,13 @@ namespace DataTest
         [ExpectedException(typeof(ArgumentException))]
         public void Update_InvalidId_Throws()
         {
-            Product a = CreateProduct(), b = new Product(ID + 1U, NAME, PRICE, TYPE);
+            IProduct a = CreateProduct(), b = new Product(ID + 1U, NAME, PRICE, TYPE);
             a.Update(b);
+        }
+
+        private class Product : IProduct
+        {
+            public Product(uint id, string name, double price, ProductType productType) : base(id, name, price, productType) { }
         }
     }
 }
