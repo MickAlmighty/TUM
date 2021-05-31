@@ -14,22 +14,10 @@ using Newtonsoft.Json;
 
 namespace Logic.File
 {
-    public class FileRepository : IDataRepository, IDisposable, IObserver<DataChanged<IOrder>>
+    public sealed class FileRepository : IDataRepository, IDisposable, IObserver<DataChanged<IOrder>>
     {
-        public FileRepository(string filePath = "data.json")
+        public FileRepository()
         {
-            if (filePath == null)
-            {
-                throw new ArgumentNullException(nameof(filePath));
-            }
-            if (filePath.Length == 0)
-            {
-                throw new ArgumentException(nameof(filePath));
-            }
-
-            DataPathWatcher = new FileSystemWatcher(Path.GetDirectoryName(Path.GetFullPath(filePath)) ?? throw new InvalidOperationException());
-            FileName = Path.GetFileName(filePath);
-            FullFilePath = Path.Combine(DataPathWatcher.Path, FileName);
             OrderUnsubscriber = OrderManager.Subscribe(this);
         }
 
@@ -86,16 +74,19 @@ namespace Logic.File
         private FileSystemWatcher DataPathWatcher
         {
             get;
+            set;
         }
 
         private string FileName
         {
             get;
+            set;
         }
 
         private string FullFilePath
         {
             get;
+            set;
         }
 
         public bool SaveData()
@@ -162,37 +153,37 @@ namespace Logic.File
             }
         }
 
-        protected object ClientLock
+        private object ClientLock
         {
             get;
         } = new object();
 
-        protected object OrderLock
+        private object OrderLock
         {
             get;
         } = new object();
 
-        protected object ProductLock
+        private object ProductLock
         {
             get;
         } = new object();
 
-        protected object FileLock
+        private object FileLock
         {
             get;
         } = new object();
 
-        protected ClientManager ClientManager
+        private ClientManager ClientManager
         {
             get;
         } = new ClientManager();
 
-        protected OrderManager OrderManager
+        private OrderManager OrderManager
         {
             get;
         } = new OrderManager();
 
-        protected ProductManager ProductManager
+        private ProductManager ProductManager
         {
             get;
         } = new ProductManager();
@@ -274,8 +265,20 @@ namespace Logic.File
             }
         }
 
-        public Task<bool> OpenRepository()
+        public Task<bool> OpenRepository(string filePath)
         {
+            if (filePath == null)
+            {
+                throw new ArgumentNullException(nameof(filePath));
+            }
+            if (filePath.Length == 0)
+            {
+                throw new ArgumentException(nameof(filePath));
+            }
+
+            DataPathWatcher = new FileSystemWatcher(Path.GetDirectoryName(Path.GetFullPath(filePath)) ?? throw new InvalidOperationException());
+            FileName = Path.GetFileName(filePath);
+            FullFilePath = Path.Combine(DataPathWatcher.Path, FileName);
             if (System.IO.File.Exists(FullFilePath))
             {
                 LoadData();
@@ -525,7 +528,7 @@ namespace Logic.File
         #region IDisposable Support
         private bool disposedValue;
 
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (!disposedValue)
             {

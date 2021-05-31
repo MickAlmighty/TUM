@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-using Logic.File;
+using Logic;
 
 namespace Presentation.Server
 {
@@ -10,7 +10,7 @@ namespace Presentation.Server
         private static void Main()
         {
             Task serverTask;
-            using (Server server = new Server(new FileRepository()))
+            using (Server server = new Server(4444U, new DataRepository(), null))
             {
                 serverTask = Task.Run(server.RunServer);
                 string input;

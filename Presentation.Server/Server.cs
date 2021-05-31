@@ -12,30 +12,32 @@ using WebSockets;
 
 namespace Presentation.Server
 {
-    internal class Server : IDisposable, IObserver<OrderSent>
+    public class Server : IDisposable, IObserver<OrderSent>
     {
-        private ServerWebSocketConnection ServerWebSocketConnection { get; set; }
+        public ServerWebSocketConnection ServerWebSocketConnection { get; }
+        public IDataRepository DataRepository { get; }
+        private string RepositoryParam { get; }
 
         private WebSerializer WebSerializer { get; } = new WebSerializer();
 
-        private IDataRepository DataRepository { get; }
         private IDisposable OrderSentUnsubscriber { get; }
 
-        public Server(IDataRepository dataRepository)
+        public Server(uint port, IDataRepository dataRepository, string repositoryParam)
         {
             DataRepository = dataRepository;
+            RepositoryParam = repositoryParam;
             OrderSentUnsubscriber = DataRepository.Subscribe(this);
+            ServerWebSocketConnection = WebSocketServer.CreateServer(port);
         }
 
         public async Task RunServer()
         {
-            if (!await DataRepository.OpenRepository())
+            if (!await DataRepository.OpenRepository(RepositoryParam))
             {
                 Console.WriteLine("Failed to open the data repository!");
                 return;
             }
 
-            ServerWebSocketConnection = WebSocketServer.CreateServer(4444);
             ServerWebSocketConnection.OnClientConnected += ServerWebSocketConnection_OnClientConnected;
             ServerWebSocketConnection.OnMessage += (e, a) => OnMessage(a.Connection, a.Message);
             ServerWebSocketConnection.OnError += (e, a) => OnError(a.Connection, a.Exception);

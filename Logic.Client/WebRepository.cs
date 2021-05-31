@@ -22,7 +22,7 @@ namespace Logic.Client
     {
         private const int WEB_TIMEOUT = 5000;
 
-        private WebSocketConnection WebSocketConnection { get; set; }
+        public WebSocketConnection WebSocketConnection { get; private set; }
         private WebSerializer WebSerializer { get; } = new WebSerializer();
         private ConcurrentQueue<string> MessageQueue { get; } = new ConcurrentQueue<string>();
         private ManualResetEvent NewMessageEvent { get; } = new ManualResetEvent(false);
@@ -32,11 +32,11 @@ namespace Logic.Client
         private HashSet<IObserver<DataChanged<IProduct>>> ProductObservers { get; } = new HashSet<IObserver<DataChanged<IProduct>>>();
         private HashSet<IObserver<DataChanged<IOrder>>> OrderObservers { get; } = new HashSet<IObserver<DataChanged<IOrder>>>();
 
-        public async Task<bool> OpenRepository()
+        public async Task<bool> OpenRepository(string connectionUri)
         {
             try
             {
-                WebSocketConnection = await WebSocketClient.ConnectAsync(new Uri("ws://localhost:4444"));
+                WebSocketConnection = await WebSocketClient.ConnectAsync(new Uri(connectionUri));
                 WebSocketConnection.OnMessage += (e, a) => OnMessage(a.Message);
                 WebSocketConnection.OnError += (e, a) => OnError(a.Exception);
                 WebSocketConnection.OnClose += (e, a) => OnClose();

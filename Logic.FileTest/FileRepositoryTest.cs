@@ -14,7 +14,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Logic.FileTest
 {
-    //[TestClass]
+    [TestClass]
     public class FileRepositoryTest
     {
         private const string TEST_FILE = "test.json";
@@ -33,7 +33,8 @@ namespace Logic.FileTest
         public void SaveData_ReturnsTrueAndCreatesFile()
         {
             System.IO.File.Delete(TEST_FILE);
-            using FileRepository repo = new FileRepository(TEST_FILE);
+            using FileRepository repo = new FileRepository();
+            Assert.IsTrue(repo.OpenRepository(TEST_FILE).GetAwaiter().GetResult());
             Assert.IsTrue(repo.SaveData());
             Assert.IsTrue(System.IO.File.Exists(TEST_FILE));
         }
@@ -43,8 +44,9 @@ namespace Logic.FileTest
         {
             IClient testClient = CreateClient();
             System.IO.File.Delete(TEST_FILE);
-            using (FileRepository repo = new FileRepository(TEST_FILE))
+            using (FileRepository repo = new FileRepository())
             {
+                Assert.IsTrue(repo.OpenRepository(TEST_FILE).GetAwaiter().GetResult());
                 await repo.CreateClient(
                     testClient.Username,
                     testClient.FirstName,
@@ -53,8 +55,9 @@ namespace Logic.FileTest
                     testClient.StreetNumber,
                     testClient.PhoneNumber);
             }
-            using (FileRepository repo = new FileRepository(TEST_FILE))
+            using (FileRepository repo = new FileRepository())
             {
+                Assert.IsTrue(repo.OpenRepository(TEST_FILE).GetAwaiter().GetResult());
                 IClient client = await repo.GetClient(testClient.Username);
                 Assert.IsNotNull(client);
                 Assert.AreEqual(testClient.FirstName, client.FirstName);
@@ -133,7 +136,8 @@ namespace Logic.FileTest
             IClient testClient = CreateClient();
             IProduct product = CreateProduct();
             System.IO.File.Delete(TEST_FILE);
-            using FileRepository repo = new FileRepository(TEST_FILE);
+            using FileRepository repo = new FileRepository();
+            Assert.IsTrue(repo.OpenRepository(TEST_FILE).GetAwaiter().GetResult());
             await repo.CreateClient(
                 testClient.Username,
                 testClient.FirstName,

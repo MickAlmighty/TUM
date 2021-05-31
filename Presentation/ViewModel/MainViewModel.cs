@@ -8,6 +8,8 @@ using System.Linq;
 using System.Threading;
 using System.Windows.Input;
 
+using Logic.Client;
+
 namespace Presentation.ViewModel
 {
     internal class MainViewModel : ViewModelBase, ILoadingPresenter, IObserver<OrderSent>, IObserver<DataChanged<IClient>>, IObserver<DataChanged<IProduct>>, IObserver<DataChanged<IOrder>>
@@ -43,7 +45,7 @@ namespace Presentation.ViewModel
         private async void ExecuteConnect()
         {
             StartLoading();
-            if (!await DataRepository.OpenRepository())
+            if (!await DataRepository.OpenRepository(ClientUtil.CreateLocalConnectionString(4444))) // todo: make connection string an actual user input
             {
                 throw new ApplicationException("Failed to open the data repository!");
             }
