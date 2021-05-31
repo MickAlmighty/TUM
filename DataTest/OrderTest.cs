@@ -38,11 +38,10 @@ namespace DataTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void Update_InvalidId_Throws()
         {
             IOrder a = CreateOrder(), b = new Order(ID + 1U, CLIENT_USERNAME, ORDER_DATE, PRODUCT_ID_QUANTITY_MAP, PRICE, DELIVERY_DATE);
-            a.Update(b);
+            Assert.ThrowsException<ArgumentException>(() => a.Update(b));
         }
 
         private class Order : IOrder

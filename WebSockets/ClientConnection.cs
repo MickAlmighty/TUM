@@ -30,6 +30,7 @@ namespace WebSockets
         {
             TokenSource.Cancel();
             await WebSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Shutdown procedure started", CancellationToken.None);
+            InvokeOnClose(new OnCloseEventHandlerArgs(this));
             ClientLoopTask.Wait();
         }
 

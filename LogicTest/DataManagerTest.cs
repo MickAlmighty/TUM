@@ -7,6 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+// ReSharper disable UnusedMember.Local
 
 namespace LogicTest
 {
@@ -21,6 +22,7 @@ namespace LogicTest
             }
         }
 
+        // ReSharper disable once ClassNeverInstantiated.Local
         private class InvalidDataType2 : IUpdatable<InvalidDataType2>
         {
             [Id]
@@ -91,30 +93,27 @@ namespace LogicTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ApplicationException))]
         public void Construction_NoIdProperty_Throws()
         {
-            new InvalidDataManager1();
+            Assert.ThrowsException<ApplicationException>(() => new InvalidDataManager1());
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ApplicationException))]
         public void Construction_MoreThanOneIdProperty_Throws()
         {
-            new InvalidDataManager2();
+            Assert.ThrowsException<ApplicationException>(() => new InvalidDataManager2());
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ApplicationException))]
         public void Construction_WrongIdPropertyType_Throws()
         {
-            new InvalidTestDataManager();
+            Assert.ThrowsException<ApplicationException>(() => new InvalidTestDataManager());
         }
 
         [TestMethod]
         public void Construction_ValidTypesAndId_Successful()
         {
-            new TestDataManager();
+            _ = new TestDataManager();
         }
 
         [TestMethod]
@@ -124,25 +123,8 @@ namespace LogicTest
             TestDataType data = new TestDataType();
             TestDataObserver obs = new TestDataObserver();
             using IDisposable unsubscriber = dm.Subscribe(obs);
-            try
-            {
-                dm.Add(data);
-            }
-            catch (Exception)
-            {
-                Assert.Fail();
-            }
-
-            try
-            {
-                dm.Add(data);
-                Assert.Fail();
-            }
-            catch (Exception)
-            {
-                // ignored
-            }
-
+            dm.Add(data);
+            Assert.ThrowsException<ArgumentException>(() => dm.Add(data));
             Assert.AreEqual(0, obs.CompleteCount);
             Assert.AreEqual(0, obs.Errors.Count);
             Assert.AreEqual(1, obs.Next.Count);

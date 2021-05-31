@@ -15,5 +15,7 @@ namespace WebSockets
         {
             OnClientConnected?.Invoke(this, args);
         }
+
+        public abstract bool IsRunning { get; }
     }
 }

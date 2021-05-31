@@ -1,5 +1,7 @@
 ﻿using Data;
+
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+
 using System;
 
 namespace DataTest
@@ -28,11 +30,10 @@ namespace DataTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void Update_InvalidId_Throws()
         {
             IClient a = CreateClient(), b = new Client(USERNAME + "1", FIRST_NAME, LAST_NAME, STREET, STREET_NUMBER, PHONE_NUMBER);
-            a.Update(b);
+            Assert.ThrowsException<ArgumentException>(() => a.Update(b));
         }
 
         private class Client : IClient

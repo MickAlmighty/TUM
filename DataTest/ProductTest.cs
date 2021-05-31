@@ -28,11 +28,10 @@ namespace DataTest
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
         public void Update_InvalidId_Throws()
         {
             IProduct a = CreateProduct(), b = new Product(ID + 1U, NAME, PRICE, TYPE);
-            a.Update(b);
+            Assert.ThrowsException<ArgumentException>(() => a.Update(b));
         }
 
         private class Product : IProduct

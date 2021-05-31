@@ -11,9 +11,9 @@ namespace WebSockets
     // Reference: https://github.com/mpostol/NBlockchain/blob/master/P2PPrototocol/NodeJSAPI/WebSocketServer.cs
     public static class WebSocketServer
     {
-        public static ServerWebSocketConnection CreateServer(int p2p_port)
+        public static ServerWebSocketConnection CreateServer(uint port)
         {
-            Uri uri = new Uri($@"http://localhost:{p2p_port}/");
+            Uri uri = new Uri($@"http://localhost:{port}/");
             return new ServerConnection(uri);
         }
 
@@ -25,6 +25,15 @@ namespace WebSockets
 
             private Uri Uri { get; }
             private bool ServerStarted { get; set; }
+
+            public override bool IsRunning
+            {
+                get
+                {
+                    return ServerStarted && !ServerStopEvent.WaitOne(0);
+                }
+            }
+
             private ManualResetEvent ServerStopEvent { get; } = new ManualResetEvent(false);
 
             public ServerConnection(Uri uri)
