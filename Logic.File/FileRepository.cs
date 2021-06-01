@@ -265,6 +265,8 @@ namespace Logic.File
             }
         }
 
+        public event OnRepositoryClosedEventHandler OnRepositoryClosed;
+
         public Task<bool> OpenRepository(string filePath)
         {
             if (filePath == null)
@@ -287,6 +289,12 @@ namespace Logic.File
             DataPathWatcher.Deleted += DataFile_Deleted;
             DataPathWatcher.EnableRaisingEvents = true;
             return Task.FromResult(true);
+        }
+
+        public Task CloseRepository()
+        {
+            Dispose();
+            return Task.CompletedTask;
         }
 
         public Task<HashSet<IClient>> GetAllClients()

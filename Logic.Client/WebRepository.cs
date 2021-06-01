@@ -32,6 +32,8 @@ namespace Logic.Client
         private HashSet<IObserver<DataChanged<IProduct>>> ProductObservers { get; } = new HashSet<IObserver<DataChanged<IProduct>>>();
         private HashSet<IObserver<DataChanged<IOrder>>> OrderObservers { get; } = new HashSet<IObserver<DataChanged<IOrder>>>();
 
+        public event OnRepositoryClosedEventHandler OnRepositoryClosed;
+
         public async Task<bool> OpenRepository(string connectionUri)
         {
             try
@@ -39,13 +41,29 @@ namespace Logic.Client
                 WebSocketConnection = await WebSocketClient.ConnectAsync(new Uri(connectionUri));
                 WebSocketConnection.OnMessage += (e, a) => OnMessage(a.Message);
                 WebSocketConnection.OnError += (e, a) => OnError(a.Exception);
-                WebSocketConnection.OnClose += (e, a) => OnClose();
+                WebSocketConnection.OnClose += WebSocketConnection_OnClose;
                 return true;
             }
             catch (Exception e)
             {
                 Debug.WriteLine(e);
                 return false;
+            }
+        }
+
+        private void WebSocketConnection_OnClose(object sender, OnCloseEventHandlerArgs args)
+        {
+            Debug.WriteLine($"Client web socket connection {WebSocketConnection} has been closed.");
+            OnRepositoryClosed?.Invoke(this, new OnRepositoryClosedEventHandlerArgs(this));
+        }
+
+        public async Task CloseRepository()
+        {
+            if (WebSocketConnection != null)
+            {
+                WebSocketConnection.OnClose -= WebSocketConnection_OnClose;
+                await WebSocketConnection.DisconnectAsync();
+                WebSocketConnection = null;
             }
         }
 
@@ -209,11 +227,6 @@ namespace Logic.Client
                         }
                 }
             }
-        }
-
-        public void OnClose()
-        {
-            Debug.WriteLine($"Client web socket connection {WebSocketConnection} has been closed.");
         }
 
         public void OnError(Exception e)

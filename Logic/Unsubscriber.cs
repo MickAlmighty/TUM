@@ -17,6 +17,7 @@ namespace Logic
         public void Dispose()
         {
             Observers.Remove(Observer);
+            Observer.OnCompleted();
         }
     }
 }

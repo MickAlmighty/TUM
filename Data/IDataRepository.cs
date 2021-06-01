@@ -6,7 +6,9 @@ namespace Data
 {
     public interface IDataRepository : IObservable<OrderSent>, IObservable<DataChanged<IClient>>, IObservable<DataChanged<IProduct>>, IObservable<DataChanged<IOrder>>
     {
+        event OnRepositoryClosedEventHandler OnRepositoryClosed;
         Task<bool> OpenRepository(string openParam);
+        Task CloseRepository();
         Task<HashSet<IClient>> GetAllClients();
         Task<HashSet<IOrder>> GetAllOrders();
         Task<HashSet<IProduct>> GetAllProducts();

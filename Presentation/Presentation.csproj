@@ -133,6 +133,7 @@
     <Compile Include="Model\MDDialogHost.cs" />
     <Compile Include="Model\MDSession.cs" />
     <Compile Include="View\PhoneNumberValidationRule.cs" />
+    <Compile Include="View\PortValidationRule.cs" />
     <Compile Include="View\PositiveIntegerValidationRule.cs" />
     <Compile Include="View\PriceValidationRule.cs" />
     <Compile Include="View\UsernameValidationRule.cs" />

@@ -14,7 +14,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Logic.FileTest
 {
-    [TestClass]
+    //[TestClass]
     public class FileRepositoryTest
     {
         private const string TEST_FILE = "test.json";

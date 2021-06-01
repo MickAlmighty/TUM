@@ -12,19 +12,178 @@ using Logic.Client;
 
 namespace Presentation.ViewModel
 {
-    internal class MainViewModel : ViewModelBase, ILoadingPresenter, IObserver<OrderSent>, IObserver<DataChanged<IClient>>, IObserver<DataChanged<IProduct>>, IObserver<DataChanged<IOrder>>
+    internal class MainViewModel : ViewModelBase, IDisposable, ILoadingPresenter, IObserver<OrderSent>, IObserver<DataChanged<IClient>>, IObserver<DataChanged<IProduct>>, IObserver<DataChanged<IOrder>>
     {
+        #region Properties
+
+        #region Backing fields
+
+        private bool _IsProcessing;
+        private bool _IsConnecting;
+        private bool _IsConnected;
+        private string _ConnectionPort = 4444U.ToString();
+        private string _ConnectionAddress = "localhost";
+        private ObservableCollection<IClient> _Clients;
+        private ObservableCollection<IOrder> _Orders;
+        private ObservableCollection<IProduct> _Products;
+
+        #endregion
+
+        public ICommand Connect { get; }
+        public ICommand Disconnect { get; }
+        public ICommand CreateClient { get; }
+        public ICommand EditClient { get; }
+        public ICommand RemoveClient { get; }
+        public ICommand CreateOrder { get; }
+        public ICommand EditOrder { get; }
+        public ICommand RemoveOrder { get; }
+        public ICommand CreateProduct { get; }
+        public ICommand EditProduct { get; }
+        public ICommand RemoveProduct { get; }
+
+        public IDataRepository DataRepository { get; }
+        public IDialogHost DialogHost { get; }
+
+        public bool IsProcessing
+        {
+            get
+            {
+                return _IsProcessing;
+            }
+            set
+            {
+                _IsProcessing = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public bool IsConnecting
+        {
+            get
+            {
+                return _IsConnecting;
+            }
+            set
+            {
+                _IsConnecting = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public bool IsConnected
+        {
+            get
+            {
+                return _IsConnected;
+            }
+            set
+            {
+                _IsConnected = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public string ConnectionPort
+        {
+            get
+            {
+                return _ConnectionPort;
+            }
+            set
+            {
+                _ConnectionPort = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public string ConnectionAddress
+        {
+            get
+            {
+                return _ConnectionAddress;
+            }
+            set
+            {
+                _ConnectionAddress = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        private uint LoadingCounter { get; set; }
+
+        public ObservableCollection<IClient> Clients
+        {
+            get
+            {
+                return _Clients;
+            }
+            private set
+            {
+                _Clients = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public ObservableCollection<IOrder> Orders
+        {
+            get
+            {
+                return _Orders;
+            }
+            private set
+            {
+                _Orders = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public ObservableCollection<IProduct> Products
+        {
+            get
+            {
+                return _Products;
+            }
+            private set
+            {
+                _Products = value;
+                RaisePropertyChanged();
+            }
+        }
+
+        public object DialogIdentifier0 { get; }
+
+        public object DialogIdentifier1 { get; }
+
+        private static SynchronizationContext SyncContext { get; }
+
+        public DialogClientEditViewModel DialogClientEditViewModel { get; }
+
+        public DialogOrderEditViewModel DialogOrderEditViewModel { get; }
+
+        public DialogProductEditViewModel DialogProductEditViewModel { get; }
+
+        public DialogInformationViewModel DialogInformationViewModel { get; }
+
+        public IDisposable OrderSentUnsubscriber { get; private set; }
+        public IDisposable ClientUnsubscriber { get; private set; }
+        public IDisposable ProductUnsubscriber { get; private set; }
+        public IDisposable OrderUnsubscriber { get; private set; }
+
+        #endregion
+
         public MainViewModel(IDialogHost dialogHost, IDataRepository dataRepository, object dialogIdentifier0, object dialogIdentifier1)
         {
             DataRepository = dataRepository;
+            DataRepository.OnRepositoryClosed += DataRepository_OnRepositoryClosed;
             DialogHost = dialogHost;
             DialogIdentifier0 = dialogIdentifier0;
             DialogIdentifier1 = dialogIdentifier1;
             DialogClientEditViewModel = new DialogClientEditViewModel(dialogHost, this, dataRepository);
             DialogOrderEditViewModel = new DialogOrderEditViewModel(dialogHost, this, dataRepository);
             DialogProductEditViewModel = new DialogProductEditViewModel(dialogHost, this, dataRepository);
-            DialogOrderSentViewModel = new DialogInformationViewModel(dialogHost);
+            DialogInformationViewModel = new DialogInformationViewModel(dialogHost);
             Connect = new RelayCommand(ExecuteConnect);
+            Disconnect = new RelayCommand(ExecuteDisconnect);
             CreateClient = new RelayCommand(ExecuteCreateClient);
             EditClient = new RelayCommand<IClient>(ExecuteEditClient);
             RemoveClient = new RelayCommand<IClient>(ExecuteRemoveClient);
@@ -36,6 +195,14 @@ namespace Presentation.ViewModel
             RemoveProduct = new RelayCommand<IProduct>(ExecuteRemoveProduct);
         }
 
+        private void DataRepository_OnRepositoryClosed(object sender, OnRepositoryClosedEventHandlerArgs args)
+        {
+            SyncContext.Post(o => {
+                ClearSubscriptions();
+                IsConnected = false;
+                DialogInformationViewModel.OpenDialog(DialogIdentifier1, "Data repository has been closed.");
+            }, null);
+        }
 
         static MainViewModel()
         {
@@ -45,20 +212,40 @@ namespace Presentation.ViewModel
         private async void ExecuteConnect()
         {
             StartLoading();
-            if (!await DataRepository.OpenRepository(ClientUtil.CreateLocalConnectionString(4444))) // todo: make connection string an actual user input
+            IsConnecting = true;
+            try
             {
-                throw new ApplicationException("Failed to open the data repository!");
+                if (!await DataRepository.OpenRepository(ClientUtil.CreateConnectionString(ConnectionAddress, uint.Parse(ConnectionPort))))
+                {
+                    IsConnecting = false;
+                    StopLoading();
+                    DialogInformationViewModel.OpenDialog(DialogIdentifier1, "Failed to open the data repository!");
+                    return;
+                }
+                IsConnected = true;
+                Clients = new ObservableCollection<IClient>(await DataRepository.GetAllClients());
+                Orders = new ObservableCollection<IOrder>(await DataRepository.GetAllOrders());
+                Products = new ObservableCollection<IProduct>(await DataRepository.GetAllProducts());
+                OrderSentUnsubscriber = DataRepository.Subscribe((IObserver<OrderSent>)this);
+                ClientUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<IClient>>)this);
+                ProductUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<IProduct>>)this);
+                OrderUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<IOrder>>)this);
             }
-            Clients = new ObservableCollection<IClient>(await DataRepository.GetAllClients());
-            Orders = new ObservableCollection<IOrder>(await DataRepository.GetAllOrders());
-            Products = new ObservableCollection<IProduct>(await DataRepository.GetAllProducts());
-            RaisePropertyChanged(nameof(Clients));
-            RaisePropertyChanged(nameof(Orders));
-            RaisePropertyChanged(nameof(Products));
-            OrderSentUnsubscriber = DataRepository.Subscribe((IObserver<OrderSent>)this);
-            ClientUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<IClient>>)this);
-            ProductUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<IProduct>>)this);
-            OrderUnsubscriber = DataRepository.Subscribe((IObserver<DataChanged<IOrder>>)this);
+            catch (Exception e)
+            {
+                IsConnected = false;
+                DialogInformationViewModel.OpenDialog(DialogIdentifier1, $"Connection initialization failed!\n{e}");
+            }
+            IsConnecting = false;
+            StopLoading();
+        }
+
+        private async void ExecuteDisconnect()
+        {
+            StartLoading();
+            await DataRepository.CloseRepository();
+            ClearSubscriptions();
+            IsConnected = false;
             StopLoading();
         }
 
@@ -76,6 +263,7 @@ namespace Presentation.ViewModel
             await DataRepository.RemoveClient(client);
             StopLoading();
         }
+
         private void ExecuteCreateOrder()
         {
             if (Clients.Any() && Products.Any())
@@ -85,24 +273,29 @@ namespace Presentation.ViewModel
                 StopLoading();
             }
         }
+
         private void ExecuteEditOrder(IOrder order)
         {
             DialogOrderEditViewModel.OpenDialog(order, DialogIdentifier0);
         }
+
         private async void ExecuteRemoveOrder(IOrder order)
         {
             StartLoading();
             await DataRepository.RemoveOrder(order);
             StopLoading();
         }
+
         private void ExecuteCreateProduct()
         {
             DialogProductEditViewModel.OpenDialog(DialogIdentifier0);
         }
+
         private void ExecuteEditProduct(IProduct product)
         {
             DialogProductEditViewModel.OpenDialog(product, DialogIdentifier0);
         }
+
         private async void ExecuteRemoveProduct(IProduct product)
         {
             StartLoading();
@@ -110,101 +303,18 @@ namespace Presentation.ViewModel
             StopLoading();
         }
 
-        public ICommand Connect { get; }
-        public ICommand CreateClient { get; }
-        public ICommand EditClient { get; }
-        public ICommand RemoveClient { get; }
-        public ICommand CreateOrder { get; }
-        public ICommand EditOrder { get; }
-        public ICommand RemoveOrder { get; }
-        public ICommand CreateProduct { get; }
-        public ICommand EditProduct { get; }
-        public ICommand RemoveProduct { get; }
-
-        public IDataRepository DataRepository
+        private void ClearSubscriptions()
         {
-            get;
-        }
-        public IDialogHost DialogHost
-        {
-            get;
+            OrderSentUnsubscriber?.Dispose();
+            ClientUnsubscriber?.Dispose();
+            ProductUnsubscriber?.Dispose();
+            OrderUnsubscriber?.Dispose();
+            Clients?.Clear();
+            Orders?.Clear();
+            Products?.Clear();
         }
 
-        public bool IsProcessing
-        {
-            get
-            {
-                return _IsProcessing;
-            }
-            set
-            {
-                _IsProcessing = value;
-                RaisePropertyChanged();
-            }
-        }
-
-        private bool _IsProcessing;
-
-        private uint LoadingCounter
-        {
-            get;
-            set;
-        }
-
-        public ObservableCollection<IClient> Clients
-        {
-            get;
-            private set;
-        }
-
-        public ObservableCollection<IOrder> Orders
-        {
-            get;
-            private set;
-        }
-
-        public ObservableCollection<IProduct> Products
-        {
-            get;
-            private set;
-        }
-
-        public IDisposable OrderSentUnsubscriber { get; private set; }
-        public IDisposable ClientUnsubscriber { get; private set; }
-        public IDisposable ProductUnsubscriber { get; private set; }
-        public IDisposable OrderUnsubscriber { get; private set; }
-
-        public object DialogIdentifier0
-        {
-            get;
-        }
-
-        public object DialogIdentifier1
-        {
-            get;
-        }
-
-        private static SynchronizationContext SyncContext { get; }
-
-        public DialogClientEditViewModel DialogClientEditViewModel
-        {
-            get;
-        }
-
-        public DialogOrderEditViewModel DialogOrderEditViewModel
-        {
-            get;
-        }
-
-        public DialogProductEditViewModel DialogProductEditViewModel
-        {
-            get;
-        }
-
-        public DialogInformationViewModel DialogOrderSentViewModel
-        {
-            get;
-        }
+        #region IObserver implementation
 
         public void OnNext(OrderSent value)
         {
@@ -214,7 +324,7 @@ namespace Presentation.ViewModel
                 int index = Orders.IndexOf(order);
                 Orders.RemoveAt(index);
                 Orders.Insert(index, order);
-                DialogOrderSentViewModel.OpenDialog(DialogIdentifier1, $"Order {value.Order.Id} of {value.Order.ClientUsername} was successfully delivered on {(value.Order.DeliveryDate.HasValue ? value.Order.DeliveryDate.Value.ToString() : "")}!");
+                DialogInformationViewModel.OpenDialog(DialogIdentifier1, $"Order {value.Order.Id} of {value.Order.ClientUsername} was successfully delivered on {(value.Order.DeliveryDate.HasValue ? value.Order.DeliveryDate.Value.ToString() : "")}!");
             }, null);
         }
 
@@ -359,7 +469,7 @@ namespace Presentation.ViewModel
 
         void IObserver<DataChanged<IOrder>>.OnError(Exception error)
         {
-            Console.WriteLine($"An exception occurred during {nameof(IOrder)} subscription: {error}");
+            DialogInformationViewModel.OpenDialog(DialogIdentifier1, $"An exception occurred during order subscription: \n{error}");
         }
 
         void IObserver<DataChanged<IProduct>>.OnCompleted()
@@ -369,7 +479,7 @@ namespace Presentation.ViewModel
 
         void IObserver<DataChanged<IProduct>>.OnError(Exception error)
         {
-            Console.WriteLine($"An exception occurred during {nameof(IProduct)} subscription: {error}");
+            DialogInformationViewModel.OpenDialog(DialogIdentifier1, $"An exception occurred during product subscription: \n{error}");
         }
 
         void IObserver<DataChanged<IClient>>.OnCompleted()
@@ -379,7 +489,7 @@ namespace Presentation.ViewModel
 
         void IObserver<DataChanged<IClient>>.OnError(Exception error)
         {
-            Console.WriteLine($"An exception occurred during {nameof(IClient)} subscription: {error}");
+            DialogInformationViewModel.OpenDialog(DialogIdentifier1, $"An exception occurred during client subscription: \n{error}");
         }
 
         void IObserver<OrderSent>.OnCompleted()
@@ -389,8 +499,10 @@ namespace Presentation.ViewModel
 
         void IObserver<OrderSent>.OnError(Exception error)
         {
-            Console.WriteLine($"An exception occurred during {nameof(OrderSent)} subscription: {error}");
+            DialogInformationViewModel.OpenDialog(DialogIdentifier1, $"An exception occurred during {nameof(OrderSent)} subscription: \n{error}");
         }
+
+        #endregion
 
         public void StartLoading()
         {
@@ -405,6 +517,15 @@ namespace Presentation.ViewModel
                 --LoadingCounter;
             }
             SyncContext.Post(o => IsProcessing = LoadingCounter > 0U, null);
+        }
+
+        public void Dispose()
+        {
+            ExecuteDisconnect();
+            if (DataRepository is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
         }
     }
 }

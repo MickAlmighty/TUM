@@ -22,7 +22,7 @@ namespace Presentation.View
 
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            ((DataContext as MainViewModel)?.DataRepository as IDisposable)?.Dispose();
+            ((MainViewModel)DataContext as IDisposable)?.Dispose();
         }
     }
 }

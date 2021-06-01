@@ -87,9 +87,16 @@ namespace Logic
             get;
         } = new ProductManager();
 
+        public event OnRepositoryClosedEventHandler OnRepositoryClosed;
+
         public Task<bool> OpenRepository(string openParam)
         {
             return Task.FromResult(true);
+        }
+
+        public Task CloseRepository()
+        {
+            return Task.CompletedTask;
         }
 
         public Task<HashSet<IClient>> GetAllClients()
