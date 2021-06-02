@@ -20,6 +20,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{378BBCAD-912C-448D-9767-15B4543417A6}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		CodeMap.dgml = CodeMap.dgml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Data.Transfer", "Data.Transfer\Data.Transfer.csproj", "{7B19FF2F-EC4A-496D-A72F-CAE3EC4EF7E1}"
@@ -40,7 +41,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DataModel.Transfer", "DataM
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebSockets.Test", "WebSockets.Test\WebSockets.Test.csproj", "{E9E9283B-B4E6-4147-846E-582B44DDFBB2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IntegrationTest", "IntegrationTest\IntegrationTest.csproj", "{FD825F77-4E4E-4D90-87F3-3FD71EAEE7AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTest", "IntegrationTest\IntegrationTest.csproj", "{FD825F77-4E4E-4D90-87F3-3FD71EAEE7AB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -12,7 +12,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DataModel.Transfer\DataModel.Transfer.csproj" />
-    <ProjectReference Include="..\Data\Data.csproj" />
   </ItemGroup>
 
 </Project>
