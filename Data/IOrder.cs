@@ -3,7 +3,8 @@ using System.Collections.Generic;
 
 namespace Data
 {
-    public abstract class IOrder : IUpdatable<IOrder>
+    [Updatable]
+    public abstract class IOrder
     {
         [Id]
         public uint Id { get; protected set; }
@@ -26,23 +27,6 @@ namespace Data
             ProductIdQuantityMap = productIdQuantityMap;
             Price = price;
             DeliveryDate = deliveryDate;
-        }
-
-        public void Update(IOrder order)
-        {
-            if (order == null)
-            {
-                throw new ArgumentNullException(nameof(order));
-            }
-            if (Id != order.Id)
-            {
-                throw new ArgumentException(nameof(order));
-            }
-            ClientUsername = order.ClientUsername;
-            OrderDate = order.OrderDate;
-            ProductIdQuantityMap = order.ProductIdQuantityMap;
-            Price = order.Price;
-            DeliveryDate = order.DeliveryDate;
         }
     }
 }

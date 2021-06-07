@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Data
 {
-    public class DataChanged<DataType> where DataType : IUpdatable<DataType>
+    public class DataChanged<DataType>
     {
         public DataChanged(DataChangedAction action, IList<DataType> changedItems)
         {

@@ -1,13 +1,18 @@
-﻿using Data;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace DataTest
+using Data;
+
+using Logic;
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace LogicTest
 {
     [TestClass]
-    public class OrderTest
+    public class UpdaterOrderTest
     {
+
         private const uint ID = 1U;
         private const string CLIENT_USERNAME = "Username";
         private readonly DateTime ORDER_DATE = new DateTime(2000, 1, 1);
@@ -21,16 +26,10 @@ namespace DataTest
         }
 
         [TestMethod]
-        public void Construction_ValidValues_NoException()
-        {
-            CreateOrder();
-        }
-
-        [TestMethod]
         public void Update_ValidId_UpdatesProperly()
         {
             IOrder a = CreateOrder(), b = new Order(ID, CLIENT_USERNAME + "1", ORDER_DATE.AddDays(1.0), PRODUCT_ID_QUANTITY_MAP, PRICE + 1.0, ORDER_DATE.AddDays(2.0));
-            a.Update(b);
+            Updater.Update(a, b);
             Assert.AreEqual(a.ClientUsername, b.ClientUsername);
             Assert.AreEqual(a.OrderDate, b.OrderDate);
             Assert.AreEqual(a.Price, b.Price);
@@ -41,7 +40,7 @@ namespace DataTest
         public void Update_InvalidId_Throws()
         {
             IOrder a = CreateOrder(), b = new Order(ID + 1U, CLIENT_USERNAME, ORDER_DATE, PRODUCT_ID_QUANTITY_MAP, PRICE, DELIVERY_DATE);
-            Assert.ThrowsException<ArgumentException>(() => a.Update(b));
+            Assert.ThrowsException<ArgumentException>(() => Updater.Update(a, b));
         }
 
         private class Order : IOrder

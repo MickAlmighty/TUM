@@ -1,5 +1,4 @@
 ﻿using Data;
-using Logic;
 using Presentation.Model;
 
 namespace Presentation.ViewModel

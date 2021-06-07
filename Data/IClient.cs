@@ -1,8 +1,7 @@
-﻿using System;
-
-namespace Data
+﻿namespace Data
 {
-    public abstract class IClient : IUpdatable<IClient>
+    [Updatable]
+    public abstract class IClient
     {
         [Id]
         public string Username { get; protected set; }
@@ -25,23 +24,6 @@ namespace Data
             Street = street;
             StreetNumber = streetNumber;
             PhoneNumber = phoneNumber;
-        }
-
-        public void Update(IClient client)
-        {
-            if (client == null)
-            {
-                throw new ArgumentNullException(nameof(client));
-            }
-            if (Username != client.Username)
-            {
-                throw new ArgumentException(nameof(client));
-            }
-            FirstName = client.FirstName;
-            LastName = client.LastName;
-            Street = client.Street;
-            StreetNumber = client.StreetNumber;
-            PhoneNumber = client.PhoneNumber;
         }
     }
 }

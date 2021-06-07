@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace Logic
 {
-    public abstract class DataManager<DataType, KeyType> : IObservable<DataChanged<DataType>> where DataType : IUpdatable<DataType>
+    public abstract class DataManager<DataType, KeyType> : IObservable<DataChanged<DataType>>
     {
         private HashSet<IObserver<DataChanged<DataType>>> Observers
         {
@@ -112,7 +112,7 @@ namespace Logic
             }
             if (!ReferenceEquals(targetData, data))
             {
-                targetData.Update(data);
+                Updater.Update(targetData, data);
             }
             foreach (IObserver<DataChanged<DataType>> observer in Observers.ToList())
             {

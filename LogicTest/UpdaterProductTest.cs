@@ -1,11 +1,15 @@
-﻿using Data;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
+﻿using System;
 
-namespace DataTest
+using Data;
+
+using Logic;
+
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+namespace LogicTest
 {
     [TestClass]
-    public class ProductTest
+    public class UpdaterProductTest
     {
         private const uint ID = 1U;
         private const string NAME = "Product";
@@ -21,7 +25,7 @@ namespace DataTest
         public void Update_ValidId_UpdatesProperly()
         {
             IProduct a = CreateProduct(), b = new Product(ID, NAME + "1", PRICE + 1.0, TYPE + 1);
-            a.Update(b);
+            Updater.Update(a, b);
             Assert.AreEqual(a.Name, b.Name);
             Assert.AreEqual(a.Price, b.Price);
             Assert.AreEqual(a.ProductType, b.ProductType);
@@ -31,7 +35,7 @@ namespace DataTest
         public void Update_InvalidId_Throws()
         {
             IProduct a = CreateProduct(), b = new Product(ID + 1U, NAME, PRICE, TYPE);
-            Assert.ThrowsException<ArgumentException>(() => a.Update(b));
+            Assert.ThrowsException<ArgumentException>(() => Updater.Update(a, b));
         }
 
         private class Product : IProduct

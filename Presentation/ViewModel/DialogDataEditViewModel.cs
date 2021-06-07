@@ -1,11 +1,10 @@
 ﻿using Data;
-using Logic;
 using Presentation.Model;
 using System.Windows.Input;
 
 namespace Presentation.ViewModel
 {
-    public abstract class DialogDataEditViewModel<T> : DialogBaseViewModel where T : IUpdatable<T>
+    public abstract class DialogDataEditViewModel<T> : DialogBaseViewModel
     {
         private bool _EditMode;
 

@@ -14,16 +14,12 @@ namespace LogicTest
     [TestClass]
     public class DataManagerTest
     {
-        private class InvalidDataType1 : IUpdatable<InvalidDataType1>
+        private class InvalidDataType1
         {
-            public void Update(InvalidDataType1 t)
-            {
-                throw new NotImplementedException();
-            }
         }
 
         // ReSharper disable once ClassNeverInstantiated.Local
-        private class InvalidDataType2 : IUpdatable<InvalidDataType2>
+        private class InvalidDataType2
         {
             [Id]
             public uint Id
@@ -36,15 +32,10 @@ namespace LogicTest
             {
                 get;
                 set;
-            }
-
-            public void Update(InvalidDataType2 t)
-            {
-                throw new NotImplementedException();
             }
         }
 
-        private class TestDataType : IUpdatable<TestDataType>
+        private class TestDataType
         {
             [Id]
             public uint Id
@@ -57,11 +48,6 @@ namespace LogicTest
             {
                 get;
                 set;
-            }
-
-            public void Update(TestDataType t)
-            {
-                throw new NotImplementedException();
             }
         }
         private class InvalidDataManager1 : DataManager<InvalidDataType1, uint> { }

@@ -1,13 +1,15 @@
-﻿using Data;
+﻿using System;
+
+using Data;
+
+using Logic;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using System;
-
-namespace DataTest
+namespace LogicTest
 {
     [TestClass]
-    public class ClientTest
+    public class UpdaterClientTest
     {
         private const string USERNAME = "Username", FIRST_NAME = "First name", LAST_NAME = "Last name", STREET = "Street", PHONE_NUMBER = "+20 500 500 500";
         private const uint STREET_NUMBER = 30U;
@@ -21,7 +23,7 @@ namespace DataTest
         public void Update_ValidId_UpdatesProperly()
         {
             IClient a = CreateClient(), b = new Client(USERNAME, FIRST_NAME + "1", LAST_NAME + "1", STREET + "1", STREET_NUMBER + 1U, "500 500 501");
-            a.Update(b);
+            Updater.Update(a, b);
             Assert.AreEqual(a.FirstName, b.FirstName);
             Assert.AreEqual(a.LastName, b.LastName);
             Assert.AreEqual(a.Street, b.Street);
@@ -33,7 +35,7 @@ namespace DataTest
         public void Update_InvalidId_Throws()
         {
             IClient a = CreateClient(), b = new Client(USERNAME + "1", FIRST_NAME, LAST_NAME, STREET, STREET_NUMBER, PHONE_NUMBER);
-            Assert.ThrowsException<ArgumentException>(() => a.Update(b));
+            Assert.ThrowsException<ArgumentException>(() => Updater.Update(a, b));
         }
 
         private class Client : IClient
