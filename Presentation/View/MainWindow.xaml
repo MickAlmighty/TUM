@@ -222,7 +222,7 @@
                     </TextBox>
                 </DockPanel>
                 <DockPanel Margin="15">
-                    <Label Content="Port: "/>
+                    <Label Content="Address: "/>
                     <TextBox Name="AddressBox">
                         <Binding Path="ConnectionAddress" UpdateSourceTrigger="PropertyChanged" NotifyOnValidationError="True">
                             <Binding.ValidationRules>
