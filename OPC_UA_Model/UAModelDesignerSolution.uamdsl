@@ -7,7 +7,7 @@
       <Name>Model_0</Name>
       <CSVFileName>$(ProjectFileName).csv</CSVFileName>
       <BuildOutputDirectoryName>$(ProjectFileName)</BuildOutputDirectoryName>
-      <FileName>C:\Users\Mike\Documents\Model_0.xml</FileName>
+      <FileName>Model_0.xml</FileName>
     </UAModelDesignerProject>
   </Projects>
   <ServerDetails codebase="" configuration="" />

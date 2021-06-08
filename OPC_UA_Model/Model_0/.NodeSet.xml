@@ -146,7 +146,7 @@
         </Value>
       </Value>
       <DataType>
-        <Identifier>i=15</Identifier>
+        <Identifier>i=12</Identifier>
       </DataType>
       <ValueRank>-1</ValueRank>
       <ArrayDimensions />
@@ -210,7 +210,7 @@
         </Value>
       </Value>
       <DataType>
-        <Identifier>i=15</Identifier>
+        <Identifier>i=12</Identifier>
       </DataType>
       <ValueRank>-1</ValueRank>
       <ArrayDimensions />
@@ -274,7 +274,7 @@
         </Value>
       </Value>
       <DataType>
-        <Identifier>i=15</Identifier>
+        <Identifier>i=12</Identifier>
       </DataType>
       <ValueRank>-1</ValueRank>
       <ArrayDimensions />
@@ -338,7 +338,7 @@
         </Value>
       </Value>
       <DataType>
-        <Identifier>i=15</Identifier>
+        <Identifier>i=12</Identifier>
       </DataType>
       <ValueRank>-1</ValueRank>
       <ArrayDimensions />
@@ -398,11 +398,11 @@
       </References>
       <Value>
         <Value>
-          <UInt64 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</UInt64>
+          <UInt32 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</UInt32>
         </Value>
       </Value>
       <DataType>
-        <Identifier>i=28</Identifier>
+        <Identifier>i=7</Identifier>
       </DataType>
       <ValueRank>-1</ValueRank>
       <ArrayDimensions />
@@ -466,7 +466,7 @@
         </Value>
       </Value>
       <DataType>
-        <Identifier>i=15</Identifier>
+        <Identifier>i=12</Identifier>
       </DataType>
       <ValueRank>-1</ValueRank>
       <ArrayDimensions />
@@ -594,11 +594,11 @@
       </References>
       <Value>
         <Value>
-          <UInt64 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</UInt64>
+          <UInt32 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</UInt32>
         </Value>
       </Value>
       <DataType>
-        <Identifier>i=28</Identifier>
+        <Identifier>i=7</Identifier>
       </DataType>
       <ValueRank>-1</ValueRank>
       <ArrayDimensions />
@@ -662,7 +662,7 @@
         </Value>
       </Value>
       <DataType>
-        <Identifier>i=15</Identifier>
+        <Identifier>i=12</Identifier>
       </DataType>
       <ValueRank>-1</ValueRank>
       <ArrayDimensions />
@@ -936,11 +936,11 @@
       </References>
       <Value>
         <Value>
-          <UInt64 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</UInt64>
+          <UInt32 xmlns="http://opcfoundation.org/UA/2008/02/Types.xsd">0</UInt32>
         </Value>
       </Value>
       <DataType>
-        <Identifier>i=28</Identifier>
+        <Identifier>i=7</Identifier>
       </DataType>
       <ValueRank>-1</ValueRank>
       <ArrayDimensions />
@@ -1004,7 +1004,7 @@
         </Value>
       </Value>
       <DataType>
-        <Identifier>i=15</Identifier>
+        <Identifier>i=12</Identifier>
       </DataType>
       <ValueRank>-1</ValueRank>
       <ArrayDimensions />

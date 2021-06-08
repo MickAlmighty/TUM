@@ -434,12 +434,12 @@ namespace
         #region Initialization String
         private const string InitializationString =
            "AQAAABwAAABodHRwOi8vY2FzLmV1L1VBL0NvbW1TZXJ2ZXIv/////wRggAABAAAAAQAOAAAAQ2xpZW50" +
-           "SW5zdGFuY2UBAQEAAQEBAP////8GAAAAFWCJCgIAAAABAAgAAABVc2VybmFtZQEBAgAALwA/AgAAAAAP" +
-           "/////wEB/////wAAAAAVYIkKAgAAAAEACQAAAEZpcnN0TmFtZQEBAwAALwA/AwAAAAAP/////wMD////" +
-           "/wAAAAAVYIkKAgAAAAEACAAAAExhc3ROYW1lAQEEAAAvAD8EAAAAAA//////AwP/////AAAAABVgiQoC" +
-           "AAAAAQAGAAAAU3RyZWV0AQEFAAAvAD8FAAAAAA//////AwP/////AAAAABVgiQoCAAAAAQAMAAAAU3Ry" +
-           "ZWV0TnVtYmVyAQEGAAAvAD8GAAAAABz/////AwP/////AAAAABVgiQoCAAAAAQALAAAAUGhvbmVOdW1i" +
-           "ZXIBAQcAAC8APwcAAAAAD/////8DA/////8AAAAA";
+           "SW5zdGFuY2UBAQEAAQEBAP////8GAAAAFWCJCgIAAAABAAgAAABVc2VybmFtZQEBAgAALwA/AgAAAAAM" +
+           "/////wEB/////wAAAAAVYIkKAgAAAAEACQAAAEZpcnN0TmFtZQEBAwAALwA/AwAAAAAM/////wMD////" +
+           "/wAAAAAVYIkKAgAAAAEACAAAAExhc3ROYW1lAQEEAAAvAD8EAAAAAAz/////AwP/////AAAAABVgiQoC" +
+           "AAAAAQAGAAAAU3RyZWV0AQEFAAAvAD8FAAAAAAz/////AwP/////AAAAABVgiQoCAAAAAQAMAAAAU3Ry" +
+           "ZWV0TnVtYmVyAQEGAAAvAD8GAAAAAAf/////AwP/////AAAAABVgiQoCAAAAAQALAAAAUGhvbmVOdW1i" +
+           "ZXIBAQcAAC8APwcAAAAADP////8DA/////8AAAAA";
         #endregion
         #endif
         #endregion
@@ -448,7 +448,7 @@ namespace
         /// <summary>
         /// A description for the Username Variable.
         /// </summary>
-        public BaseDataVariableState<byte[]> Username
+        public BaseDataVariableState<string> Username
         {
             get
             {
@@ -469,7 +469,7 @@ namespace
         /// <summary>
         /// A description for the FirstName Variable.
         /// </summary>
-        public BaseDataVariableState<byte[]> FirstName
+        public BaseDataVariableState<string> FirstName
         {
             get
             {
@@ -490,7 +490,7 @@ namespace
         /// <summary>
         /// A description for the LastName Variable.
         /// </summary>
-        public BaseDataVariableState<byte[]> LastName
+        public BaseDataVariableState<string> LastName
         {
             get
             {
@@ -511,7 +511,7 @@ namespace
         /// <summary>
         /// A description for the Street Variable.
         /// </summary>
-        public BaseDataVariableState<byte[]> Street
+        public BaseDataVariableState<string> Street
         {
             get
             {
@@ -532,7 +532,7 @@ namespace
         /// <summary>
         /// A description for the StreetNumber Variable.
         /// </summary>
-        public BaseDataVariableState StreetNumber
+        public BaseDataVariableState<uint> StreetNumber
         {
             get
             {
@@ -553,7 +553,7 @@ namespace
         /// <summary>
         /// A description for the PhoneNumber Variable.
         /// </summary>
-        public BaseDataVariableState<byte[]> PhoneNumber
+        public BaseDataVariableState<string> PhoneNumber
         {
             get
             {
@@ -641,11 +641,11 @@ namespace
                         {
                             if (replacement == null)
                             {
-                                Username = new BaseDataVariableState<byte[]>(this);
+                                Username = new BaseDataVariableState<string>(this);
                             }
                             else
                             {
-                                Username = (BaseDataVariableState<byte[]>)replacement;
+                                Username = (BaseDataVariableState<string>)replacement;
                             }
                         }
                     }
@@ -662,11 +662,11 @@ namespace
                         {
                             if (replacement == null)
                             {
-                                FirstName = new BaseDataVariableState<byte[]>(this);
+                                FirstName = new BaseDataVariableState<string>(this);
                             }
                             else
                             {
-                                FirstName = (BaseDataVariableState<byte[]>)replacement;
+                                FirstName = (BaseDataVariableState<string>)replacement;
                             }
                         }
                     }
@@ -683,11 +683,11 @@ namespace
                         {
                             if (replacement == null)
                             {
-                                LastName = new BaseDataVariableState<byte[]>(this);
+                                LastName = new BaseDataVariableState<string>(this);
                             }
                             else
                             {
-                                LastName = (BaseDataVariableState<byte[]>)replacement;
+                                LastName = (BaseDataVariableState<string>)replacement;
                             }
                         }
                     }
@@ -704,11 +704,11 @@ namespace
                         {
                             if (replacement == null)
                             {
-                                Street = new BaseDataVariableState<byte[]>(this);
+                                Street = new BaseDataVariableState<string>(this);
                             }
                             else
                             {
-                                Street = (BaseDataVariableState<byte[]>)replacement;
+                                Street = (BaseDataVariableState<string>)replacement;
                             }
                         }
                     }
@@ -725,11 +725,11 @@ namespace
                         {
                             if (replacement == null)
                             {
-                                StreetNumber = new BaseDataVariableState(this);
+                                StreetNumber = new BaseDataVariableState<uint>(this);
                             }
                             else
                             {
-                                StreetNumber = (BaseDataVariableState)replacement;
+                                StreetNumber = (BaseDataVariableState<uint>)replacement;
                             }
                         }
                     }
@@ -746,11 +746,11 @@ namespace
                         {
                             if (replacement == null)
                             {
-                                PhoneNumber = new BaseDataVariableState<byte[]>(this);
+                                PhoneNumber = new BaseDataVariableState<string>(this);
                             }
                             else
                             {
-                                PhoneNumber = (BaseDataVariableState<byte[]>)replacement;
+                                PhoneNumber = (BaseDataVariableState<string>)replacement;
                             }
                         }
                     }
@@ -770,12 +770,12 @@ namespace
         #endregion
 
         #region Private Fields
-        private BaseDataVariableState<byte[]> m_username;
-        private BaseDataVariableState<byte[]> m_firstName;
-        private BaseDataVariableState<byte[]> m_lastName;
-        private BaseDataVariableState<byte[]> m_street;
-        private BaseDataVariableState m_streetNumber;
-        private BaseDataVariableState<byte[]> m_phoneNumber;
+        private BaseDataVariableState<string> m_username;
+        private BaseDataVariableState<string> m_firstName;
+        private BaseDataVariableState<string> m_lastName;
+        private BaseDataVariableState<string> m_street;
+        private BaseDataVariableState<uint> m_streetNumber;
+        private BaseDataVariableState<string> m_phoneNumber;
         #endregion
     }
     #endif
@@ -833,8 +833,8 @@ namespace
         #region Initialization String
         private const string InitializationString =
            "AQAAABwAAABodHRwOi8vY2FzLmV1L1VBL0NvbW1TZXJ2ZXIv/////wRggAABAAAAAQAPAAAAUHJvZHVj" +
-           "dEluc3RhbmNlAQEIAAEBCAD/////BAAAABVgiQoCAAAAAQACAAAASWQBAQkAAC8APwkAAAAAHP////8B" +
-           "Af////8AAAAAFWCJCgIAAAABAAQAAABOYW1lAQEKAAAvAD8KAAAAAA//////AwP/////AAAAABVgiQoC" +
+           "dEluc3RhbmNlAQEIAAEBCAD/////BAAAABVgiQoCAAAAAQACAAAASWQBAQkAAC8APwkAAAAAB/////8B" +
+           "Af////8AAAAAFWCJCgIAAAABAAQAAABOYW1lAQEKAAAvAD8KAAAAAAz/////AwP/////AAAAABVgiQoC" +
            "AAAAAQAFAAAAUHJpY2UBAQsAAC8APwsAAAAAC/////8DA/////8AAAAAFWCJCgIAAAABAAsAAABQcm9k" +
            "dWN0VHlwZQEBDAAALwA/DAAAAAAd/////wMD/////wAAAAA=";
         #endregion
@@ -845,7 +845,7 @@ namespace
         /// <summary>
         /// A description for the Id Variable.
         /// </summary>
-        public BaseDataVariableState Id
+        public BaseDataVariableState<uint> Id
         {
             get
             {
@@ -866,7 +866,7 @@ namespace
         /// <summary>
         /// A description for the Name Variable.
         /// </summary>
-        public BaseDataVariableState<byte[]> Name
+        public BaseDataVariableState<string> Name
         {
             get
             {
@@ -986,11 +986,11 @@ namespace
                         {
                             if (replacement == null)
                             {
-                                Id = new BaseDataVariableState(this);
+                                Id = new BaseDataVariableState<uint>(this);
                             }
                             else
                             {
-                                Id = (BaseDataVariableState)replacement;
+                                Id = (BaseDataVariableState<uint>)replacement;
                             }
                         }
                     }
@@ -1007,11 +1007,11 @@ namespace
                         {
                             if (replacement == null)
                             {
-                                Name = new BaseDataVariableState<byte[]>(this);
+                                Name = new BaseDataVariableState<string>(this);
                             }
                             else
                             {
-                                Name = (BaseDataVariableState<byte[]>)replacement;
+                                Name = (BaseDataVariableState<string>)replacement;
                             }
                         }
                     }
@@ -1073,8 +1073,8 @@ namespace
         #endregion
 
         #region Private Fields
-        private BaseDataVariableState m_id;
-        private BaseDataVariableState<byte[]> m_name;
+        private BaseDataVariableState<uint> m_id;
+        private BaseDataVariableState<string> m_name;
         private BaseDataVariableState<double> m_price;
         private BaseDataVariableState<int> m_productType;
         #endregion
@@ -1143,8 +1143,8 @@ namespace
 
         private const string InitializationString =
            "AQAAABwAAABodHRwOi8vY2FzLmV1L1VBL0NvbW1TZXJ2ZXIv/////wRggAABAAAAAQANAAAAT3JkZXJJ" +
-           "bnN0YW5jZQEBDQABAQ0A/////wYAAAAVYIkKAgAAAAEAAgAAAElkAQEOAAAvAD8OAAAAABz/////AQH/" +
-           "////AAAAABVgiQoCAAAAAQAOAAAAQ2xpZW50VXNlcm5hbWUBAQ8AAC8APw8AAAAAD/////8DA/////8A" +
+           "bnN0YW5jZQEBDQABAQ0A/////wYAAAAVYIkKAgAAAAEAAgAAAElkAQEOAAAvAD8OAAAAAAf/////AQH/" +
+           "////AAAAABVgiQoCAAAAAQAOAAAAQ2xpZW50VXNlcm5hbWUBAQ8AAC8APw8AAAAADP////8DA/////8A" +
            "AAAAFWCJCgIAAAABAAkAAABPcmRlckRhdGUBARAAAC8APxAAAAAADf////8DA/////8AAAAAFWCJCgIA" +
            "AAABABQAAABQcm9kdWN0SWRRdWFudGl0eU1hcAEBEQAALwA/EQAAAAAY/////wMD/////wAAAAAVYIkK" +
            "AgAAAAEABQAAAFByaWNlAQESAAAvAD8SAAAAAAv/////AwP/////AAAAABVgiQoCAAAAAQAMAAAARGVs" +
@@ -1157,7 +1157,7 @@ namespace
         /// <summary>
         /// A description for the Id Variable.
         /// </summary>
-        public BaseDataVariableState Id
+        public BaseDataVariableState<uint> Id
         {
             get
             {
@@ -1178,7 +1178,7 @@ namespace
         /// <summary>
         /// A description for the ClientUsername Variable.
         /// </summary>
-        public BaseDataVariableState<byte[]> ClientUsername
+        public BaseDataVariableState<string> ClientUsername
         {
             get
             {
@@ -1350,11 +1350,11 @@ namespace
                         {
                             if (replacement == null)
                             {
-                                Id = new BaseDataVariableState(this);
+                                Id = new BaseDataVariableState<uint>(this);
                             }
                             else
                             {
-                                Id = (BaseDataVariableState)replacement;
+                                Id = (BaseDataVariableState<uint>)replacement;
                             }
                         }
                     }
@@ -1371,11 +1371,11 @@ namespace
                         {
                             if (replacement == null)
                             {
-                                ClientUsername = new BaseDataVariableState<byte[]>(this);
+                                ClientUsername = new BaseDataVariableState<string>(this);
                             }
                             else
                             {
-                                ClientUsername = (BaseDataVariableState<byte[]>)replacement;
+                                ClientUsername = (BaseDataVariableState<string>)replacement;
                             }
                         }
                     }
@@ -1479,8 +1479,8 @@ namespace
         #endregion
 
         #region Private Fields
-        private BaseDataVariableState m_id;
-        private BaseDataVariableState<byte[]> m_clientUsername;
+        private BaseDataVariableState<uint> m_id;
+        private BaseDataVariableState<string> m_clientUsername;
         private BaseDataVariableState<DateTime> m_orderDate;
         private BaseDataVariableState m_productIdQuantityMap;
         private BaseDataVariableState<double> m_price;

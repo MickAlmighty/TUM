@@ -57,7 +57,7 @@
       <Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
     </References>
   </UAObjectType>
-  <UAVariable NodeId="ns=1;i=2" BrowseName="1:Username" ParentNodeId="ns=1;i=1" DataType="ByteString">
+  <UAVariable NodeId="ns=1;i=2" BrowseName="1:Username" ParentNodeId="ns=1;i=1" DataType="String">
     <DisplayName>Username</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
@@ -65,7 +65,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=1</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=3" BrowseName="1:FirstName" ParentNodeId="ns=1;i=1" DataType="ByteString" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=3" BrowseName="1:FirstName" ParentNodeId="ns=1;i=1" DataType="String" AccessLevel="3">
     <DisplayName>FirstName</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
@@ -73,7 +73,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=1</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=4" BrowseName="1:LastName" ParentNodeId="ns=1;i=1" DataType="ByteString" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=4" BrowseName="1:LastName" ParentNodeId="ns=1;i=1" DataType="String" AccessLevel="3">
     <DisplayName>LastName</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
@@ -81,7 +81,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=1</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=5" BrowseName="1:Street" ParentNodeId="ns=1;i=1" DataType="ByteString" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=5" BrowseName="1:Street" ParentNodeId="ns=1;i=1" DataType="String" AccessLevel="3">
     <DisplayName>Street</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
@@ -89,7 +89,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=1</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=6" BrowseName="1:StreetNumber" ParentNodeId="ns=1;i=1" DataType="UInteger" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=6" BrowseName="1:StreetNumber" ParentNodeId="ns=1;i=1" DataType="UInt32" AccessLevel="3">
     <DisplayName>StreetNumber</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
@@ -97,7 +97,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=1</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=7" BrowseName="1:PhoneNumber" ParentNodeId="ns=1;i=1" DataType="ByteString" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=7" BrowseName="1:PhoneNumber" ParentNodeId="ns=1;i=1" DataType="String" AccessLevel="3">
     <DisplayName>PhoneNumber</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
@@ -115,7 +115,7 @@
       <Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
     </References>
   </UAObjectType>
-  <UAVariable NodeId="ns=1;i=9" BrowseName="1:Id" ParentNodeId="ns=1;i=8" DataType="UInteger">
+  <UAVariable NodeId="ns=1;i=9" BrowseName="1:Id" ParentNodeId="ns=1;i=8" DataType="UInt32">
     <DisplayName>Id</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
@@ -123,7 +123,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=8</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=10" BrowseName="1:Name" ParentNodeId="ns=1;i=8" DataType="ByteString" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=10" BrowseName="1:Name" ParentNodeId="ns=1;i=8" DataType="String" AccessLevel="3">
     <DisplayName>Name</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
@@ -159,7 +159,7 @@
       <Reference ReferenceType="HasSubtype" IsForward="false">i=58</Reference>
     </References>
   </UAObjectType>
-  <UAVariable NodeId="ns=1;i=14" BrowseName="1:Id" ParentNodeId="ns=1;i=13" DataType="UInteger">
+  <UAVariable NodeId="ns=1;i=14" BrowseName="1:Id" ParentNodeId="ns=1;i=13" DataType="UInt32">
     <DisplayName>Id</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>
@@ -167,7 +167,7 @@
       <Reference ReferenceType="HasComponent" IsForward="false">ns=1;i=13</Reference>
     </References>
   </UAVariable>
-  <UAVariable NodeId="ns=1;i=15" BrowseName="1:ClientUsername" ParentNodeId="ns=1;i=13" DataType="ByteString" AccessLevel="3">
+  <UAVariable NodeId="ns=1;i=15" BrowseName="1:ClientUsername" ParentNodeId="ns=1;i=13" DataType="String" AccessLevel="3">
     <DisplayName>ClientUsername</DisplayName>
     <References>
       <Reference ReferenceType="HasTypeDefinition">i=63</Reference>

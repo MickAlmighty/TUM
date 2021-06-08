@@ -43,6 +43,24 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebSockets.Test", "WebSocke
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntegrationTest", "IntegrationTest\IntegrationTest.csproj", "{FD825F77-4E4E-4D90-87F3-3FD71EAEE7AB}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OPC_UA_Model", "OPC_UA_Model", "{7D78AA6B-C49B-4ECF-818C-1FCCB7517C8B}"
+	ProjectSection(SolutionItems) = preProject
+		OPC_UA_Model\Model_0.csv = OPC_UA_Model\Model_0.csv
+		OPC_UA_Model\Model_0.xml = OPC_UA_Model\Model_0.xml
+		OPC_UA_Model\UAModelDesignerSolution.uamdsl = OPC_UA_Model\UAModelDesignerSolution.uamdsl
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Model_0", "Model_0", "{A8CF4268-F4C0-4833-B1A2-443463A3212C}"
+	ProjectSection(SolutionItems) = preProject
+		OPC_UA_Model\Model_0\.Classes.cs = OPC_UA_Model\Model_0\.Classes.cs
+		OPC_UA_Model\Model_0\.NodeSet.xml = OPC_UA_Model\Model_0\.NodeSet.xml
+		OPC_UA_Model\Model_0\.NodeSet2.xml = OPC_UA_Model\Model_0\.NodeSet2.xml
+		OPC_UA_Model\Model_0\.PredefinedNodes.uanodes = OPC_UA_Model\Model_0\.PredefinedNodes.uanodes
+		OPC_UA_Model\Model_0\.PredefinedNodes.xml = OPC_UA_Model\Model_0\.PredefinedNodes.xml
+		OPC_UA_Model\Model_0\.Types.bsd = OPC_UA_Model\Model_0\.Types.bsd
+		OPC_UA_Model\Model_0\.Types.xsd = OPC_UA_Model\Model_0\.Types.xsd
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -120,6 +138,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{7D78AA6B-C49B-4ECF-818C-1FCCB7517C8B} = {378BBCAD-912C-448D-9767-15B4543417A6}
+		{A8CF4268-F4C0-4833-B1A2-443463A3212C} = {7D78AA6B-C49B-4ECF-818C-1FCCB7517C8B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3F48B22F-A1C0-48C5-891E-30E784DD4461}

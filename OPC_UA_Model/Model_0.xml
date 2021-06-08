@@ -7,26 +7,26 @@
   </Namespaces>
   <ObjectType xmlns:q1="http://cas.eu/UA/CommServer/" SymbolicName="q1:Client" IsAbstract="true">
     <Children>
-      <Variable SymbolicName="q1:Username" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q2="http://opcfoundation.org/UA/" DataType="q2:ByteString" AccessLevel="Read" />
-      <Variable SymbolicName="q1:FirstName" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q3="http://opcfoundation.org/UA/" DataType="q3:ByteString" AccessLevel="ReadWrite" />
-      <Variable SymbolicName="q1:LastName" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q4="http://opcfoundation.org/UA/" DataType="q4:ByteString" AccessLevel="ReadWrite" />
-      <Variable SymbolicName="q1:Street" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q5="http://opcfoundation.org/UA/" DataType="q5:ByteString" AccessLevel="ReadWrite" />
-      <Variable SymbolicName="q1:StreetNumber" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q6="http://opcfoundation.org/UA/" DataType="q6:UInteger" AccessLevel="ReadWrite" />
-      <Variable SymbolicName="q1:PhoneNumber" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q7="http://opcfoundation.org/UA/" DataType="q7:ByteString" AccessLevel="ReadWrite" />
+      <Variable SymbolicName="q1:Username" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q2="http://opcfoundation.org/UA/" DataType="q2:String" AccessLevel="Read" />
+      <Variable SymbolicName="q1:FirstName" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q3="http://opcfoundation.org/UA/" DataType="q3:String" AccessLevel="ReadWrite" />
+      <Variable SymbolicName="q1:LastName" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q4="http://opcfoundation.org/UA/" DataType="q4:String" AccessLevel="ReadWrite" />
+      <Variable SymbolicName="q1:Street" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q5="http://opcfoundation.org/UA/" DataType="q5:String" AccessLevel="ReadWrite" />
+      <Variable SymbolicName="q1:StreetNumber" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q6="http://opcfoundation.org/UA/" DataType="q6:UInt32" AccessLevel="ReadWrite" />
+      <Variable SymbolicName="q1:PhoneNumber" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q7="http://opcfoundation.org/UA/" DataType="q7:String" AccessLevel="ReadWrite" />
     </Children>
   </ObjectType>
   <ObjectType xmlns:q8="http://cas.eu/UA/CommServer/" SymbolicName="q8:Product" IsAbstract="true">
     <Children>
-      <Variable SymbolicName="q8:Id" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q9="http://opcfoundation.org/UA/" DataType="q9:UInteger" AccessLevel="Read" />
-      <Variable SymbolicName="q8:Name" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q10="http://opcfoundation.org/UA/" DataType="q10:ByteString" AccessLevel="ReadWrite" />
+      <Variable SymbolicName="q8:Id" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q9="http://opcfoundation.org/UA/" DataType="q9:UInt32" AccessLevel="Read" />
+      <Variable SymbolicName="q8:Name" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q10="http://opcfoundation.org/UA/" DataType="q10:String" AccessLevel="ReadWrite" />
       <Variable SymbolicName="q8:Price" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q11="http://opcfoundation.org/UA/" DataType="q11:Double" AccessLevel="ReadWrite" />
       <Variable SymbolicName="q8:ProductType" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q12="http://opcfoundation.org/UA/" DataType="q12:Enumeration" AccessLevel="ReadWrite" />
     </Children>
   </ObjectType>
   <ObjectType xmlns:q13="http://cas.eu/UA/CommServer/" SymbolicName="q13:Order" IsAbstract="true">
     <Children>
-      <Variable SymbolicName="q13:Id" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q14="http://opcfoundation.org/UA/" DataType="q14:UInteger" AccessLevel="Read" />
-      <Variable SymbolicName="q13:ClientUsername" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q15="http://opcfoundation.org/UA/" DataType="q15:ByteString" AccessLevel="ReadWrite" />
+      <Variable SymbolicName="q13:Id" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q14="http://opcfoundation.org/UA/" DataType="q14:UInt32" AccessLevel="Read" />
+      <Variable SymbolicName="q13:ClientUsername" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q15="http://opcfoundation.org/UA/" DataType="q15:String" AccessLevel="ReadWrite" />
       <Variable SymbolicName="q13:OrderDate" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q16="http://opcfoundation.org/UA/" DataType="q16:DateTime" AccessLevel="ReadWrite" />
       <Variable SymbolicName="q13:ProductIdQuantityMap" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" AccessLevel="ReadWrite" />
       <Variable SymbolicName="q13:Price" ModellingRule="Mandatory" MinCardinality="1" MaxCardinality="1" xmlns:q17="http://opcfoundation.org/UA/" DataType="q17:Double" AccessLevel="ReadWrite" />
